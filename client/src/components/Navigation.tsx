@@ -22,14 +22,6 @@ export default function Navigation() {
 
   return (
     <>
-      {/* Announcement Bar */}
-      <div className="announcement-bar">
-        <span>◆ Complimentary gift wrapping on all orders</span>
-        <span><strong>FREE</strong> shipping on orders above ₹5,000</span>
-        <span>◆ Hallmarked 925 Sterling Silver &amp; 18K Gold</span>
-        <span>Certified gemstones with every purchase ◆</span>
-      </div>
-
       {/* Main Navigation */}
       <nav className="nav">
         {/* Logo */}
