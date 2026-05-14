@@ -107,3 +107,10 @@
 - [x] Wire /admin/sku-upload route in App.tsx
 - [x] Add "SKU Upload" link to admin navigation
 - [x] Write vitest tests for dedup logic and import procedure (covered by existing 17 tests)
+
+## Hero Image Upload Feature
+- [x] Upload provided hero banner image to Manus static storage
+- [x] Add site_settings table to Drizzle schema (key/value store)
+- [x] tRPC siteSettings.getHeroImage and siteSettings.updateHeroImage procedures
+- [x] Admin dashboard: hero image upload UI with preview and save
+- [x] Homepage: load hero image from site settings (DB), fallback to static upload

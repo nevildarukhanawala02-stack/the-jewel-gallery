@@ -1,7 +1,9 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
-import { Package, TrendingUp, ShoppingBag, AlertTriangle, Truck, CreditCard, Users, BarChart2, FileSpreadsheet } from "lucide-react";
+import { Package, TrendingUp, ShoppingBag, AlertTriangle, Truck, CreditCard, Users, BarChart2, FileSpreadsheet, Upload, ImageIcon } from "lucide-react";
+import { useState, useRef } from "react";
+import { toast } from "sonner";
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "Pending",
@@ -173,9 +175,44 @@ export default function AdminDashboard() {
   const { data: metrics } = trpc.admin.getDashboardMetrics.useQuery(undefined, { enabled: !!user });
   const { data: recentOrders } = trpc.admin.getRecentOrders.useQuery({ limit: 10 }, { enabled: !!user });
   const { data: lowStockProducts } = trpc.admin.getLowStockProducts.useQuery({ threshold: 5 }, { enabled: !!user });
+  const { data: heroData, refetch: refetchHero } = trpc.siteSettings.getHeroImage.useQuery();
 
   const updateStatusMutation = trpc.admin.updateOrderStatus.useMutation();
+  const updateHeroMutation = trpc.siteSettings.updateHeroImage.useMutation({
+    onSuccess: () => {
+      toast.success("Hero image updated successfully.");
+      refetchHero();
+    },
+    onError: () => toast.error("Failed to update hero image."),
+  });
   const utils = trpc.useUtils();
+
+  const heroFileRef = useRef<HTMLInputElement>(null);
+  const [heroPreview, setHeroPreview] = useState<string | null>(null);
+  const [heroUploading, setHeroUploading] = useState(false);
+
+  const handleHeroFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Preview locally
+    const reader = new FileReader();
+    reader.onload = (ev) => setHeroPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+    // Upload via multipart form to the storage endpoint
+    setHeroUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload-hero", { method: "POST", body: formData });
+      if (!res.ok) throw new Error("Upload failed");
+      const { url } = await res.json() as { url: string };
+      await updateHeroMutation.mutateAsync({ url });
+    } catch {
+      toast.error("Upload failed. Please try again.");
+    } finally {
+      setHeroUploading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -415,6 +452,74 @@ export default function AdminDashboard() {
                 All products well-stocked
               </div>
             )}
+          </div>
+        </div>
+      </div>
+
+      {/* Hero Image Upload */}
+      <div style={{
+        background: "#1A1A1A",
+        border: "1px solid rgba(201,169,110,0.15)",
+        borderRadius: "4px",
+        padding: "28px",
+        marginTop: "32px",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+          <ImageIcon size={16} color="var(--gold)" />
+          <h3 style={{ fontFamily: "var(--font-display)", fontSize: "15px", fontWeight: 400, color: "white", letterSpacing: "1px", margin: 0 }}>
+            Homepage Hero Image
+          </h3>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", alignItems: "start" }}>
+          {/* Current image preview */}
+          <div>
+            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "10px" }}>Current Image</div>
+            <div style={{ width: "100%", aspectRatio: "16/9", background: "#111", borderRadius: "4px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <img
+                src={heroPreview ?? heroData?.url ?? "/manus-storage/hero_banner_5729f2e3.webp"}
+                alt="Current hero"
+                style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
+              />
+            </div>
+          </div>
+          {/* Upload control */}
+          <div>
+            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "10px" }}>Upload New Image</div>
+            <input
+              ref={heroFileRef}
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={handleHeroFileChange}
+            />
+            <button
+              onClick={() => heroFileRef.current?.click()}
+              disabled={heroUploading}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "12px 20px",
+                background: heroUploading ? "rgba(201,169,110,0.3)" : "rgba(201,169,110,0.15)",
+                border: "1px solid rgba(201,169,110,0.4)",
+                borderRadius: "4px",
+                color: "var(--gold)",
+                fontFamily: "var(--font-body)",
+                fontSize: "12px",
+                letterSpacing: "1px",
+                textTransform: "uppercase",
+                cursor: heroUploading ? "not-allowed" : "pointer",
+                transition: "all 0.2s",
+                width: "100%",
+                justifyContent: "center",
+              }}
+            >
+              <Upload size={14} />
+              {heroUploading ? "Uploading..." : "Choose Image File"}
+            </button>
+            <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)", marginTop: "10px", lineHeight: 1.6 }}>
+              Recommended: 1920×1080px or wider, JPEG/WebP format. The image will be displayed as the right-side panel of the homepage hero section.
+            </p>
           </div>
         </div>
       </div>

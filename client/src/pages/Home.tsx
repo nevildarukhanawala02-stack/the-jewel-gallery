@@ -58,8 +58,10 @@ const CELEBRITY_TEASERS = [
 export default function Home() {
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState("All");
-  const [heroImg] = useState(0);
   const [email, setEmail] = useState("");
+
+  const { data: heroData } = trpc.siteSettings.getHeroImage.useQuery();  
+  const heroImageUrl = heroData?.url ?? "/manus-storage/hero_banner_5729f2e3.webp";
 
   const categoryFilter = activeTab === "All" ? undefined : activeTab.toLowerCase() as "rings" | "necklaces" | "earrings" | "bracelets";
 
@@ -131,9 +133,10 @@ export default function Home() {
         </div>
         <div className="hero-visual">
           <img
-            src={HERO_IMAGES[heroImg]}
+            src={heroImageUrl}
             alt="Luxury jewellery collection"
             className="hero-img"
+            style={{ objectFit: "cover", objectPosition: "center top" }}
           />
         </div>
       </section>

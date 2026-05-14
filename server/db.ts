@@ -10,6 +10,7 @@ import {
   orderItems,
   orders,
   products,
+  siteSettings,
   skuImportLogs,
   users,
 } from "../drizzle/schema";
@@ -615,4 +616,25 @@ export async function getSkuImportLogs(limit = 20) {
     .from(skuImportLogs)
     .orderBy(desc(skuImportLogs.createdAt))
     .limit(limit);
+}
+
+// ============================================================
+// SITE SETTINGS HELPERS
+// ============================================================
+/** Get a single site setting by key. Returns null if not found. */
+export async function getSiteSetting(key: string): Promise<string | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).limit(1);
+  return rows[0]?.value ?? null;
+}
+
+/** Upsert a site setting by key. */
+export async function setSiteSetting(key: string, value: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .insert(siteSettings)
+    .values({ key, value })
+    .onDuplicateKeyUpdate({ set: { value } });
 }

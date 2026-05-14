@@ -251,3 +251,14 @@ export const newsletterSubscribers = mysqlTable("newsletter_subscribers", {
   isActive: boolean("isActive").default(true),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
+
+// ============================================================
+// SITE SETTINGS TABLE — key/value store for admin-configurable settings
+// ============================================================
+export const siteSettings = mysqlTable("site_settings", {
+  id: int("id").autoincrement().primaryKey(),
+  key: varchar("key", { length: 128 }).notNull().unique(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type SiteSetting = typeof siteSettings.$inferSelect;

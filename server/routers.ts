@@ -36,6 +36,8 @@ import {
   bulkImportSkus,
   logSkuImport,
   getSkuImportLogs,
+  getSiteSetting,
+  setSiteSetting,
   type SkuRow,
 } from "./db";
 import { COOKIE_NAME } from "@shared/const";
@@ -607,6 +609,25 @@ const newsletterRouter = router({
 });
 
 // ============================================================
+// SITE SETTINGS ROUTER
+// ============================================================
+const siteSettingsRouter = router({
+  getHeroImage: publicProcedure.query(async () => {
+    const url = await getSiteSetting("hero_image_url");
+    return { url: url ?? "/manus-storage/hero_banner_5729f2e3.webp" };
+  }),
+  updateHeroImage: protectedProcedure
+    .input(z.object({ url: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user?.role !== "admin") {
+        throw new Error("Admin access required.");
+      }
+      await setSiteSetting("hero_image_url", input.url);
+      return { success: true };
+    }),
+});
+
+// ============================================================
 // MAIN APP ROUTER
 // ============================================================
 export const appRouter = router({
@@ -625,6 +646,7 @@ export const appRouter = router({
   orders: ordersRouter,
   admin: adminRouter,
   newsletter: newsletterRouter,
+  siteSettings: siteSettingsRouter,
 });
 
 export type AppRouter = typeof appRouter;
