@@ -149,3 +149,13 @@
 
 ## Product Page Trust Badges
 - [x] Replace trust badges with: 100+ Celebrity Looks / Lifetime Warranty / Free Shipping / 30-Day Returns
+
+## Celebrity Feature
+- [x] Download celebrity images from Google Drive (TJG 110–114 folders)
+- [x] Convert celebrity HEIC images to JPEG
+- [x] Upload celebrity images to Manus storage
+- [x] Populate celebrity DB records (name, bio, title, photo URL)
+- [ ] Create celebrity_products join table entries (pending product mapping from user)
+- [x] Update CelebrityPage.tsx to match reference design (grid, search by name, filter by style/occasion)
+- [x] Update CelebrityProfilePage.tsx to match reference design (hero photo, bio, product count, "Shop the Look" grid, "Explore Other Celebrity Looks" section)
+- [x] Update homepage celebrity section to show real celebrity photos

@@ -3,171 +3,303 @@ import { trpc } from "@/lib/trpc";
 import { useState } from "react";
 import { useLocation } from "wouter";
 
-const FALLBACK_CELEBRITIES = [
-  { id: 1, name: "Deepika Padukone", slug: "deepika-padukone", designation: "Film Artiste", imageUrl: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&q=80", style: "Classic Elegance", occasion: "Awards" },
-  { id: 2, name: "Anushka Sharma", slug: "anushka-sharma", designation: "Film Artiste", imageUrl: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&q=80", style: "Bridal", occasion: "Wedding" },
-  { id: 3, name: "Kareena Kapoor", slug: "kareena-kapoor", designation: "Film Artiste", imageUrl: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&q=80", style: "Statement", occasion: "Festive" },
-  { id: 4, name: "Priyanka Chopra", slug: "priyanka-chopra", designation: "Global Artiste", imageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&q=80", style: "Contemporary", occasion: "International" },
-  { id: 5, name: "Alia Bhatt", slug: "alia-bhatt", designation: "Film Artiste", imageUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&q=80", style: "Minimalist", occasion: "Casual" },
-  { id: 6, name: "Katrina Kaif", slug: "katrina-kaif", designation: "Film Artiste", imageUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80", style: "Glamour", occasion: "Red Carpet" },
-  { id: 7, name: "Sonam Kapoor", slug: "sonam-kapoor", designation: "Style Icon", imageUrl: "https://images.unsplash.com/photo-1500917293891-ef795e70e1f6?w=400&q=80", style: "Avant-Garde", occasion: "Fashion Week" },
-  { id: 8, name: "Vidya Balan", slug: "vidya-balan", designation: "Film Artiste", imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80", style: "Heritage", occasion: "Cultural Events" },
-];
-
-const STYLE_FILTERS = ["All", "Classic Elegance", "Bridal", "Statement", "Contemporary", "Minimalist", "Heritage", "Glamour"];
-const OCCASION_FILTERS = ["All", "Awards", "Wedding", "Festive", "Red Carpet", "International", "Casual"];
+const STYLE_OPTIONS = ["All Styles", "Statement Pieces", "Evening Wear", "Casual Luxury", "Bridal"];
+const OCCASION_OPTIONS = ["All Occasions", "Awards Show", "Red Carpet", "Event", "Wedding"];
 
 export default function CelebrityPage() {
   const [, navigate] = useLocation();
-  const [styleFilter, setStyleFilter] = useState("All");
-  const [occasionFilter, setOccasionFilter] = useState("All");
+  const [styleFilter, setStyleFilter] = useState("");
+  const [occasionFilter, setOccasionFilter] = useState("");
   const [search, setSearch] = useState("");
 
-  const { data: celebrities } = trpc.celebrities.list.useQuery({});
+  const { data: celebrities, isLoading } = trpc.celebrities.list.useQuery({});
 
-  const displayList = (celebrities && celebrities.length > 0 ? celebrities : FALLBACK_CELEBRITIES);
-
-  const filtered = displayList.filter((c) => {
-    const matchStyle = styleFilter === "All" || c.style === styleFilter;
-    const matchOccasion = occasionFilter === "All" || c.occasion === occasionFilter;
+  const filtered = (celebrities ?? []).filter((c) => {
+    const matchStyle = !styleFilter || c.style === styleFilter;
+    const matchOccasion = !occasionFilter || c.occasion === occasionFilter;
     const matchSearch = !search || c.name.toLowerCase().includes(search.toLowerCase());
     return matchStyle && matchOccasion && matchSearch;
   });
 
   return (
     <StorefrontLayout>
-      {/* Hero */}
-      <div className="category-hero">
-        <div className="breadcrumb">
-          <span style={{ cursor: "pointer" }} onClick={() => navigate("/")}>Home</span>
-          {" / "}
-          <span style={{ color: "var(--gold)" }}>As Worn By</span>
-        </div>
-        <div className="section-eyebrow">Adorned by Icons</div>
-        <h1 className="section-title">As <em>Worn By</em></h1>
-        <p className="section-desc" style={{ margin: "0 auto" }}>
-          Distinguished artistes and cultural icons have chosen The Jewel Gallery for their most memorable moments.
-          Discover the pieces that graced the spotlight.
-        </p>
-      </div>
-
-      {/* Filters */}
-      <div style={{
-        padding: "24px 60px",
+      {/* Category Hero */}
+      <section style={{
         background: "var(--ivory)",
-        borderBottom: "1px solid var(--linen-dark)",
-        display: "flex",
-        gap: "24px",
-        flexWrap: "wrap",
-        alignItems: "center",
+        padding: "100px 60px",
+        textAlign: "center",
       }}>
-        {/* Search */}
-        <input
-          type="text"
-          placeholder="Search by name..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{
-            padding: "8px 16px",
-            border: "1px solid var(--linen-dark)",
-            background: "white",
-            fontFamily: "var(--font-body)",
-            fontSize: "12px",
-            color: "var(--text-dark)",
-            outline: "none",
-            width: "200px",
-          }}
-        />
-
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-          <span className="filter-label">Style:</span>
-          {STYLE_FILTERS.map((f) => (
-            <button
-              key={f}
-              className={`sort-btn ${styleFilter === f ? "active" : ""}`}
-              onClick={() => setStyleFilter(f)}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-          <span className="filter-label">Occasion:</span>
-          {OCCASION_FILTERS.map((f) => (
-            <button
-              key={f}
-              className={`sort-btn ${occasionFilter === f ? "active" : ""}`}
-              onClick={() => setOccasionFilter(f)}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Celebrity Grid */}
-      <div style={{
-        padding: "60px",
-        background: "linear-gradient(135deg, var(--ivory) 0%, var(--linen) 100%)",
-      }}>
-        {filtered.length > 0 ? (
-          <div className="celeb-grid">
-            {filtered.map((c) => (
-              <div
-                key={c.id}
-                className="celeb-card"
-                onClick={() => navigate(`/celebrity/${c.slug}`)}
-              >
-                <div className="celeb-card-img">
-                  {c.imageUrl ? (
-                    <img src={c.imageUrl} alt={c.name} loading="lazy" />
-                  ) : (
-                    <div style={{
-                      width: "100%",
-                      height: "100%",
-                      background: "linear-gradient(135deg, var(--linen) 0%, var(--ivory-deep) 100%)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "var(--gold)",
-                      fontSize: "40px",
-                    }}>
-                      ◆
-                    </div>
-                  )}
-                </div>
-                <div className="celeb-card-name">{c.name}</div>
-                <div className="celeb-card-role">{c.designation}</div>
-                {c.style && (
-                  <div style={{
-                    display: "inline-block",
-                    padding: "4px 10px",
-                    background: "rgba(201,169,110,0.1)",
-                    border: "1px solid rgba(201,169,110,0.3)",
-                    fontSize: "8px",
-                    fontWeight: 700,
-                    letterSpacing: "1px",
-                    textTransform: "uppercase",
-                    color: "var(--gold)",
-                    marginTop: "8px",
-                  }}>
-                    {c.style}
-                  </div>
-                )}
-              </div>
-            ))}
+        <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+          <div style={{
+            fontSize: "11px",
+            letterSpacing: "2px",
+            textTransform: "uppercase",
+            color: "var(--gold)",
+            marginBottom: "24px",
+          }}>
+            COLLECTIONS / CELEBRITY LOOKS
           </div>
+          <h1 style={{
+            fontFamily: "var(--font-heading)",
+            fontSize: "clamp(36px, 5vw, 56px)",
+            fontWeight: 400,
+            lineHeight: 1.1,
+            marginBottom: "16px",
+            color: "var(--text-dark)",
+          }}>
+            Worn by <em style={{ color: "var(--gold)", fontStyle: "italic" }}>Celebrities</em>
+          </h1>
+          <p style={{
+            fontSize: "14px",
+            color: "var(--text-muted)",
+            lineHeight: 1.8,
+            maxWidth: "600px",
+            margin: "0 auto",
+          }}>
+            Discover the jewelry pieces worn by your favorite celebrities and style icons.
+            Shop the exact looks from red carpet moments, award shows, and exclusive events.
+            Elevate your style with pieces loved by the stars.
+          </p>
+        </div>
+      </section>
+
+      {/* Filters & Search */}
+      <section style={{
+        background: "var(--ivory)",
+        padding: "40px 60px",
+        borderBottom: "1px solid var(--linen-dark)",
+        borderTop: "1px solid var(--linen-dark)",
+      }}>
+        <div style={{
+          maxWidth: "1400px",
+          margin: "0 auto",
+          display: "flex",
+          gap: "40px",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+        }}>
+          {/* Search */}
+          <div style={{ flex: 1, minWidth: "280px" }}>
+            <input
+              type="text"
+              placeholder="Search by celebrity name..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{
+                padding: "10px 16px",
+                border: "1px solid var(--linen-dark)",
+                background: "white",
+                color: "var(--text-dark)",
+                fontSize: "12px",
+                fontFamily: "var(--font-body)",
+                width: "100%",
+                outline: "none",
+                transition: "border-color 0.3s ease",
+              }}
+              onFocus={(e) => { e.target.style.borderColor = "var(--gold)"; }}
+              onBlur={(e) => { e.target.style.borderColor = "var(--linen-dark)"; }}
+            />
+          </div>
+
+          {/* Filters */}
+          <div style={{ display: "flex", gap: "16px", alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{
+              fontSize: "11px",
+              fontWeight: 700,
+              letterSpacing: "2px",
+              textTransform: "uppercase",
+              color: "var(--text-muted)",
+            }}>
+              Filter By:
+            </span>
+            <select
+              value={styleFilter}
+              onChange={(e) => setStyleFilter(e.target.value === "All Styles" ? "" : e.target.value)}
+              style={{
+                padding: "10px 16px",
+                border: "1px solid var(--linen-dark)",
+                background: "white",
+                color: "var(--text-dark)",
+                fontSize: "12px",
+                fontFamily: "var(--font-body)",
+                cursor: "pointer",
+                outline: "none",
+              }}
+            >
+              {STYLE_OPTIONS.map((s) => (
+                <option key={s} value={s === "All Styles" ? "" : s}>{s}</option>
+              ))}
+            </select>
+            <select
+              value={occasionFilter}
+              onChange={(e) => setOccasionFilter(e.target.value === "All Occasions" ? "" : e.target.value)}
+              style={{
+                padding: "10px 16px",
+                border: "1px solid var(--linen-dark)",
+                background: "white",
+                color: "var(--text-dark)",
+                fontSize: "12px",
+                fontFamily: "var(--font-body)",
+                cursor: "pointer",
+                outline: "none",
+              }}
+            >
+              {OCCASION_OPTIONS.map((o) => (
+                <option key={o} value={o === "All Occasions" ? "" : o}>{o}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </section>
+
+      {/* Celebrities Grid */}
+      <section style={{
+        background: "var(--ivory)",
+        padding: "60px",
+      }}>
+        <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
+          {isLoading ? (
+            <div style={{ textAlign: "center", padding: "80px 0" }}>
+              <div style={{
+                width: "40px",
+                height: "40px",
+                border: "3px solid var(--linen-dark)",
+                borderTopColor: "var(--gold)",
+                borderRadius: "50%",
+                animation: "spin 0.8s linear infinite",
+                margin: "0 auto",
+              }} />
+            </div>
+          ) : filtered.length > 0 ? (
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gap: "40px",
+              marginBottom: "60px",
+            }}>
+              {filtered.map((c) => (
+                <CelebrityCard
+                  key={c.id}
+                  celebrity={c}
+                  onClick={() => navigate(`/celebrity/${c.slug}`)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div style={{ textAlign: "center", padding: "80px 0" }}>
+              <h3 style={{ fontFamily: "var(--font-heading)", fontSize: "24px", marginBottom: "12px" }}>
+                No Results Found
+              </h3>
+              <p style={{ color: "var(--text-muted)", marginBottom: "24px" }}>
+                Try adjusting your search or filters.
+              </p>
+              <button
+                style={{
+                  background: "var(--gold)",
+                  color: "var(--ivory)",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "2px",
+                  textTransform: "uppercase",
+                  padding: "12px 24px",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+                onClick={() => { setSearch(""); setStyleFilter(""); setOccasionFilter(""); }}
+              >
+                Clear Filters
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+    </StorefrontLayout>
+  );
+}
+
+function CelebrityCard({
+  celebrity,
+  onClick,
+}: {
+  celebrity: { id: number; name: string; designation?: string | null; imageUrl?: string | null; style?: string | null; occasion?: string | null };
+  onClick: () => void;
+}) {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "16px",
+        cursor: "pointer",
+        transition: "transform 0.3s ease",
+      }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)"; }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
+    >
+      {/* Image */}
+      <div style={{
+        width: "100%",
+        height: "400px",
+        background: "var(--ivory-deep)",
+        border: "1px solid var(--linen-dark)",
+        overflow: "hidden",
+        position: "relative",
+      }}>
+        {celebrity.imageUrl ? (
+          <img
+            src={celebrity.imageUrl}
+            alt={celebrity.name}
+            loading="lazy"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
         ) : (
-          <div className="empty-state">
-            <h3>No Results Found</h3>
-            <p>Try adjusting your search or filters.</p>
-            <button className="btn-primary" style={{ marginTop: "24px" }} onClick={() => { setSearch(""); setStyleFilter("All"); setOccasionFilter("All"); }}>
-              Clear Filters
-            </button>
+          <div style={{
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "var(--gold)",
+            fontSize: "48px",
+          }}>
+            ◆
           </div>
         )}
       </div>
-    </StorefrontLayout>
+
+      {/* Info */}
+      <div style={{ fontFamily: "var(--font-heading)", fontSize: "18px", fontWeight: 400, color: "var(--text-dark)", lineHeight: 1.3 }}>
+        {celebrity.name}
+      </div>
+      {celebrity.designation && (
+        <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "-8px" }}>
+          {celebrity.designation}
+        </div>
+      )}
+
+      {/* CTA */}
+      <button
+        style={{
+          background: "var(--gold)",
+          color: "var(--ivory)",
+          fontSize: "11px",
+          fontWeight: 700,
+          letterSpacing: "2px",
+          textTransform: "uppercase",
+          padding: "12px 24px",
+          border: "none",
+          cursor: "pointer",
+          transition: "background 0.3s ease",
+          width: "100%",
+        }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--gold-dark)"; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--gold)"; }}
+        onClick={(e) => { e.stopPropagation(); onClick(); }}
+      >
+        View Look
+      </button>
+    </div>
   );
 }

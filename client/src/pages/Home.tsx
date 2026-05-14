@@ -25,41 +25,14 @@ const HERO_IMAGES = [
 
 const CATEGORY_TABS = ["All", "Rings", "Necklaces", "Earrings", "Bracelets"];
 
-const CELEBRITY_TEASERS = [
-  {
-    name: "Deepika Padukone",
-    role: "Film Artiste",
-    desc: "Seen wearing our Celestial Solitaire Ring at the IIFA Awards",
-    img: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&q=80",
-    slug: "deepika-padukone",
-  },
-  {
-    name: "Anushka Sharma",
-    role: "Film Artiste",
-    desc: "Chosen our Mogra Bloom Necklace for her wedding anniversary",
-    img: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&q=80",
-    slug: "anushka-sharma",
-  },
-  {
-    name: "Kareena Kapoor",
-    role: "Film Artiste",
-    desc: "Spotted with our Heritage Jhumka collection at Diwali celebrations",
-    img: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&q=80",
-    slug: "kareena-kapoor",
-  },
-  {
-    name: "Priyanka Chopra",
-    role: "Global Artiste",
-    desc: "Wore our Maharani Choker at the Met Gala after-party",
-    img: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&q=80",
-    slug: "priyanka-chopra",
-  },
-];
+
 
 export default function Home() {
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState("All");
   const [email, setEmail] = useState("");
+
+  const { data: celebrities } = trpc.celebrities.list.useQuery({});
 
   const { data: heroData } = trpc.siteSettings.getHeroImage.useQuery();  
   const heroImageUrl = heroData?.url ?? "/manus-storage/hero_banner_5729f2e3.webp";
@@ -264,18 +237,22 @@ export default function Home() {
         </div>
 
         <div className="celeb-grid">
-          {CELEBRITY_TEASERS.map((c) => (
+          {(celebrities ?? []).slice(0, 4).map((c) => (
             <div
-              key={c.slug}
+              key={c.id}
               className="celeb-card"
               onClick={() => navigate(`/celebrity/${c.slug}`)}
             >
               <div className="celeb-card-img">
-                <img src={c.img} alt={c.name} loading="lazy" />
+                {c.imageUrl ? (
+                  <img src={c.imageUrl} alt={c.name} loading="lazy" />
+                ) : (
+                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gold)", fontSize: "40px" }}>◆</div>
+                )}
               </div>
               <div className="celeb-card-name">{c.name}</div>
-              <div className="celeb-card-role">{c.role}</div>
-              <div className="celeb-card-desc">{c.desc}</div>
+              <div className="celeb-card-role">{c.designation ?? ""}</div>
+              {c.style && <div className="celeb-card-desc">{c.style}</div>}
             </div>
           ))}
         </div>
