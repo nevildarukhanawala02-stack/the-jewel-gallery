@@ -120,3 +120,8 @@
 - [x] Update SKU upload parser to read Price column (column H)
 - [x] Update bulkImportSkus DB helper to accept and save price field
 - [x] Update AdminSkuUpload UI to show Price column in preview table
+
+## Bug Fixes Round 3
+- [x] Homepage collections grid: show latest 8 active products (remove isFeatured filter)
+- [x] Homepage bestsellers: mark 5 SKUs as isBestseller in DB and show them
+- [x] Fix Google Drive image URLs in DB to direct-render format

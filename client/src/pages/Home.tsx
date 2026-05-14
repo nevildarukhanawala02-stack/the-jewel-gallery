@@ -66,14 +66,13 @@ export default function Home() {
   const categoryFilter = activeTab === "All" ? undefined : activeTab.toLowerCase() as "rings" | "necklaces" | "earrings" | "bracelets";
 
   const { data: featuredProducts, isLoading: loadingFeatured } = trpc.products.list.useQuery({
-    isFeatured: true,
     limit: 8,
     category: categoryFilter,
   });
 
   const { data: bestsellers, isLoading: loadingBest } = trpc.products.list.useQuery({
     isBestseller: true,
-    limit: 4,
+    limit: 5,
   });
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
