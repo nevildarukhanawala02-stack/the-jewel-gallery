@@ -259,6 +259,7 @@ button {
 }
 .ticker-item::before { content: '◆'; font-size: 7px; color: var(--gold); }
 @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+@keyframes ticker-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
 /* ============================================================
    HERO SECTION

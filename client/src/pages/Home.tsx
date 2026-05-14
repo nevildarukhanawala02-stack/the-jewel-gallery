@@ -141,6 +141,47 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Scrolling Ticker Bar ── */}
+      <div style={{
+        background: "#1A1008",
+        overflow: "hidden",
+        padding: "14px 0",
+        borderTop: "1px solid #3A2A18",
+        borderBottom: "1px solid #3A2A18",
+      }}>
+        <div style={{
+          display: "flex",
+          animation: "ticker-scroll 28s linear infinite",
+          whiteSpace: "nowrap",
+          width: "max-content",
+        }}>
+          {[...Array(4)].map((_, i) => (
+            <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 0 }}>
+              {[
+                "FREE SHIPPING IN INDIA",
+                "WORN BY 200+ CELEBRITIES",
+                "LIFETIME SERVICE",
+                "HALLMARKED 925 STERLING SILVER",
+                "CERTIFIED GEMSTONES",
+              ].map((item, j) => (
+                <span key={j} style={{ display: "inline-flex", alignItems: "center" }}>
+                  <span style={{
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    letterSpacing: "0.18em",
+                    color: "#E8D5B0",
+                    padding: "0 36px",
+                    textTransform: "uppercase",
+                  }}>{item}</span>
+                  <span style={{ color: "#C9A96E", fontSize: "8px", lineHeight: 1 }}>◆</span>
+                </span>
+              ))}
+            </span>
+          ))}
+        </div>
+      </div>
+
       {/* Collections Section */}
       <section className="collections">
         <div style={{ textAlign: "center", marginBottom: "50px" }}>
