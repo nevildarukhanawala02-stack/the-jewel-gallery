@@ -159,3 +159,12 @@
 - [x] Update CelebrityPage.tsx to match reference design (grid, search by name, filter by style/occasion)
 - [x] Update CelebrityProfilePage.tsx to match reference design (hero photo, bio, product count, "Shop the Look" grid, "Explore Other Celebrity Looks" section)
 - [x] Update homepage celebrity section to show real celebrity photos
+
+## Image Ordering Fix
+- [x] Audit imageTypes data — identify products where first image is celebrity/model rather than product close-up
+- [x] Write and run script to re-order images array so product-type images always come first
+- [x] Verify bestsellers section, homepage product grid, and category pages show close-up product images first
+
+## Products Needing Re-photography (No Product Close-Up Available)
+- [ ] TJG 025 — only has lifestyle shots; needs product-only close-up images
+- [ ] TJG 026 — only has lifestyle shots; needs product-only close-up images
