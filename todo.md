@@ -146,3 +146,6 @@
 ## Homepage Stats Update
 - [x] Update stats: 2,400+ Pieces Crafted | 18 Collections | 12+ Years of Craft | 4.9★ Client Rating
 - [x] Remove blue highlight/background from stats numbers and labels (was browser text selection, not CSS)
+
+## Product Page Trust Badges
+- [x] Replace trust badges with: 100+ Celebrity Looks / Lifetime Warranty / Free Shipping / 30-Day Returns

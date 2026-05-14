@@ -2,7 +2,7 @@ import StorefrontLayout from "@/components/StorefrontLayout";
 import ProductCard from "@/components/ProductCard";
 import { useCart } from "@/contexts/CartContext";
 import { trpc } from "@/lib/trpc";
-import { ChevronDown, ChevronUp, Shield, Truck, RefreshCw, Award } from "lucide-react";
+import { ChevronDown, ChevronUp, Star, Wrench, Truck, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useParams } from "wouter";
 import { toast } from "sonner";
@@ -201,24 +201,24 @@ export default function ProductPage() {
           {/* Trust Signals */}
           <div className="product-trust">
             <div className="trust-item">
-              <Shield size={16} color="var(--gold)" />
-              <span className="trust-label">Hallmarked</span>
-              <span className="trust-desc">BIS certified precious metals</span>
+              <Star size={16} color="var(--gold)" />
+              <span className="trust-label">100+ Celebrity Looks</span>
+              <span className="trust-desc">Worn by celebrities and style icons</span>
+            </div>
+            <div className="trust-item">
+              <Wrench size={16} color="var(--gold)" />
+              <span className="trust-label">Lifetime Warranty</span>
+              <span className="trust-desc">Complimentary servicing for life</span>
             </div>
             <div className="trust-item">
               <Truck size={16} color="var(--gold)" />
               <span className="trust-label">Free Shipping</span>
-              <span className="trust-desc">On orders above ₹5,000</span>
+              <span className="trust-desc">Insured delivery in 5–7 days</span>
             </div>
             <div className="trust-item">
               <RefreshCw size={16} color="var(--gold)" />
               <span className="trust-label">30-Day Returns</span>
-              <span className="trust-desc">Hassle-free returns policy</span>
-            </div>
-            <div className="trust-item">
-              <Award size={16} color="var(--gold)" />
-              <span className="trust-label">Certified Gems</span>
-              <span className="trust-desc">Grading report included</span>
+              <span className="trust-desc">Hassle-free returns and exchanges</span>
             </div>
           </div>
 
