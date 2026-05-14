@@ -470,6 +470,7 @@ export interface SkuRow {
   subCategory?: string;
   description?: string;
   imageUrls?: string[];
+  price?: number;
 }
 
 export interface ImportResult {
@@ -570,9 +571,9 @@ export async function bulkImportSkus(
         collection: collection || undefined,
         description: row.description?.trim() || undefined,
         images: row.imageUrls && row.imageUrls.length > 0 ? row.imageUrls : undefined,
-        price: "0.00", // Price to be set by admin after import
-        stock: 0,
-        isActive: false, // Inactive until admin sets price & activates
+        price: row.price && row.price > 0 ? String(row.price.toFixed(2)) : "0.00",
+        stock: row.price && row.price > 0 ? 10 : 0,
+        isActive: !!(row.price && row.price > 0), // Auto-activate if price is provided
         isNewArrival: true,
       });
       result.imported++;

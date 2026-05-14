@@ -114,3 +114,9 @@
 - [x] tRPC siteSettings.getHeroImage and siteSettings.updateHeroImage procedures
 - [x] Admin dashboard: hero image upload UI with preview and save
 - [x] Homepage: load hero image from site settings (DB), fallback to static upload
+
+## Bug Fixes & Improvements (Round 2)
+- [x] Activate all imported products (set isActive = true, price from sheet)
+- [x] Update SKU upload parser to read Price column (column H)
+- [x] Update bulkImportSkus DB helper to accept and save price field
+- [x] Update AdminSkuUpload UI to show Price column in preview table

@@ -514,6 +514,7 @@ const adminRouter = router({
         subCategory: z.string().optional(),
         description: z.string().optional(),
         imageUrls: z.array(z.string()).optional(),
+        price: z.number().optional(),
       })),
     }))
     .mutation(async ({ input }) => {
@@ -527,7 +528,7 @@ const adminRouter = router({
     }),
 
   /** Confirm import: insert only new, non-duplicate rows */
-  importSkus: adminProcedure
+    importSkus: adminProcedure
     .input(z.object({
       filename: z.string(),
       rows: z.array(z.object({
@@ -538,12 +539,12 @@ const adminRouter = router({
         subCategory: z.string().optional(),
         description: z.string().optional(),
         imageUrls: z.array(z.string()).optional(),
+        price: z.number().optional(),
       })),
     }))
     .mutation(async ({ ctx, input }) => {
       const existingSkus = await getExistingSkus();
       const existingSet = new Set(existingSkus);
-
       const validRows: SkuRow[] = input.rows
         .filter((r) => r.sku?.trim() && r.title?.trim() && r.category?.trim())
         .map((r) => ({
@@ -554,6 +555,7 @@ const adminRouter = router({
           subCategory: r.subCategory?.trim(),
           description: r.description?.trim(),
           imageUrls: r.imageUrls,
+          price: r.price,
         }));
 
       const result = await bulkImportSkus(validRows, existingSet);

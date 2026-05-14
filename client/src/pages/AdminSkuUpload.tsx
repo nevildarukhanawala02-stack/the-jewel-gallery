@@ -27,6 +27,7 @@ interface ParsedRow {
   subCategory?: string;
   description?: string;
   imageUrls?: string[];
+  price?: number;
 }
 
 interface PreviewRow extends ParsedRow {
@@ -82,6 +83,10 @@ function parseFile(file: File): Promise<ParsedRow[]> {
             const description = get(["Description", "description", "DESC"]);
             const imageRaw = get(["Image URLS", "Image URLs", "Images", "image_urls"]);
             const date = get(["Date", "date"]);
+            const priceRaw = get(["Price", "price", "PRICE"]);
+            const price = priceRaw
+              ? Math.round(parseFloat(priceRaw.replace(/[₹,\s]/g, "")) || 0)
+              : undefined;
 
             return {
               date: date || undefined,
@@ -91,6 +96,7 @@ function parseFile(file: File): Promise<ParsedRow[]> {
               subCategory: subCategory || undefined,
               description: description || undefined,
               imageUrls: parseGoogleDriveUrls(imageRaw),
+              price: price && price > 0 ? price : undefined,
             };
           })
           .filter((r) => r.sku || r.title); // Drop completely empty rows
@@ -337,8 +343,8 @@ export default function AdminSkuUpload() {
               </CardTitle>
               <p className="text-sm text-[#5C4A3A] mt-1">
                 Upload a <strong>.csv</strong> or <strong>.xlsx</strong> file with columns:
-                Date, SKU, Title, Category, Sub Category, Description, Image URLS.
-                Duplicate SKUs are automatically detected and skipped.
+                Date, SKU, Title, Category, Sub Category, Description, Image URLS, Price.
+                Duplicate SKUs are automatically detected and skipped. The Price column is optional — leave blank to set ₹0.
               </p>
             </CardHeader>
             <CardContent className="pt-4">
@@ -434,6 +440,7 @@ export default function AdminSkuUpload() {
                       <th className="text-left py-3 px-4 font-semibold text-[#5C4A3A] w-28">Category</th>
                       <th className="text-left py-3 px-4 font-semibold text-[#5C4A3A] w-36">Sub Category</th>
                       <th className="text-left py-3 px-4 font-semibold text-[#5C4A3A] w-20">Images</th>
+                      <th className="text-right py-3 px-4 font-semibold text-[#5C4A3A] w-24">Price</th>
                       <th className="text-left py-3 px-4 font-semibold text-[#5C4A3A] w-28">Status</th>
                     </tr>
                   </thead>
@@ -462,6 +469,9 @@ export default function AdminSkuUpload() {
                             ? <span className="text-xs bg-[#E8E0D5] px-1.5 py-0.5 rounded">{row.imageUrls.length}</span>
                             : "—"}
                         </td>
+                        <td className="py-3 px-4 text-right text-[#2C1810] font-medium">
+                          {row.price && row.price > 0 ? `₹${row.price.toLocaleString("en-IN")}` : <span className="text-[#B0A090] text-xs">—</span>}
+                        </td>
                         <td className="py-3 px-4">
                           {row.isDuplicate ? (
                             <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-xs">
@@ -488,7 +498,7 @@ export default function AdminSkuUpload() {
                 <p className="text-sm text-[#5C4A3A]">
                   {newCount === 0
                     ? "No new SKUs to import — all rows are duplicates or invalid."
-                    : `${newCount} new product${newCount !== 1 ? "s" : ""} will be added to the database (inactive, price ₹0).`}
+                    : `${newCount} new product${newCount !== 1 ? "s" : ""} will be added. Products with a price will be set active; others will be inactive with price ₹0.`}
                 </p>
                 <div className="flex gap-3">
                   <Button
