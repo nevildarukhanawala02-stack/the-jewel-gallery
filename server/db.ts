@@ -10,6 +10,7 @@ import {
   orderItems,
   orders,
   products,
+  skuImportLogs,
   users,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
@@ -443,4 +444,175 @@ export async function subscribeNewsletter(email: string) {
   } catch {
     // Already subscribed — ignore duplicate
   }
+}
+
+// ============================================================
+// SKU IMPORT HELPERS
+// ============================================================
+
+/** Return all existing SKUs from the products table (non-null only) */
+export async function getExistingSkus(): Promise<string[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({ sku: products.sku })
+    .from(products)
+    .where(sql`${products.sku} IS NOT NULL`);
+  return rows.map((r) => r.sku as string).filter(Boolean);
+}
+
+export interface SkuRow {
+  date?: string;
+  sku: string;
+  title: string;
+  category: string;
+  subCategory?: string;
+  description?: string;
+  imageUrls?: string[];
+}
+
+export interface ImportResult {
+  imported: number;
+  duplicates: number;
+  skipped: number;
+  importedSkus: string[];
+  duplicateSkus: string[];
+  errors: string[];
+}
+
+/** Slugify a product name for the slug field */
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[·•|]/g, "-")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+/** Normalize category string to the enum values used in the schema */
+function normalizeCategory(cat: string): "rings" | "necklaces" | "earrings" | "bracelets" | null {
+  const c = cat.toLowerCase().trim();
+  if (c === "rings" || c === "ring") return "rings";
+  if (c === "necklaces" || c === "necklace") return "necklaces";
+  if (c === "earrings" || c === "earring") return "earrings";
+  if (c === "bracelets" || c === "bracelet") return "bracelets";
+  return null;
+}
+
+/** Extract collection name from the title format: "Name | Type · Metal | Collection" */
+function extractCollection(title: string): string | undefined {
+  const parts = title.split("|").map((p) => p.trim());
+  if (parts.length >= 3) return parts[parts.length - 1].trim() || undefined;
+  return undefined;
+}
+
+/**
+ * Bulk-insert new SKU rows, skipping any that already exist.
+ * Returns a detailed import result.
+ */
+export async function bulkImportSkus(
+  rows: SkuRow[],
+  existingSkus: Set<string>
+): Promise<ImportResult> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result: ImportResult = {
+    imported: 0,
+    duplicates: 0,
+    skipped: 0,
+    importedSkus: [],
+    duplicateSkus: [],
+    errors: [],
+  };
+
+  for (const row of rows) {
+    const sku = row.sku?.trim();
+    if (!sku) {
+      result.skipped++;
+      result.errors.push(`Row skipped: missing SKU (title: ${row.title?.slice(0, 40)})`);
+      continue;
+    }
+
+    // Deduplication check
+    if (existingSkus.has(sku)) {
+      result.duplicates++;
+      result.duplicateSkus.push(sku);
+      continue;
+    }
+
+    const category = normalizeCategory(row.category);
+    if (!category) {
+      result.skipped++;
+      result.errors.push(`Row skipped: unrecognised category "${row.category}" for SKU ${sku}`);
+      continue;
+    }
+
+    const title = row.title?.trim() || sku;
+    const collection = extractCollection(title);
+
+    // Build a unique slug — append sku suffix to guarantee uniqueness
+    const baseSlug = slugify(title);
+    const skuSuffix = sku.toLowerCase().replace(/\s+/g, "-");
+    const slug = `${baseSlug}-${skuSuffix}`;
+
+    try {
+      await db.insert(products).values({
+        name: title,
+        slug,
+        sku,
+        category,
+        subcategory: row.subCategory?.trim() || undefined,
+        collection: collection || undefined,
+        description: row.description?.trim() || undefined,
+        images: row.imageUrls && row.imageUrls.length > 0 ? row.imageUrls : undefined,
+        price: "0.00", // Price to be set by admin after import
+        stock: 0,
+        isActive: false, // Inactive until admin sets price & activates
+        isNewArrival: true,
+      });
+      result.imported++;
+      result.importedSkus.push(sku);
+      // Add to set so subsequent rows in same batch don't duplicate
+      existingSkus.add(sku);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      result.skipped++;
+      result.errors.push(`SKU ${sku}: ${msg}`);
+    }
+  }
+
+  return result;
+}
+
+/** Log a completed SKU import to the sku_import_logs table */
+export async function logSkuImport(data: {
+  filename: string;
+  uploadedBy?: string;
+  totalRows: number;
+  newRows: number;
+  duplicateRows: number;
+  skippedRows: number;
+  importedSkus: string[];
+  duplicateSkus: string[];
+  status: "success" | "partial" | "failed";
+  errorMessage?: string;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(skuImportLogs).values(data);
+}
+
+/** Return the last N import logs for display in the admin UI */
+export async function getSkuImportLogs(limit = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(skuImportLogs)
+    .orderBy(desc(skuImportLogs.createdAt))
+    .limit(limit);
 }

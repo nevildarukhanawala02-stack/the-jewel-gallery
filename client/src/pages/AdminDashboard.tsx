@@ -1,7 +1,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
-import { Package, TrendingUp, ShoppingBag, AlertTriangle, Truck, CreditCard, Users, BarChart2 } from "lucide-react";
+import { Package, TrendingUp, ShoppingBag, AlertTriangle, Truck, CreditCard, Users, BarChart2, FileSpreadsheet } from "lucide-react";
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "Pending",
@@ -31,6 +31,7 @@ function AdminLayout({ children, title }: { children: React.ReactNode; title: st
     { href: "/admin", label: "Dashboard", icon: BarChart2 },
     { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
     { href: "/admin/products", label: "Products", icon: Package },
+    { href: "/admin/sku-upload", label: "SKU Upload", icon: FileSpreadsheet },
   ];
 
   return (

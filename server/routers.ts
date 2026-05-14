@@ -32,6 +32,11 @@ import {
   updateOrderTracking,
   updateProduct,
   decrementProductStock,
+  getExistingSkus,
+  bulkImportSkus,
+  logSkuImport,
+  getSkuImportLogs,
+  type SkuRow,
 } from "./db";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
@@ -485,6 +490,107 @@ const adminRouter = router({
     }))
     .mutation(async ({ input }) => {
       return createProduct(input);
+    }),
+
+  // ────────────────────────────────────────────────────────────
+  // SKU BULK IMPORT
+  // ────────────────────────────────────────────────────────────
+
+  /** Return all existing SKUs for client-side dedup preview */
+  getExistingSkus: adminProcedure.query(async () => {
+    return getExistingSkus();
+  }),
+
+  /** Preview: parse rows sent from client, flag new vs duplicate */
+  previewSkuImport: adminProcedure
+    .input(z.object({
+      rows: z.array(z.object({
+        date: z.string().optional(),
+        sku: z.string(),
+        title: z.string(),
+        category: z.string(),
+        subCategory: z.string().optional(),
+        description: z.string().optional(),
+        imageUrls: z.array(z.string()).optional(),
+      })),
+    }))
+    .mutation(async ({ input }) => {
+      const existingSkus = await getExistingSkus();
+      const existingSet = new Set(existingSkus);
+      return input.rows.map((row) => ({
+        ...row,
+        isDuplicate: existingSet.has(row.sku.trim()),
+        isValid: !!(row.sku?.trim() && row.title?.trim() && row.category?.trim()),
+      }));
+    }),
+
+  /** Confirm import: insert only new, non-duplicate rows */
+  importSkus: adminProcedure
+    .input(z.object({
+      filename: z.string(),
+      rows: z.array(z.object({
+        date: z.string().optional(),
+        sku: z.string(),
+        title: z.string(),
+        category: z.string(),
+        subCategory: z.string().optional(),
+        description: z.string().optional(),
+        imageUrls: z.array(z.string()).optional(),
+      })),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const existingSkus = await getExistingSkus();
+      const existingSet = new Set(existingSkus);
+
+      const validRows: SkuRow[] = input.rows
+        .filter((r) => r.sku?.trim() && r.title?.trim() && r.category?.trim())
+        .map((r) => ({
+          date: r.date,
+          sku: r.sku.trim(),
+          title: r.title.trim(),
+          category: r.category.trim(),
+          subCategory: r.subCategory?.trim(),
+          description: r.description?.trim(),
+          imageUrls: r.imageUrls,
+        }));
+
+      const result = await bulkImportSkus(validRows, existingSet);
+
+      // Log the import
+      const status = result.skipped > 0 && result.imported === 0
+        ? "failed"
+        : result.skipped > 0
+        ? "partial"
+        : "success";
+
+      await logSkuImport({
+        filename: input.filename,
+        uploadedBy: ctx.user.name ?? ctx.user.email ?? "Admin",
+        totalRows: input.rows.length,
+        newRows: result.imported,
+        duplicateRows: result.duplicates,
+        skippedRows: result.skipped,
+        importedSkus: result.importedSkus,
+        duplicateSkus: result.duplicateSkus,
+        status,
+        errorMessage: result.errors.length > 0 ? result.errors.join("\n") : undefined,
+      });
+
+      return {
+        imported: result.imported,
+        duplicates: result.duplicates,
+        skipped: result.skipped,
+        importedSkus: result.importedSkus,
+        duplicateSkus: result.duplicateSkus,
+        errors: result.errors,
+      };
+    }),
+
+  /** Return recent import logs */
+  getSkuImportLogs: adminProcedure
+    .input(z.object({ limit: z.number().optional() }))
+    .query(async ({ input }) => {
+      return getSkuImportLogs(input.limit ?? 20);
     }),
 });
 

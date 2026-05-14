@@ -215,3 +215,120 @@ describe("newsletter.subscribe input validation", () => {
     await expect(caller.newsletter.subscribe({ email: "not-an-email" })).rejects.toThrow();
   });
 });
+
+// ============================================================
+// SKU IMPORT DEDUP LOGIC TESTS
+// ============================================================
+
+// Helper: create a public (unauthenticated) context
+function createPublicContext(): TrpcContext {
+  return {
+    user: null,
+    req: { protocol: "https", headers: {} } as TrpcContext["req"],
+    res: { clearCookie: () => {} } as TrpcContext["res"],
+  };
+}
+
+describe("SKU import — deduplication and validation", () => {
+  it("previewSkuImport marks row with empty SKU as invalid", async () => {
+    const { ctx } = createAdminContext();
+    const caller = appRouter.createCaller(ctx);
+
+    const result = await caller.admin.previewSkuImport({
+      rows: [{ sku: "", title: "No SKU Ring", category: "Rings" }],
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0].isValid).toBe(false);
+  });
+
+  it("previewSkuImport marks row with empty title as invalid", async () => {
+    const { ctx } = createAdminContext();
+    const caller = appRouter.createCaller(ctx);
+
+    const result = await caller.admin.previewSkuImport({
+      rows: [{ sku: "TJG-TEST-001", title: "", category: "Rings" }],
+    });
+
+    expect(result[0].isValid).toBe(false);
+  });
+
+  it("previewSkuImport marks row with empty category as invalid", async () => {
+    const { ctx } = createAdminContext();
+    const caller = appRouter.createCaller(ctx);
+
+    const result = await caller.admin.previewSkuImport({
+      rows: [{ sku: "TJG-TEST-002", title: "Valid Title", category: "" }],
+    });
+
+    expect(result[0].isValid).toBe(false);
+  });
+
+  it("previewSkuImport marks a fully populated row as valid", async () => {
+    const { ctx } = createAdminContext();
+    const caller = appRouter.createCaller(ctx);
+
+    const result = await caller.admin.previewSkuImport({
+      rows: [{ sku: "TJG-VALID-001", title: "Celestial Ring", category: "Rings" }],
+    });
+
+    expect(result[0].isValid).toBe(true);
+    expect(result[0]).toHaveProperty("isDuplicate");
+  });
+
+  it("previewSkuImport returns isDuplicate property for every row", async () => {
+    const { ctx } = createAdminContext();
+    const caller = appRouter.createCaller(ctx);
+
+    const result = await caller.admin.previewSkuImport({
+      rows: [
+        { sku: "TJG-A", title: "Ring A", category: "Rings" },
+        { sku: "TJG-B", title: "Earring B", category: "Earrings" },
+      ],
+    });
+
+    expect(result).toHaveLength(2);
+    result.forEach((row) => {
+      expect(row).toHaveProperty("isDuplicate");
+      expect(typeof row.isDuplicate).toBe("boolean");
+    });
+  });
+
+  it("importSkus is protected — non-admin user is rejected", async () => {
+    const ctx = createUserContext();
+    const caller = appRouter.createCaller(ctx);
+
+    await expect(
+      caller.admin.importSkus({
+        filename: "test.csv",
+        rows: [{ sku: "TJG-X", title: "Test Ring", category: "Rings" }],
+      })
+    ).rejects.toThrow("Admin access required.");
+  });
+
+  it("importSkus is protected — unauthenticated user is rejected", async () => {
+    const ctx = createPublicContext();
+    const caller = appRouter.createCaller(ctx);
+
+    await expect(
+      caller.admin.importSkus({
+        filename: "test.csv",
+        rows: [{ sku: "TJG-X", title: "Test Ring", category: "Rings" }],
+      })
+    ).rejects.toThrow();
+  });
+
+  it("getExistingSkus is protected — non-admin is rejected", async () => {
+    const ctx = createUserContext();
+    const caller = appRouter.createCaller(ctx);
+
+    await expect(caller.admin.getExistingSkus()).rejects.toThrow("Admin access required.");
+  });
+
+  it("getSkuImportLogs is protected — non-admin is rejected", async () => {
+    const ctx = createUserContext();
+    const caller = appRouter.createCaller(ctx);
+
+    await expect(caller.admin.getSkuImportLogs({ limit: 10 })).rejects.toThrow("Admin access required.");
+  });
+});

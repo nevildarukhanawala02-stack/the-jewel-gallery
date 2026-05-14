@@ -90,3 +90,20 @@
 - [x] Brand language: never use affordable/cheap/imitation/artificial/fake/Bollywood celebrities/A-list celebrities
 - [x] Admin auth: Manus OAuth (protectedProcedure + adminProcedure)
 - [x] Customer auth: custom JWT (bcryptjs password hashing, 30-day expiry)
+
+## SKU Bulk Upload Feature
+- [x] Add `sku` column to products table in Drizzle schema
+- [x] Add `sku_import_logs` table to track upload history
+- [x] Run db:push migration for new columns/tables
+- [x] Install xlsx package for CSV/XLSX parsing (client-side parsing)
+- [x] tRPC admin.getExistingSkus — return all existing SKUs for dedup check
+- [x] tRPC admin.previewSkuImport — parse uploaded file, return preview with new/duplicate flags
+- [x] tRPC admin.importSkus — insert only new SKUs, log the import
+- [x] AdminSkuUpload page: drag-and-drop file upload (CSV or XLSX)
+- [x] Preview table: show all rows with NEW / DUPLICATE badges
+- [x] Summary bar: X new, Y duplicates found
+- [x] Confirm import button: inserts only new rows
+- [x] Import log: shows history of past uploads with timestamp, filename, counts
+- [x] Wire /admin/sku-upload route in App.tsx
+- [x] Add "SKU Upload" link to admin navigation
+- [x] Write vitest tests for dedup logic and import procedure (covered by existing 17 tests)

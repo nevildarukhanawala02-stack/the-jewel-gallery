@@ -35,6 +35,7 @@ export const products = mysqlTable("products", {
   id: int("id").autoincrement().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   slug: varchar("slug", { length: 255 }).notNull().unique(),
+  sku: varchar("sku", { length: 50 }).unique(),
   collection: varchar("collection", { length: 100 }),
   category: mysqlEnum("category", ["rings", "necklaces", "earrings", "bracelets"]).notNull(),
   subcategory: varchar("subcategory", { length: 100 }),
@@ -220,6 +221,26 @@ export const coupons = mysqlTable("coupons", {
   expiresAt: timestamp("expiresAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
+
+// ============================================================
+// SKU IMPORT LOGS TABLE
+// ============================================================
+export const skuImportLogs = mysqlTable("sku_import_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  filename: varchar("filename", { length: 255 }).notNull(),
+  uploadedBy: varchar("uploadedBy", { length: 255 }),
+  totalRows: int("totalRows").notNull().default(0),
+  newRows: int("newRows").notNull().default(0),
+  duplicateRows: int("duplicateRows").notNull().default(0),
+  skippedRows: int("skippedRows").notNull().default(0),
+  importedSkus: json("importedSkus").$type<string[]>(),
+  duplicateSkus: json("duplicateSkus").$type<string[]>(),
+  status: mysqlEnum("status", ["success", "partial", "failed"]).default("success").notNull(),
+  errorMessage: text("errorMessage"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SkuImportLog = typeof skuImportLogs.$inferSelect;
 
 // ============================================================
 // NEWSLETTER SUBSCRIBERS TABLE — Phase 2 ready
