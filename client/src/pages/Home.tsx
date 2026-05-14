@@ -112,22 +112,22 @@ export default function Home() {
               As Worn By
             </button>
           </div>
-          <div className="hero-stats">
+            <div className="hero-stats">
             <div className="stat">
               <span className="stat-num">2,400+</span>
               <span className="stat-label">Pieces Crafted</span>
             </div>
             <div className="stat">
-              <span className="stat-num">18K</span>
-              <span className="stat-label">Gold Plating</span>
+              <span className="stat-num">18</span>
+              <span className="stat-label">Collections</span>
             </div>
             <div className="stat">
-              <span className="stat-num">925</span>
-              <span className="stat-label">Sterling Silver</span>
+              <span className="stat-num">12+</span>
+              <span className="stat-label">Years of Craft</span>
             </div>
             <div className="stat">
-              <span className="stat-num">100%</span>
-              <span className="stat-label">Certified Gems</span>
+              <span className="stat-num">4.9★</span>
+              <span className="stat-label">Client Rating</span>
             </div>
           </div>
         </div>

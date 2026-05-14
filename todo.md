@@ -142,3 +142,7 @@
 - [x] Best Sellers section: show only first product-only image (no model photos)
 - [x] Product detail page: show all images including model/lifestyle shots
 - [x] Add imageTypes column to DB (product | model | lifestyle) and run LLM vision classification on all 47 products
+
+## Homepage Stats Update
+- [x] Update stats: 2,400+ Pieces Crafted | 18 Collections | 12+ Years of Craft | 4.9★ Client Rating
+- [x] Remove blue highlight/background from stats numbers and labels (was browser text selection, not CSS)

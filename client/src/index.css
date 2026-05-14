@@ -306,9 +306,10 @@ button {
 .hero-sub { font-size: 13px; color: var(--text-mid); line-height: 1.8; max-width: 360px; margin-bottom: 40px; }
 .hero-ctas { display: flex; gap: 16px; margin-bottom: 56px; }
 .hero-stats { display: flex; gap: 40px; }
-.stat { display: flex; flex-direction: column; gap: 4px; }
+.stat { display: flex; flex-direction: column; gap: 4px; user-select: none; }
 .stat-num { font-family: var(--font-display); font-size: 24px; font-weight: 300; color: var(--gold); line-height: 1; }
 .stat-label { font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
+.stat-num::selection, .stat-label::selection { background: rgba(201, 169, 110, 0.25); color: inherit; }
 .hero-visual { position: relative; overflow: hidden; }
 .hero-visual::before {
   content: '';
