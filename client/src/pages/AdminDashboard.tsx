@@ -177,6 +177,20 @@ export default function AdminDashboard() {
   const { data: lowStockProducts } = trpc.admin.getLowStockProducts.useQuery({ threshold: 5 }, { enabled: !!user });
   const { data: heroData, refetch: refetchHero } = trpc.siteSettings.getHeroImage.useQuery();
 
+  // Image migration
+  const [migrateResult, setMigrateResult] = useState<{ total: number; migrated: number; failed: number; errors: string[] } | null>(null);
+  const migrateMutation = trpc.admin.migrateImages.useMutation({
+    onSuccess: (data) => {
+      setMigrateResult(data);
+      if (data.failed === 0) {
+        toast.success(`Successfully migrated ${data.migrated} product images to Manus storage.`);
+      } else {
+        toast.warning(`Migrated ${data.migrated} images, ${data.failed} failed. Check results below.`);
+      }
+    },
+    onError: (err) => toast.error(`Migration failed: ${err.message}`),
+  });
+
   const updateStatusMutation = trpc.admin.updateOrderStatus.useMutation();
   const updateHeroMutation = trpc.siteSettings.updateHeroImage.useMutation({
     onSuccess: () => {
@@ -522,6 +536,70 @@ export default function AdminDashboard() {
             </p>
           </div>
         </div>
+      </div>
+      {/* Migrate Product Images */}
+      <div style={{
+        background: "#1A1A1A",
+        border: "1px solid rgba(201,169,110,0.15)",
+        borderRadius: "4px",
+        padding: "28px",
+        marginTop: "32px",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+          <ImageIcon size={16} color="var(--gold)" />
+          <h3 style={{ fontFamily: "var(--font-display)", fontSize: "15px", fontWeight: 400, color: "white", letterSpacing: "1px", margin: 0 }}>
+            Migrate Product Images
+          </h3>
+        </div>
+        <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.4)", marginBottom: "20px", lineHeight: 1.6 }}>
+          Downloads all Google Drive product images server-side and re-hosts them on Manus storage so they display correctly on the storefront.
+        </p>
+        <button
+          onClick={() => { setMigrateResult(null); migrateMutation.mutate(); }}
+          disabled={migrateMutation.isPending}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "12px 24px",
+            background: migrateMutation.isPending ? "rgba(201,169,110,0.3)" : "rgba(201,169,110,0.15)",
+            border: "1px solid rgba(201,169,110,0.4)",
+            borderRadius: "4px",
+            color: "var(--gold)",
+            fontFamily: "var(--font-body)",
+            fontSize: "12px",
+            letterSpacing: "1px",
+            textTransform: "uppercase",
+            cursor: migrateMutation.isPending ? "not-allowed" : "pointer",
+            transition: "all 0.2s",
+          }}
+        >
+          <Upload size={14} />
+          {migrateMutation.isPending ? "Migrating Images..." : "Start Image Migration"}
+        </button>
+        {migrateResult && (
+          <div style={{ marginTop: "20px", padding: "16px", background: "rgba(0,0,0,0.3)", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <div style={{ display: "flex", gap: "24px", marginBottom: migrateResult.errors.length > 0 ? "16px" : 0 }}>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: "22px", fontWeight: 600, color: "white" }}>{migrateResult.total}</div>
+                <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", letterSpacing: "1px", textTransform: "uppercase" }}>Total</div>
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: "22px", fontWeight: 600, color: "#10B981" }}>{migrateResult.migrated}</div>
+                <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", letterSpacing: "1px", textTransform: "uppercase" }}>Migrated</div>
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: "22px", fontWeight: 600, color: migrateResult.failed > 0 ? "#EF4444" : "rgba(255,255,255,0.3)" }}>{migrateResult.failed}</div>
+                <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", letterSpacing: "1px", textTransform: "uppercase" }}>Failed</div>
+              </div>
+            </div>
+            {migrateResult.errors.length > 0 && (
+              <div style={{ fontSize: "11px", color: "rgba(255,100,100,0.8)", lineHeight: 1.8 }}>
+                {migrateResult.errors.map((e, i) => <div key={i}>{e}</div>)}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </AdminLayout>
   );

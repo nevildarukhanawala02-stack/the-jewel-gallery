@@ -38,8 +38,23 @@ export function registerStorageProxy(app: Express) {
         return;
       }
 
-      res.set("Cache-Control", "no-store");
-      res.redirect(307, url);
+      // Pipe the image bytes directly instead of redirecting.
+      // A 307 redirect to a signed CloudFront URL can fail when accessed through
+      // the Manus preview proxy, because the signed URL may not be reachable
+      // from the browser context. Fetching and piping avoids this issue.
+      const imageResp = await fetch(url);
+      if (!imageResp.ok) {
+        console.error(`[StorageProxy] upstream error: ${imageResp.status}`);
+        res.status(502).send("Storage upstream error");
+        return;
+      }
+
+      const contentType = imageResp.headers.get("content-type") || "application/octet-stream";
+      res.set("Content-Type", contentType);
+      res.set("Cache-Control", "public, max-age=86400");
+
+      const buffer = await imageResp.arrayBuffer();
+      res.send(Buffer.from(buffer));
     } catch (err) {
       console.error("[StorageProxy] failed:", err);
       res.status(502).send("Storage proxy error");

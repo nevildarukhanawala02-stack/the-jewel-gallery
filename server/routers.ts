@@ -38,9 +38,13 @@ import {
   getSkuImportLogs,
   getSiteSetting,
   setSiteSetting,
+  getDb,
   type SkuRow,
 } from "./db";
+import { products } from "../drizzle/schema";
+import { eq } from "drizzle-orm";
 import { COOKIE_NAME } from "@shared/const";
+import { storagePut } from "./storage";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
@@ -596,6 +600,103 @@ const adminRouter = router({
     .query(async ({ input }) => {
       return getSkuImportLogs(input.limit ?? 20);
     }),
+
+  migrateImages: adminProcedure.mutation(async () => {
+    const db = await getDb();
+    if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+
+    // Fetch all products that have Google Drive image URLs
+    const allProducts = await db.select({ id: products.id, sku: products.sku, images: products.images }).from(products);
+    const driveProducts = allProducts.filter((p) => {
+      const imgs = p.images as string[] | null;
+      if (!imgs || imgs.length === 0) return false;
+      return imgs.some((url) => url.includes("drive.google.com") || url.includes("uc?export=view"));
+    });
+
+    let migrated = 0;
+    let failed = 0;
+    const errors: string[] = [];
+
+    for (const product of driveProducts) {
+      const imgs = product.images as string[];
+      const newImages: string[] = [];
+      let changed = false;
+
+      for (const imgUrl of imgs) {
+        if (!imgUrl.includes("drive.google.com") && !imgUrl.includes("uc?export=view")) {
+          newImages.push(imgUrl);
+          continue;
+        }
+
+        try {
+          // Extract Google Drive file ID
+          let fileId: string | null = null;
+          const idMatch = imgUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+          const pathMatch = imgUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+          if (idMatch) fileId = idMatch[1];
+          else if (pathMatch) fileId = pathMatch[1];
+
+          if (!fileId) {
+            errors.push(`${product.sku}: Could not extract file ID from ${imgUrl}`);
+            newImages.push(imgUrl);
+            failed++;
+            continue;
+          }
+
+          // Download via Google Drive export URL
+          const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
+          const response = await fetch(downloadUrl, {
+            headers: {
+              "User-Agent": "Mozilla/5.0 (compatible; TJG-ImageMigrator/1.0)",
+            },
+            redirect: "follow",
+          });
+
+          if (!response.ok) {
+            errors.push(`${product.sku}: Download failed (${response.status}) for ${fileId}`);
+            newImages.push(imgUrl);
+            failed++;
+            continue;
+          }
+
+          const contentType = response.headers.get("content-type") ?? "image/jpeg";
+          const ext = contentType.includes("png") ? "png" : contentType.includes("webp") ? "webp" : "jpg";
+          const arrayBuffer = await response.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer);
+
+          if (buffer.length < 1000) {
+            // Likely an HTML error page, not an actual image
+            errors.push(`${product.sku}: Response too small (${buffer.length} bytes) — likely blocked by Drive`);
+            newImages.push(imgUrl);
+            failed++;
+            continue;
+          }
+
+          const storageKey = `products/${product.sku}_${fileId.slice(0, 8)}.${ext}`;
+          const { url: newUrl } = await storagePut(storageKey, buffer, contentType.split(";")[0]);
+          newImages.push(newUrl);
+          changed = true;
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          errors.push(`${product.sku}: ${msg}`);
+          newImages.push(imgUrl);
+          failed++;
+        }
+      }
+
+      if (changed) {
+        await db.update(products).set({ images: newImages }).where(eq(products.id, product.id));
+        migrated++;
+      }
+    }
+
+    return {
+      total: driveProducts.length,
+      migrated,
+      failed,
+      errors: errors.slice(0, 20),
+    };
+  }),
 });
 
 // ============================================================

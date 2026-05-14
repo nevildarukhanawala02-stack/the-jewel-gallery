@@ -125,3 +125,7 @@
 - [x] Homepage collections grid: show latest 8 active products (remove isFeatured filter)
 - [x] Homepage bestsellers: mark 5 SKUs as isBestseller in DB and show them
 - [x] Fix Google Drive image URLs in DB to direct-render format
+
+## Image Re-hosting Fix
+- [x] Download all product images from Google Drive and re-host on Manus storage
+- [x] Update all product image URLs in database to Manus storage URLs
