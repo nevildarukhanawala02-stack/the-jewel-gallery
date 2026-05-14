@@ -89,15 +89,6 @@ export default function Home() {
 
   return (
     <StorefrontLayout>
-      {/* Ticker */}
-      <div className="ticker">
-        <div className="ticker-track">
-          {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
-            <span key={i} className="ticker-item">{item}</span>
-          ))}
-        </div>
-      </div>
-
       {/* Hero Section */}
       <section className="hero">
         <div className="hero-text">
