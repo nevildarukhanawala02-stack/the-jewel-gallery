@@ -2,6 +2,7 @@ import StorefrontLayout from "@/components/StorefrontLayout";
 import ProductCard from "@/components/ProductCard";
 import { trpc } from "@/lib/trpc";
 import { useLocation, useParams } from "wouter";
+import { getCardImage } from "@/lib/productImage";
 
 const FALLBACK_PROFILES: Record<string, {
   name: string; designation: string; imageUrl: string; bio: string; style: string; occasion: string;
@@ -212,7 +213,7 @@ export default function CelebrityProfilePage() {
                 collection={p.collection ?? undefined}
                 price={Number(p.price)}
                 comparePrice={p.comparePrice ? Number(p.comparePrice) : undefined}
-                image={Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : undefined}
+                image={getCardImage(p.images, (p as any).imageTypes)}
                 badge={p.isNewArrival ? "New" : p.isBestseller ? "Bestseller" : undefined}
                 material={p.material ?? undefined}
               />

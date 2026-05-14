@@ -6,6 +6,7 @@ import { ChevronDown, ChevronUp, Shield, Truck, RefreshCw, Award } from "lucide-
 import { useState } from "react";
 import { useLocation, useParams } from "wouter";
 import { toast } from "sonner";
+import { getCardImage } from "@/lib/productImage";
 
 export default function ProductPage() {
   const params = useParams<{ slug: string }>();
@@ -40,7 +41,7 @@ export default function ProductPage() {
       name: product.name,
       collection: product.collection ?? undefined,
       price: Number(product.price),
-      image: images[0],
+      image: getCardImage(images, (product as any).imageTypes),
     }, qty);
     toast.success(`${product.name} added to your bag`, {
       description: `Quantity: ${qty}`,
@@ -266,7 +267,7 @@ export default function ProductPage() {
                 collection={p.collection ?? undefined}
                 price={Number(p.price)}
                 comparePrice={p.comparePrice ? Number(p.comparePrice) : undefined}
-                image={Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : undefined}
+                image={getCardImage(p.images, (p as any).imageTypes)}
                 badge={p.isNewArrival ? "New" : p.isBestseller ? "Bestseller" : undefined}
                 material={p.material ?? undefined}
               />

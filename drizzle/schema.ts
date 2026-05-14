@@ -49,6 +49,7 @@ export const products = mysqlTable("products", {
   weight: varchar("weight", { length: 50 }),
   dimensions: varchar("dimensions", { length: 100 }),
   images: json("images").$type<string[]>(),
+  imageTypes: json("imageTypes").$type<Array<'product' | 'model' | 'lifestyle'>>(),
   celebrityTags: json("celebrityTags").$type<string[]>(),
   isFeatured: boolean("isFeatured").default(false),
   isNewArrival: boolean("isNewArrival").default(false),

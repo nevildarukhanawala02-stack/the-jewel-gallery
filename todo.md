@@ -129,3 +129,16 @@
 ## Image Re-hosting Fix
 - [x] Download all product images from Google Drive and re-host on Manus storage
 - [x] Update all product image URLs in database to Manus storage URLs
+
+## HEIC Image Format Fix
+- [x] Diagnose image format of stored product images (HEIC vs JPEG)
+- [x] Install heic-convert npm package for HEIC-to-JPEG conversion
+- [x] Download all product images from Manus storage, convert to proper JPEG, re-upload
+- [x] Update database image URLs to point to converted images
+- [x] Verify images display on live site (rings, necklaces, earrings, bracelets pages)
+
+## Image Display Rules
+- [x] Category page cards: show only first product-only image (no model/lifestyle photos)
+- [x] Best Sellers section: show only first product-only image (no model photos)
+- [x] Product detail page: show all images including model/lifestyle shots
+- [x] Add imageTypes column to DB (product | model | lifestyle) and run LLM vision classification on all 47 products

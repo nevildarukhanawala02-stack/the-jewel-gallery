@@ -4,6 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
+import { getCardImage } from "@/lib/productImage";
 
 const TICKER_ITEMS = [
   "Hallmarked 925 Sterling Silver",
@@ -221,7 +222,7 @@ export default function Home() {
                 collection={p.collection ?? undefined}
                 price={Number(p.price)}
                 comparePrice={p.comparePrice ? Number(p.comparePrice) : undefined}
-                image={Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : undefined}
+                image={getCardImage(p.images, (p as any).imageTypes)}
                 badge={p.isNewArrival ? "New" : p.isBestseller ? "Bestseller" : undefined}
                 material={p.material ?? undefined}
               />
@@ -307,8 +308,8 @@ export default function Home() {
                 onClick={() => navigate(`/product/${p.slug}`)}
               >
                 <div className="bestseller-img-wrap-v3">
-                  {Array.isArray(p.images) && p.images.length > 0 ? (
-                    <img src={p.images[0]} alt={p.name} loading="lazy" />
+                  {getCardImage(p.images, (p as any).imageTypes) ? (
+                    <img src={getCardImage(p.images, (p as any).imageTypes)!} alt={p.name} loading="lazy" />
                   ) : (
                     <div style={{
                       width: "100%",
