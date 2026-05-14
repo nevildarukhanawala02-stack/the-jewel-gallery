@@ -1,38 +1,75 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { CartProvider } from "./contexts/CartContext";
+import { CustomerAuthProvider } from "./contexts/CustomerAuthContext";
+
+// Storefront Pages
 import Home from "./pages/Home";
+import CategoryPage from "./pages/CategoryPage";
+import CollectionsPage from "./pages/CollectionsPage";
+import ProductPage from "./pages/ProductPage";
+import CelebrityPage from "./pages/CelebrityPage";
+import CelebrityProfilePage from "./pages/CelebrityProfilePage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import AccountPage from "./pages/AccountPage";
+import PoliciesPage from "./pages/PoliciesPage";
+import CartPage from "./pages/CartPage";
+import ShippingPage from "./pages/ShippingPage";
+import PaymentPage from "./pages/PaymentPage";
+import ConfirmationPage from "./pages/ConfirmationPage";
+
+// Admin Pages
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminOrders from "./pages/AdminOrders";
+import AdminProducts from "./pages/AdminProducts";
+
+// Fallback
+import NotFound from "./pages/NotFound";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
+      {/* Storefront */}
+      <Route path="/" component={Home} />
+      <Route path="/collections" component={CollectionsPage} />
+      <Route path="/category/:category" component={CategoryPage} />
+      <Route path="/product/:slug" component={ProductPage} />
+      <Route path="/celebrity" component={CelebrityPage} />
+      <Route path="/celebrity/:slug" component={CelebrityProfilePage} />
+      <Route path="/login" component={LoginPage} />
+      <Route path="/register" component={RegisterPage} />
+      <Route path="/account" component={AccountPage} />
+      <Route path="/policies" component={PoliciesPage} />
+      <Route path="/cart" component={CartPage} />
+      <Route path="/shipping" component={ShippingPage} />
+      <Route path="/payment" component={PaymentPage} />
+      <Route path="/confirmation" component={ConfirmationPage} />
+      {/* Admin */}
+      <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin/orders" component={AdminOrders} />
+      <Route path="/admin/products" component={AdminProducts} />
+      {/* Fallback */}
+      <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
-          <Toaster />
-          <Router />
+          <CustomerAuthProvider>
+            <CartProvider>
+              <Toaster />
+              <Router />
+            </CartProvider>
+          </CustomerAuthProvider>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
