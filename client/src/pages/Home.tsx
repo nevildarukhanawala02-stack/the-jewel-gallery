@@ -97,22 +97,22 @@ export default function Home() {
       {/* Hero Section */}
       <section className="hero">
         <div className="hero-text">
-          <div className="hero-eyebrow">New Collection 2025</div>
+          <div className="hero-eyebrow">The New Collection · 2026</div>
           <h1 className="hero-h1">
-            Where <em>Artistry</em><br />
-            Meets<br />
-            <em>Elegance</em>
+            Where Every <em>Jewel</em><br />
+            Tells a Story Worth<br />
+            Wearing
           </h1>
           <p className="hero-sub">
-            Each piece in our collection is a testament to the timeless craft of Indian jewellery-making —
-            handcrafted by master artisans using hallmarked sterling silver, 18K gold, and certified gemstones.
+            Handcrafted fine jewellery for those who understand that true luxury is not worn — it is felt.
+            Each piece at The Jewel Gallery is a testament to the art of the extraordinary.
           </p>
           <div className="hero-ctas">
             <button className="btn-primary" onClick={() => navigate("/collections")}>
-              Explore Collections
+              New Collections
             </button>
-            <button className="btn-ghost" onClick={() => navigate("/celebrity")}>
-              As Worn By
+            <button className="btn-ghost" onClick={() => navigate("/our-story")}>
+              Our Story
             </button>
           </div>
             <div className="hero-stats">
