@@ -204,3 +204,7 @@
 - [x] Fix bestseller card image zoom/display (object-fit: cover, full zoom)
 - [x] Update bestseller query limit from 5 to 6
 - [x] Add isBestseller toggle column to AdminProducts page for easy management
+
+## Celebrity Product Assignments
+- [x] Assign 3-4 products to each celebrity in celebrity_products join table
+- [x] Update celebrity product count to reflect assignments
