@@ -17,6 +17,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import AccountPage from "./pages/AccountPage";
 import PoliciesPage from "./pages/PoliciesPage";
+import OurStory from "./pages/OurStory";
 import CartPage from "./pages/CartPage";
 import ShippingPage from "./pages/ShippingPage";
 import PaymentPage from "./pages/PaymentPage";
@@ -46,6 +47,7 @@ function Router() {
       <Route path="/register" component={RegisterPage} />
       <Route path="/account" component={AccountPage} />
       <Route path="/policies" component={PoliciesPage} />
+      <Route path="/our-story" component={OurStory} />
       <Route path="/cart" component={CartPage} />
       <Route path="/shipping" component={ShippingPage} />
       <Route path="/payment" component={PaymentPage} />

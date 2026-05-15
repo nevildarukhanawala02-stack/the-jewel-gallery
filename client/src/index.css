@@ -352,6 +352,20 @@ button {
   display: inline-block;
 }
 .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn-secondary {
+  background: transparent;
+  color: var(--gold);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 13px 28px;
+  border: 1px solid var(--gold);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: inline-block;
+}
+.btn-secondary:hover { background: var(--gold); color: var(--ivory); transform: translateY(-2px); }
 .btn-outline-gold {
   background: transparent;
   color: var(--gold);

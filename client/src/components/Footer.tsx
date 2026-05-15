@@ -12,6 +12,8 @@ export default function Footer() {
             <Link href="/category/necklaces" className="footer-link">Necklaces</Link>
             <Link href="/category/earrings" className="footer-link">Earrings</Link>
             <Link href="/category/bracelets" className="footer-link">Bracelets</Link>
+            <Link href="/celebrity" className="footer-link">Celebrity Looks</Link>
+            <Link href="/our-story" className="footer-link">Our Story</Link>
           </div>
         </div>
 

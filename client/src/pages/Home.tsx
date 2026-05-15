@@ -376,7 +376,7 @@ export default function Home() {
             </div>
           </div>
 
-          <button className="btn-primary" onClick={() => navigate("/collections")} style={{ marginTop: "28px" }}>
+          <button className="btn-primary" onClick={() => navigate("/our-story")} style={{ marginTop: "28px" }}>
             Discover Our Story
           </button>
         </div>

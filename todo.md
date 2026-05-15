@@ -245,3 +245,9 @@
 - [x] Apply swipe to store slideshow on Home page (Crafted with Devotion section)
 - [x] Apply swipe to product image gallery on ProductPage (prev/next image)
 - [x] Apply swipe to horizontal product sliders (bestsellers use CSS grid — swipe N/A; celebrity shop-the-look uses CSS grid — swipe N/A)
+
+## Our Story Page (/our-story)
+- [x] Create OurStory.tsx page with brand framework, celebrity section, and store locations
+- [x] Wire /our-story route in App.tsx
+- [x] Fix "Discover Our Story" button on Home.tsx to navigate to /our-story
+- [x] Add "Our Story" link to footer SHOP column
