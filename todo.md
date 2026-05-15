@@ -286,3 +286,8 @@
 - [x] Wire /admin/ceo route in App.tsx
 - [x] Add "Command Centre" nav item to admin sidebar (crown icon)
 - [x] Write vitest tests for all CEO procedures (auth guards + input validation) — 11 tests, all passing
+
+## Cart Image Fix
+- [x] Add tRPC products.imagesByIds procedure to fetch fresh image URLs for cart items
+- [x] Add getProductsByIds DB helper with inArray query
+- [x] Cart images confirmed working on live site — stale localStorage was the root cause, resolved by re-adding items

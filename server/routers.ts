@@ -26,6 +26,7 @@ import {
   getOrderItems,
   getOrdersByCustomer,
   getProductById,
+  getProductsByIds,
   getProductBySlug,
   getProducts,
   subscribeNewsletter,
@@ -137,6 +138,17 @@ const productsRouter = router({
     .query(async ({ input }) => {
       const all = await getProducts({ category: input.category, isActive: true, limit: input.limit ?? 4 });
       return all.filter((p) => p.id !== input.excludeId).slice(0, input.limit ?? 4);
+    }),
+
+  // Fetch fresh image URLs for a list of product IDs (used by cart to avoid stale localStorage images)
+  imagesByIds: publicProcedure
+    .input(z.object({ ids: z.array(z.number()).min(1).max(50) }))
+    .query(async ({ input }) => {
+      const products = await getProductsByIds(input.ids);
+      return products.map((p) => ({
+        id: p.id,
+        image: Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : null,
+      }));
     }),
 });
 

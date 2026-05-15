@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lte, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, lte, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   InsertUser,
@@ -110,6 +110,15 @@ export async function getProductById(id: number) {
   if (!db) return undefined;
   const result = await db.select().from(products).where(eq(products.id, id)).limit(1);
   return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getProductsByIds(ids: number[]) {
+  if (ids.length === 0) return [];
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({ id: products.id, images: products.images, imageTypes: products.imageTypes })
+    .from(products)
+    .where(inArray(products.id, ids));
 }
 
 export async function createProduct(data: {
