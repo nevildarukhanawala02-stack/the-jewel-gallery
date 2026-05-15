@@ -1,8 +1,10 @@
 import StorefrontLayout from "@/components/StorefrontLayout";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { LayoutDashboard } from "lucide-react";
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "Order Placed",
@@ -16,6 +18,8 @@ const STATUS_LABELS: Record<string, string> = {
 export default function AccountPage() {
   const [, navigate] = useLocation();
   const { customer, logout, isAuthenticated, loading } = useCustomerAuth();
+  const { user: manusUser } = useAuth();
+  const isAdmin = manusUser?.role === "admin";
   const [activeTab, setActiveTab] = useState("orders");
 
   useEffect(() => {
@@ -52,6 +56,32 @@ export default function AccountPage() {
             Welcome, <em style={{ color: "var(--gold)", fontStyle: "italic" }}>{customer.name?.split(" ")[0] ?? "Valued Member"}</em>
           </h1>
           <p style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "8px" }}>{customer.email}</p>
+          {isAdmin && (
+            <button
+              onClick={() => navigate("/admin")}
+              style={{
+                marginTop: "20px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                background: "var(--gold)",
+                color: "#fff",
+                border: "none",
+                padding: "12px 24px",
+                fontSize: "11px",
+                fontWeight: 700,
+                letterSpacing: "1.5px",
+                textTransform: "uppercase",
+                cursor: "pointer",
+                transition: "opacity 0.2s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+            >
+              <LayoutDashboard size={14} />
+              Admin Dashboard
+            </button>
+          )}
         </div>
 
         {/* Tabs */}

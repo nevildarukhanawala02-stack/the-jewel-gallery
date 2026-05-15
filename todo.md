@@ -251,3 +251,7 @@
 - [x] Wire /our-story route in App.tsx
 - [x] Fix "Discover Our Story" button on Home.tsx to navigate to /our-story
 - [x] Add "Our Story" link to footer SHOP column
+
+## Admin Access from Account Page
+- [x] Show "Admin Dashboard" button on /account page for admin-role users
+- [x] Show "Admin" link in the top nav for admin-role users (admin only)

@@ -1,6 +1,7 @@
 import { useCart } from "@/contexts/CartContext";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
-import { ShoppingBag, Search, Menu, X } from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { ShoppingBag, Search, Menu, X, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 
@@ -16,6 +17,8 @@ const NAV_LINKS = [
 export default function Navigation() {
   const { totalItems } = useCart();
   const { customer, logout } = useCustomerAuth();
+  const { user: manusUser } = useAuth();
+  const isAdmin = manusUser?.role === "admin";
   const [location, navigate] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -57,6 +60,17 @@ export default function Navigation() {
 
           {/* Desktop auth buttons — hidden on mobile */}
           <div className="nav-auth-desktop">
+            {isAdmin && (
+              <button
+                className="nav-auth-btn"
+                onClick={() => navigate("/admin")}
+                style={{ display: "flex", alignItems: "center", gap: "5px", background: "var(--gold)", color: "#fff", border: "none" }}
+                title="Admin Dashboard"
+              >
+                <LayoutDashboard size={12} />
+                Admin
+              </button>
+            )}
             {customer ? (
               <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                 <button
@@ -208,6 +222,15 @@ export default function Navigation() {
 
           {/* Auth section */}
           <div style={{ padding: "24px", marginTop: "auto", borderTop: "1px solid var(--linen-dark)" }}>
+            {isAdmin && (
+              <button
+                className="nav-auth-btn"
+                style={{ width: "100%", padding: "14px", fontSize: "11px", marginBottom: "12px", background: "var(--gold)", color: "#fff", border: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
+                onClick={() => { navigate("/admin"); setMobileOpen(false); }}
+              >
+                <LayoutDashboard size={13} /> Admin Dashboard
+              </button>
+            )}
             {customer ? (
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                 <div style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "4px" }}>
