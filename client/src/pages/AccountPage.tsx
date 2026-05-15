@@ -18,15 +18,20 @@ const STATUS_LABELS: Record<string, string> = {
 export default function AccountPage() {
   const [, navigate] = useLocation();
   const { customer, logout, isAuthenticated, loading } = useCustomerAuth();
-  const { user: manusUser } = useAuth();
+  const { user: manusUser, loading: manusLoading } = useAuth();
   const isAdmin = manusUser?.role === "admin";
   const [activeTab, setActiveTab] = useState("orders");
 
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
+    // Wait for BOTH auth systems to resolve before deciding to redirect
+    if (manusLoading || loading) return;
+    // Admins don't need a customer session — let them through
+    if (isAdmin) return;
+    // Non-admin, not authenticated as customer → send to login
+    if (!isAuthenticated) {
       navigate("/login");
     }
-  }, [isAuthenticated, loading, navigate]);
+  }, [isAuthenticated, loading, navigate, isAdmin, manusLoading]);
 
   const { data: orders, isLoading: ordersLoading } = trpc.orders.myOrders.useQuery(
     { token: localStorage.getItem("tjg_customer_token") ?? "" },
@@ -36,7 +41,44 @@ export default function AccountPage() {
   const formatPrice = (p: number) =>
     new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", minimumFractionDigits: 0 }).format(p);
 
-  if (loading || !customer) {
+  // Admin users without a customer session: show admin entry screen
+  if (isAdmin && !customer) {
+    return (
+      <StorefrontLayout>
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "60vh",
+          gap: "24px",
+          padding: "48px 24px",
+          textAlign: "center",
+        }}>
+          <div className="section-eyebrow">Admin Access</div>
+          <h1 style={{ fontFamily: "var(--font-display)", fontSize: "36px", fontWeight: 300, color: "var(--text-dark)" }}>
+            Welcome, <em style={{ color: "var(--gold)", fontStyle: "italic" }}>{manusUser?.name?.split(" ")[0] ?? "Admin"}</em>
+          </h1>
+          <p style={{ fontSize: "14px", color: "var(--text-muted)", maxWidth: "400px", lineHeight: 1.7 }}>
+            You are signed in as an administrator. Access the backend dashboard to manage products, orders, celebrities, and more.
+          </p>
+          <button
+            onClick={() => navigate("/admin")}
+            className="btn-primary"
+            style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "16px 40px", fontSize: "11px", letterSpacing: "2px" }}
+          >
+            <LayoutDashboard size={15} />
+            Go to Admin Dashboard
+          </button>
+          <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "8px" }}>
+            Want to shop? <button onClick={() => navigate("/login")} style={{ background: "none", border: "none", color: "var(--gold)", cursor: "pointer", fontSize: "12px", textDecoration: "underline" }}>Sign in as a customer</button>
+          </p>
+        </div>
+      </StorefrontLayout>
+    );
+  }
+
+  if (loading || manusLoading || !customer) {
     return (
       <StorefrontLayout>
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>

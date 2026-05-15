@@ -255,3 +255,7 @@
 ## Admin Access from Account Page
 - [x] Show "Admin Dashboard" button on /account page for admin-role users
 - [x] Show "Admin" link in the top nav for admin-role users (admin only)
+
+## Admin Access Fix
+- [x] Nav "NEVIL" button should go to /admin for Manus OAuth admin users (not /account)
+- [x] Admin button on /account page should show based on Manus OAuth role, not customer login
