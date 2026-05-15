@@ -27,6 +27,42 @@ export default function Footer() {
             <Link href="/policies?tab=returns" className="footer-link">Returns</Link>
           </div>
         </div>
+
+        {/* Instagram Column */}
+        <div>
+          <div className="footer-col-title">Follow Us</div>
+          <a
+            href="https://www.instagram.com/the_jewel_gallery/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-instagram-card"
+          >
+            {/* Instagram gradient icon */}
+            <div className="footer-ig-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <defs>
+                  <linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#f09433" />
+                    <stop offset="25%" stopColor="#e6683c" />
+                    <stop offset="50%" stopColor="#dc2743" />
+                    <stop offset="75%" stopColor="#cc2366" />
+                    <stop offset="100%" stopColor="#bc1888" />
+                  </linearGradient>
+                </defs>
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="url(#ig-grad)" strokeWidth="1.8" fill="none" />
+                <circle cx="12" cy="12" r="4.5" stroke="url(#ig-grad)" strokeWidth="1.8" fill="none" />
+                <circle cx="17.5" cy="6.5" r="1.2" fill="url(#ig-grad)" />
+              </svg>
+            </div>
+            <div className="footer-ig-text">
+              <span className="footer-ig-handle">@the_jewel_gallery</span>
+              <span className="footer-ig-desc">
+                Latest products, celebrity looks &amp; behind-the-scenes — all on Instagram.
+              </span>
+              <span className="footer-ig-cta">Follow Us →</span>
+            </div>
+          </a>
+        </div>
       </div>
 
       {/* Bottom Bar */}

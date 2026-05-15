@@ -624,11 +624,51 @@ button {
   color: #3a2e24;
   border-top: 1px solid rgba(0,0,0,0.08);
 }
-.footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; max-width: 480px; margin-bottom: 48px; }
+.footer-grid { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 60px; max-width: 900px; margin-bottom: 48px; }
 .footer-col-title { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #3a2e24; margin-bottom: 20px; }
 .footer-links { display: flex; flex-direction: column; gap: 10px; }
 .footer-link { font-size: 13px; color: #6b5c4e; transition: color 0.2s ease; cursor: pointer; text-decoration: none; }
 .footer-link:hover { color: var(--gold); }
+
+/* Instagram card in footer */
+.footer-instagram-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid rgba(201,169,110,0.25);
+  background: linear-gradient(135deg, rgba(201,169,110,0.04) 0%, rgba(250,246,240,0) 100%);
+  text-decoration: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  cursor: pointer;
+}
+.footer-instagram-card:hover {
+  border-color: rgba(201,169,110,0.55);
+  box-shadow: 0 4px 20px rgba(201,169,110,0.12);
+  transform: translateY(-2px);
+}
+.footer-ig-icon { display: flex; align-items: center; }
+.footer-ig-text { display: flex; flex-direction: column; gap: 6px; }
+.footer-ig-handle {
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 600;
+  color: #3a2e24;
+  letter-spacing: 0.3px;
+}
+.footer-ig-desc {
+  font-size: 12px;
+  color: #9a8878;
+  line-height: 1.7;
+}
+.footer-ig-cta {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-top: 4px;
+}
 .footer-bottom {
   border-top: 1px solid rgba(0,0,0,0.08);
   padding-top: 24px;
@@ -1130,6 +1170,7 @@ button {
   .admin-sidebar { width: 220px; }
   .admin-main { margin-left: 220px; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; max-width: 100%; }
+  .footer-grid > div:last-child { grid-column: 1 / -1; }
   .footer { padding: 40px 24px 24px; }
 }
 
@@ -1194,7 +1235,7 @@ button {
   /* Policies */
   .policies-page .policy-content { padding: 32px 20px; }
   /* Footer */
-  .footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 24px; }
   .footer { padding: 32px 20px 20px; }
   /* Section headings */
   .section-eyebrow { font-size: 8px; }
