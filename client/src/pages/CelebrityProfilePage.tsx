@@ -43,7 +43,7 @@ export default function CelebrityProfilePage() {
   if (!profile) {
     return (
       <StorefrontLayout>
-        <div style={{ textAlign: "center", padding: "120px 60px" }}>
+        <div style={{ textAlign: "center", padding: "clamp(48px, 8vw, 120px) clamp(16px, 5vw, 60px)" }}>
           <h3 style={{ fontFamily: "var(--font-heading)", fontSize: "28px", marginBottom: "12px" }}>
             Profile Not Found
           </h3>
@@ -78,7 +78,7 @@ export default function CelebrityProfilePage() {
   return (
     <StorefrontLayout>
       {/* Main Container */}
-      <div style={{ background: "var(--ivory)", padding: "60px", minHeight: "calc(100vh - 72px)" }}>
+      <div style={{ background: "var(--ivory)", padding: "clamp(24px, 5vw, 60px) clamp(16px, 5vw, 60px)", minHeight: "calc(100vh - 72px)" }}>
 
         {/* Breadcrumb */}
         <div style={{ marginBottom: "40px", fontSize: "12px", letterSpacing: "1px" }}>

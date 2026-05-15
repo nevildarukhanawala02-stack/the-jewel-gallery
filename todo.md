@@ -223,3 +223,19 @@
 
 ## Footer Redesign
 - [x] Replace dark footer with clean minimal light footer: cream background, SHOP + LEGAL columns, thin copyright bar
+
+## Mobile Responsiveness Overhaul
+- [x] Audit all pages on 390px mobile viewport
+- [x] Fix mobile navigation (hamburger menu, drawer)
+- [x] Fix hero section on mobile (font size, layout, CTA buttons)
+- [x] Fix product grid on mobile (2-col cards, image height)
+- [x] Fix bestseller section on mobile
+- [x] Fix brand story / Crafted with Devotion section on mobile
+- [x] Fix category page filters on mobile (horizontal scroll)
+- [x] Fix product detail page on mobile (image gallery, add to bag)
+- [x] Fix cart page on mobile
+- [x] Fix checkout/shipping form on mobile
+- [x] Fix celebrity pages on mobile
+- [x] Fix footer on mobile
+- [x] Fix typography scaling (headings too large on mobile)
+- [x] Fix horizontal overflow / scroll issues

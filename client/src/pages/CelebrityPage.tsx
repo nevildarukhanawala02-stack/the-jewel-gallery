@@ -26,7 +26,7 @@ export default function CelebrityPage() {
       {/* Category Hero */}
       <section style={{
         background: "var(--ivory)",
-        padding: "100px 60px",
+        padding: "clamp(48px, 8vw, 100px) clamp(16px, 5vw, 60px)",
         textAlign: "center",
       }}>
         <div style={{ maxWidth: "800px", margin: "0 auto" }}>
@@ -66,7 +66,7 @@ export default function CelebrityPage() {
       {/* Filters & Search */}
       <section style={{
         background: "var(--ivory)",
-        padding: "40px 60px",
+        padding: "24px clamp(16px, 5vw, 60px)",
         borderBottom: "1px solid var(--linen-dark)",
         borderTop: "1px solid var(--linen-dark)",
       }}>
@@ -156,7 +156,7 @@ export default function CelebrityPage() {
       {/* Celebrities Grid */}
       <section style={{
         background: "var(--ivory)",
-        padding: "60px",
+        padding: "clamp(32px, 5vw, 60px) clamp(16px, 5vw, 60px)",
       }}>
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
           {isLoading ? (
@@ -174,8 +174,8 @@ export default function CelebrityPage() {
           ) : filtered.length > 0 ? (
             <div style={{
               display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: "40px",
+              gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+              gap: "clamp(16px, 3vw, 40px)",
               marginBottom: "60px",
             }}>
               {filtered.map((c) => (

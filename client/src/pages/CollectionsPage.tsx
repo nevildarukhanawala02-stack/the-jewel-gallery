@@ -57,7 +57,7 @@ export default function CollectionsPage() {
       <div style={{
         display: "flex",
         gap: "0",
-        padding: "0 60px",
+        padding: "0 clamp(16px, 5vw, 60px)",
         background: "var(--ivory)",
         borderBottom: "1px solid var(--linen-dark)",
         overflowX: "auto",
@@ -107,7 +107,7 @@ export default function CollectionsPage() {
 
       {/* Products */}
       {isLoading ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: "80px" }}>
+        <div style={{ display: "flex", justifyContent: "center", padding: "clamp(40px, 6vw, 80px)" }}>
           <div className="loading-spinner" />
         </div>
       ) : sortedProducts.length > 0 ? (
@@ -128,7 +128,7 @@ export default function CollectionsPage() {
           ))}
         </div>
       ) : (
-        <div className="empty-state" style={{ padding: "80px 60px" }}>
+        <div className="empty-state" style={{ padding: "clamp(40px, 6vw, 80px) clamp(16px, 5vw, 60px)" }}>
           <h3>Collection Coming Soon</h3>
           <p>Our artisans are crafting something extraordinary. Check back shortly.</p>
         </div>

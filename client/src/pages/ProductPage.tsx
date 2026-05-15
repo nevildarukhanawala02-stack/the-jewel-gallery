@@ -112,7 +112,7 @@ export default function ProductPage() {
   return (
     <StorefrontLayout>
       {/* Breadcrumb */}
-      <div style={{ padding: "16px 60px", background: "var(--ivory)", borderBottom: "1px solid var(--linen-dark)" }}>
+      <div style={{ padding: "16px clamp(16px, 5vw, 60px)", background: "var(--ivory)", borderBottom: "1px solid var(--linen-dark)" }}>
         <div className="breadcrumb">
           <span style={{ cursor: "pointer" }} onClick={() => navigate("/")}>Home</span>
           {" / "}
@@ -249,7 +249,7 @@ export default function ProductPage() {
       {/* Related Products */}
       {relatedProducts.length > 0 && (
         <section style={{
-          padding: "80px 60px",
+          padding: "clamp(40px, 6vw, 80px) clamp(16px, 5vw, 60px)",
           background: "linear-gradient(135deg, var(--ivory) 0%, var(--linen) 100%)",
           borderTop: "1px solid var(--linen-dark)",
         }}>

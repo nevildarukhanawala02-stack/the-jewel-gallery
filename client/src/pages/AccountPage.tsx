@@ -75,7 +75,7 @@ export default function AccountPage() {
         {activeTab === "orders" && (
           <div>
             {ordersLoading ? (
-              <div style={{ display: "flex", justifyContent: "center", padding: "60px" }}>
+              <div style={{ display: "flex", justifyContent: "center", padding: "clamp(32px, 5vw, 60px)" }}>
                 <div className="loading-spinner" />
               </div>
             ) : orders && orders.length > 0 ? (
@@ -128,7 +128,7 @@ export default function AccountPage() {
 
         {/* Profile Tab */}
         {activeTab === "profile" && (
-          <div style={{ background: "white", border: "1px solid var(--linen-dark)", padding: "40px", maxWidth: "600px" }}>
+          <div style={{ background: "white", border: "1px solid var(--linen-dark)", padding: "clamp(20px, 4vw, 40px)", maxWidth: "600px" }}>
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 400, color: "var(--text-dark)", marginBottom: "32px" }}>
               Profile Information
             </h2>

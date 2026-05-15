@@ -1090,9 +1090,15 @@ button {
 /* ============================================================
    RESPONSIVE
    ============================================================ */
+/* Hamburger: hidden on desktop, shown on mobile */
+.nav-hamburger { display: none; }
+.nav-auth-desktop { display: flex; }
+
 @media (max-width: 1024px) {
   .nav { padding: 0 24px; gap: 20px; }
   .nav-links { display: none; }
+  .nav-hamburger { display: flex; }
+  .nav-auth-desktop { display: none; }
   .hero { grid-template-columns: 1fr; }
   .hero-visual { height: 50vh; }
   .collections { padding: 60px 24px; }
@@ -1115,19 +1121,83 @@ button {
 
 @media (max-width: 640px) {
   .nav { padding: 0 16px; }
-  .hero-text { padding: 60px 24px; }
-  .hero-h1 { font-size: 36px; }
-  .hero-stats { gap: 20px; flex-wrap: wrap; }
-  .product-grid { grid-template-columns: 1fr; padding: 24px 16px; }
-  .bestsellers-grid-v3 { grid-template-columns: 1fr; }
-  .celeb-grid { grid-template-columns: repeat(2, 1fr); }
-  .cart-page { padding: 24px 16px; }
-  .checkout-layout { padding: 24px 16px; }
-  .account-page { padding: 24px 16px; }
-  .policies-page .policy-content { padding: 40px 24px; }
+  /* Hero */
+  .hero-text { padding: 40px 20px; }
+  .hero-h1 { font-size: 32px; line-height: 1.15; }
+  .hero-subtitle { font-size: 12px; }
+  .hero-stats { gap: 16px; flex-wrap: wrap; }
+  .hero-cta { flex-direction: column; gap: 10px; }
+  .hero-cta a, .hero-cta button { width: 100%; text-align: center; }
+  /* Product grid: 2 columns on mobile for better browsing */
+  .product-grid { grid-template-columns: repeat(2, 1fr); padding: 20px 12px; gap: 12px; }
+  .product-card-info { padding: 12px; }
+  .product-card-name { font-size: 12px; }
+  .product-card-price { font-size: 13px; }
+  .product-card-btn { font-size: 8px; padding: 10px; letter-spacing: 1.5px; }
+  /* Bestsellers: 2 columns on mobile */
+  .bestsellers-grid-v3 { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .bestseller-card-v3 .product-card-info { padding: 12px; }
+  /* Celebrity grid */
+  .celeb-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .celeb-card-name { font-size: 12px; }
+  /* Collections grid */
+  .collection-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  /* Brand story: image first on mobile */
+  .brand-story { padding: 48px 20px; gap: 32px; }
+  .brand-story-image { order: -1; }
+  /* Category page */
+  .category-hero { padding: 48px 20px 32px; }
+  .category-hero h1 { font-size: 28px; }
+  .category-filters { padding: 16px 12px; gap: 8px; overflow-x: auto; flex-wrap: nowrap; }
+  .filter-bar { padding: 16px 20px; gap: 12px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+  .filter-bar::-webkit-scrollbar { display: none; }
+  /* Product detail */
+  .product-detail { gap: 0; }
+  .product-gallery { padding: 0; }
+  .gallery-thumbs { gap: 6px; }
+  .gallery-thumb { width: 60px; height: 60px; }
+  .product-info { padding: 24px 20px; }
+  .product-name { font-size: 26px; }
+  .product-price { font-size: 24px; }
+  .product-trust { grid-template-columns: 1fr 1fr; gap: 12px; }
+  /* Cart */
+  .cart-page { padding: 20px 16px; }
+  .cart-layout { gap: 24px; }
+  .cart-item { gap: 16px; padding: 16px; }
+  .cart-item-img { width: 72px; height: 72px; }
+  .cart-item-name { font-size: 14px; }
+  .cart-item-price { font-size: 15px; }
+  /* Checkout */
+  .checkout-layout { padding: 20px 16px; gap: 24px; }
+  .checkout-header { padding: 16px 20px; }
+  .checkout-steps { gap: 0; margin: 24px auto; }
+  .step-circle { width: 32px; height: 32px; font-size: 11px; }
+  .step-label { font-size: 8px; }
+  .checkout-form-section { padding: 24px 20px; }
+  .form-grid { grid-template-columns: 1fr; gap: 12px; }
+  /* Account */
+  .account-page { padding: 20px 16px; }
+  /* Policies */
+  .policies-page .policy-content { padding: 32px 20px; }
+  /* Footer */
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+  .footer { padding: 32px 20px 20px; }
+  /* Section headings */
+  .section-eyebrow { font-size: 8px; }
+  .section-title { font-size: 28px; }
+  /* Admin */
   .kpi-grid { grid-template-columns: 1fr; }
   .admin-sidebar { display: none; }
   .admin-main { margin-left: 0; padding: 16px; }
+  /* Overflow prevention */
+  .newsletter-form { flex-direction: column; gap: 8px; }
+  .newsletter-form input, .newsletter-form button { width: 100%; }
+  .policy-content { padding: 32px 20px; }
+  .order-tracker { gap: 0; overflow-x: auto; padding: 0 16px; }
+  .tracker-line { min-width: 24px; }
+  /* Prevent any horizontal overflow */
+  body { overflow-x: hidden; }
+  .section-container { padding: 0 16px; }
 }
 
 /* ============================================================

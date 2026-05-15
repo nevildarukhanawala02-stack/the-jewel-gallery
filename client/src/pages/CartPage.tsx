@@ -16,7 +16,7 @@ export default function CartPage() {
   return (
     <StorefrontLayout>
       {/* Header */}
-      <div style={{ padding: "40px 60px 24px", background: "var(--ivory)", borderBottom: "1px solid var(--linen-dark)" }}>
+      <div style={{ padding: "clamp(20px, 4vw, 40px) clamp(16px, 5vw, 60px) 24px", background: "var(--ivory)", borderBottom: "1px solid var(--linen-dark)" }}>
         <div className="breadcrumb">
           <span style={{ cursor: "pointer" }} onClick={() => navigate("/")}>Home</span>
           {" / "}

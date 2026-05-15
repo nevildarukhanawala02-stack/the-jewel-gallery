@@ -94,7 +94,7 @@ export default function CategoryPage() {
       <div style={{
         display: "flex",
         gap: "0",
-        padding: "0 60px",
+        padding: "0 clamp(16px, 5vw, 60px)",
         background: "var(--ivory)",
         borderBottom: "1px solid var(--linen-dark)",
         overflowX: "auto",
@@ -145,7 +145,7 @@ export default function CategoryPage() {
 
       {/* Product Grid */}
       {isLoading ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: "80px" }}>
+        <div style={{ display: "flex", justifyContent: "center", padding: "clamp(40px, 6vw, 80px)" }}>
           <div className="loading-spinner" />
         </div>
       ) : filteredProducts.length > 0 ? (
@@ -166,7 +166,7 @@ export default function CategoryPage() {
           ))}
         </div>
       ) : (
-        <div className="empty-state" style={{ padding: "80px 60px" }}>
+        <div className="empty-state" style={{ padding: "clamp(40px, 6vw, 80px) clamp(16px, 5vw, 60px)" }}>
           <h3>No Pieces Found</h3>
           <p>Try adjusting your filters or explore our other collections.</p>
           <button className="btn-primary" style={{ marginTop: "24px" }} onClick={() => { setSubcategory("All"); }}>

@@ -21,7 +21,7 @@ export default function ConfirmationPage() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        padding: "80px 60px",
+        padding: "clamp(40px, 6vw, 80px) clamp(16px, 5vw, 60px)",
         background: "linear-gradient(135deg, var(--ivory) 0%, var(--linen) 100%)",
         textAlign: "center",
       }}>
