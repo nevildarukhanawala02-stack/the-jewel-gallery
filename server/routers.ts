@@ -14,6 +14,9 @@ import {
   getCelebrities,
   getCelebrityBySlug,
   getCelebrityProducts,
+  getCelebrityProductIds,
+  assignCelebrityProduct,
+  unassignCelebrityProduct,
   getCustomerAddresses,
   getCustomerByEmail,
   getCustomerById,
@@ -88,6 +91,14 @@ function getRazorpay() {
 }
 
 // ============================================================
+// ADMIN PROCEDURE (defined early so it can be used in any router below)
+// ============================================================
+const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required." });
+  return next({ ctx });
+});
+
+// ============================================================
 // PRODUCTS ROUTER
 // ============================================================
 const productsRouter = router({
@@ -139,6 +150,36 @@ const celebritiesRouter = router({
       if (!celebrity) throw new TRPCError({ code: "NOT_FOUND" });
       const linkedProducts = await getCelebrityProducts(celebrity.id);
       return { celebrity, products: linkedProducts };
+    }),
+
+  // Admin: get all celebrities with their assigned product IDs
+  adminList: adminProcedure
+    .query(async () => {
+      const all = await getCelebrities({ isActive: undefined });
+      return all;
+    }),
+
+  // Admin: get assigned product IDs for a celebrity
+  getAssignedProductIds: adminProcedure
+    .input(z.object({ celebrityId: z.number() }))
+    .query(async ({ input }) => {
+      return getCelebrityProductIds(input.celebrityId);
+    }),
+
+  // Admin: assign a product to a celebrity
+  assignProduct: adminProcedure
+    .input(z.object({ celebrityId: z.number(), productId: z.number() }))
+    .mutation(async ({ input }) => {
+      await assignCelebrityProduct(input.celebrityId, input.productId);
+      return { success: true };
+    }),
+
+  // Admin: unassign a product from a celebrity
+  unassignProduct: adminProcedure
+    .input(z.object({ celebrityId: z.number(), productId: z.number() }))
+    .mutation(async ({ input }) => {
+      await unassignCelebrityProduct(input.celebrityId, input.productId);
+      return { success: true };
     }),
 });
 
@@ -377,11 +418,6 @@ const ordersRouter = router({
 // ============================================================
 // ADMIN ROUTER
 // ============================================================
-const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required." });
-  return next({ ctx });
-});
-
 const adminRouter = router({
   getDashboardMetrics: adminProcedure.query(async () => {
     return getDashboardMetrics();

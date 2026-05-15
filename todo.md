@@ -184,3 +184,10 @@
 
 ## UI Cleanup
 - [x] Remove "All Materials" filter dropdown from all category pages (CategoryPage.tsx)
+
+## Celebrity-Product Assignment (Admin)
+- [x] Add tRPC procedures: celebrities.adminList, celebrities.getAssignedProductIds, celebrities.assignProduct, celebrities.unassignProduct
+- [x] Build AdminCelebrities.tsx page with celebrity cards + product assignment modal (search + checkbox grid)
+- [x] Add "Celebrities" nav item to admin sidebar (Star icon)
+- [x] Register /admin/celebrities route in App.tsx
+- [x] Verify celebrity detail page "Shop the Look" reads from celebrity_products join table (already wired via bySlug)

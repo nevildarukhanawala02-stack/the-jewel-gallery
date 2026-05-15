@@ -188,6 +188,33 @@ export async function getCelebrityProducts(celebrityId: number) {
   return rows;
 }
 
+export async function assignCelebrityProduct(celebrityId: number, productId: number) {
+  const db = await getDb();
+  if (!db) return;
+  // Avoid duplicates
+  const existing = await db.select().from(celebrityProducts)
+    .where(eq(celebrityProducts.celebrityId, celebrityId))
+    .then(rows => rows.filter(r => r.productId === productId));
+  if (existing.length > 0) return;
+  await db.insert(celebrityProducts).values({ celebrityId, productId });
+}
+
+export async function unassignCelebrityProduct(celebrityId: number, productId: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(celebrityProducts)
+    .where(and(eq(celebrityProducts.celebrityId, celebrityId), eq(celebrityProducts.productId, productId)));
+}
+
+export async function getCelebrityProductIds(celebrityId: number): Promise<number[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select({ productId: celebrityProducts.productId })
+    .from(celebrityProducts)
+    .where(eq(celebrityProducts.celebrityId, celebrityId));
+  return rows.map(r => r.productId);
+}
+
 // ============================================================
 // CUSTOMER HELPERS (storefront JWT auth)
 // ============================================================
