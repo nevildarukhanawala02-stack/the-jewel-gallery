@@ -1246,3 +1246,12 @@ button {
 @keyframes spin { to { transform: rotate(360deg); } }
 .empty-state { text-align: center; padding: 80px 40px; color: var(--text-muted); }
 .empty-state h3 { font-family: var(--font-display); font-size: 24px; font-weight: 300; color: var(--text-dark); margin-bottom: 12px; }
+
+/* ── Trust Signals Section ── */
+@media (max-width: 900px) {
+  .trust-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 540px) {
+  .trust-grid { grid-template-columns: 1fr !important; }
+  .trust-strip { flex-direction: column; text-align: center; }
+}
