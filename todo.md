@@ -266,3 +266,23 @@
 - [x] AdminOrders: card-based order rows with expandable details, horizontal-scroll filter tabs
 - [x] AdminProducts: mobile card view (hide desktop table columns), responsive Add Product modal
 - [x] All admin pages: sticky top bar with hamburger, touch-friendly 44px+ tap targets
+
+## CEO Command Centre Dashboard (V1)
+- [x] DB helper: getCeoMetrics(dateRange) — revenue today/MTD/YTD, AOV, orders, new customers, repeat rate
+- [x] DB helper: getRevenueByDay(startAt, endAt) — daily revenue array for sparkline/bar chart
+- [x] DB helper: getRevenueByCategory(startAt, endAt) — revenue split by rings/necklaces/earrings/bracelets
+- [x] DB helper: getInventoryHealth() — per-product stock status, turnover, dead stock (0 sales in 60d), sell-through
+- [x] DB helper: getFulfilmentMetrics(startAt, endAt) — pipeline counts, avg dispatch time, return rate, payment failure rate
+- [x] DB helper: getTopProducts(startAt, endAt) — top 10 by revenue with units sold
+- [x] DB helper: getCeoAlerts() — out of stock, low stock, pending backlog, payment failure spike
+- [x] tRPC admin.getCeoMetrics procedure
+- [x] tRPC admin.getCeoAlerts procedure
+- [x] AdminCEO.tsx page: Pulse Bar (8 KPI cards with delta vs previous period)
+- [x] AdminCEO.tsx: Revenue Intelligence zone (daily bar chart + category donut + top products table)
+- [x] AdminCEO.tsx: Inventory Health zone (traffic-light product grid + dead stock filter)
+- [x] AdminCEO.tsx: Fulfilment Pipeline zone (Kanban counts + dispatch SLA + return/failure rates + shipping mix)
+- [x] AdminCEO.tsx: CEO Alerts sidebar (prioritised live action list)
+- [x] AdminCEO.tsx: Global time selector (Today/7d/30d/MTD/YTD/Custom)
+- [x] Wire /admin/ceo route in App.tsx
+- [x] Add "Command Centre" nav item to admin sidebar (crown icon)
+- [x] Write vitest tests for all CEO procedures (auth guards + input validation) — 11 tests, all passing

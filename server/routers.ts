@@ -42,6 +42,13 @@ import {
   getSiteSetting,
   setSiteSetting,
   getDb,
+  getCeoMetrics,
+  getRevenueByDay,
+  getRevenueByCategory,
+  getTopProducts,
+  getInventoryHealth,
+  getFulfilmentMetrics,
+  getCeoAlerts,
   type SkuRow,
 } from "./db";
 import { products } from "../drizzle/schema";
@@ -636,6 +643,51 @@ const adminRouter = router({
     .query(async ({ input }) => {
       return getSkuImportLogs(input.limit ?? 20);
     }),
+
+  // ── CEO Command Centre ──────────────────────────────────────
+  getCeoMetrics: adminProcedure
+    .input(z.object({
+      startAt: z.number(), // Unix ms
+      endAt: z.number(),
+    }))
+    .query(async ({ input }) => {
+      return getCeoMetrics({
+        startAt: new Date(input.startAt),
+        endAt: new Date(input.endAt),
+      });
+    }),
+
+  getRevenueByDay: adminProcedure
+    .input(z.object({ startAt: z.number(), endAt: z.number() }))
+    .query(async ({ input }) => {
+      return getRevenueByDay({ startAt: new Date(input.startAt), endAt: new Date(input.endAt) });
+    }),
+
+  getRevenueByCategory: adminProcedure
+    .input(z.object({ startAt: z.number(), endAt: z.number() }))
+    .query(async ({ input }) => {
+      return getRevenueByCategory({ startAt: new Date(input.startAt), endAt: new Date(input.endAt) });
+    }),
+
+  getTopProducts: adminProcedure
+    .input(z.object({ startAt: z.number(), endAt: z.number() }))
+    .query(async ({ input }) => {
+      return getTopProducts({ startAt: new Date(input.startAt), endAt: new Date(input.endAt) });
+    }),
+
+  getInventoryHealth: adminProcedure.query(async () => {
+    return getInventoryHealth();
+  }),
+
+  getFulfilmentMetrics: adminProcedure
+    .input(z.object({ startAt: z.number(), endAt: z.number() }))
+    .query(async ({ input }) => {
+      return getFulfilmentMetrics({ startAt: new Date(input.startAt), endAt: new Date(input.endAt) });
+    }),
+
+  getCeoAlerts: adminProcedure.query(async () => {
+    return getCeoAlerts();
+  }),
 
   migrateImages: adminProcedure.mutation(async () => {
     const db = await getDb();

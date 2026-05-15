@@ -29,6 +29,7 @@ import AdminOrders from "./pages/AdminOrders";
 import AdminProducts from "./pages/AdminProducts";
 import AdminSkuUpload from "./pages/AdminSkuUpload";
 import AdminCelebrities from "./pages/AdminCelebrities";
+import AdminCEO from "./pages/AdminCEO";
 
 // Fallback
 import NotFound from "./pages/NotFound";
@@ -58,6 +59,7 @@ function Router() {
       <Route path="/admin/products" component={AdminProducts} />
       <Route path="/admin/sku-upload" component={AdminSkuUpload} />
       <Route path="/admin/celebrities" component={AdminCelebrities} />
+      <Route path="/admin/ceo" component={AdminCEO} />
       {/* Fallback */}
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />

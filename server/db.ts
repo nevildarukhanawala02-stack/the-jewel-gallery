@@ -666,3 +666,423 @@ export async function setSiteSetting(key: string, value: string): Promise<void> 
     .values({ key, value })
     .onDuplicateKeyUpdate({ set: { value } });
 }
+
+// ============================================================
+// CEO COMMAND CENTRE HELPERS
+// ============================================================
+
+export interface DateRange {
+  startAt: Date;
+  endAt: Date;
+}
+
+/** Core KPI metrics for the CEO Pulse Bar */
+export async function getCeoMetrics(range: DateRange) {
+  const db = await getDb();
+  const empty = {
+    revenueToday: 0, revenueMTD: 0, revenueYTD: 0, revenueInRange: 0,
+    ordersToday: 0, ordersInRange: 0, aov: 0,
+    newCustomersInRange: 0, totalCustomers: 0,
+    repeatCustomers: 0, repeatRate: 0,
+    paymentFailureRate: 0,
+    revenueVsPrev: 0, ordersVsPrev: 0,
+  };
+  if (!db) return empty;
+
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const yearStart = new Date(now.getFullYear(), 0, 1);
+
+  // Revenue today
+  const [todayRev] = await db.select({
+    total: sql<number>`COALESCE(SUM(CAST(${orders.totalAmount} AS DECIMAL(10,2))), 0)`,
+    count: sql<number>`COUNT(*)`,
+  }).from(orders).where(and(eq(orders.paymentStatus, "paid"), gte(orders.createdAt, todayStart)));
+
+  // Revenue MTD
+  const [mtdRev] = await db.select({
+    total: sql<number>`COALESCE(SUM(CAST(${orders.totalAmount} AS DECIMAL(10,2))), 0)`,
+  }).from(orders).where(and(eq(orders.paymentStatus, "paid"), gte(orders.createdAt, monthStart)));
+
+  // Revenue YTD
+  const [ytdRev] = await db.select({
+    total: sql<number>`COALESCE(SUM(CAST(${orders.totalAmount} AS DECIMAL(10,2))), 0)`,
+  }).from(orders).where(and(eq(orders.paymentStatus, "paid"), gte(orders.createdAt, yearStart)));
+
+  // Revenue in selected range
+  const [rangeRev] = await db.select({
+    total: sql<number>`COALESCE(SUM(CAST(${orders.totalAmount} AS DECIMAL(10,2))), 0)`,
+    count: sql<number>`COUNT(*)`,
+  }).from(orders).where(and(
+    eq(orders.paymentStatus, "paid"),
+    gte(orders.createdAt, range.startAt),
+    lte(orders.createdAt, range.endAt),
+  ));
+
+  // Previous period revenue (same duration before range)
+  const rangeDuration = range.endAt.getTime() - range.startAt.getTime();
+  const prevStart = new Date(range.startAt.getTime() - rangeDuration);
+  const prevEnd = new Date(range.startAt.getTime() - 1);
+  const [prevRev] = await db.select({
+    total: sql<number>`COALESCE(SUM(CAST(${orders.totalAmount} AS DECIMAL(10,2))), 0)`,
+    count: sql<number>`COUNT(*)`,
+  }).from(orders).where(and(
+    eq(orders.paymentStatus, "paid"),
+    gte(orders.createdAt, prevStart),
+    lte(orders.createdAt, prevEnd),
+  ));
+
+  // New customers in range
+  const [newCust] = await db.select({ count: sql<number>`COUNT(*)` })
+    .from(customers)
+    .where(and(gte(customers.createdAt, range.startAt), lte(customers.createdAt, range.endAt)));
+
+  // Total customers
+  const [totalCust] = await db.select({ count: sql<number>`COUNT(*)` }).from(customers);
+
+  // Repeat customers (placed 2+ orders) in range
+  const repeatRows = await db.select({
+    customerId: orders.customerId,
+    orderCount: sql<number>`COUNT(*) as orderCount`,
+  }).from(orders)
+    .where(and(
+      eq(orders.paymentStatus, "paid"),
+      gte(orders.createdAt, range.startAt),
+      lte(orders.createdAt, range.endAt),
+    ))
+    .groupBy(orders.customerId)
+    .having(sql`COUNT(*) >= 2`);
+
+  // Payment failure rate in range
+  const [totalOrdersInRange] = await db.select({ count: sql<number>`COUNT(*)` })
+    .from(orders).where(and(gte(orders.createdAt, range.startAt), lte(orders.createdAt, range.endAt)));
+  const [failedInRange] = await db.select({ count: sql<number>`COUNT(*)` })
+    .from(orders).where(and(
+      eq(orders.paymentStatus, "failed"),
+      gte(orders.createdAt, range.startAt),
+      lte(orders.createdAt, range.endAt),
+    ));
+
+  const rangeRevTotal = Number(rangeRev?.total ?? 0);
+  const rangeOrderCount = Number(rangeRev?.count ?? 0);
+  const prevRevTotal = Number(prevRev?.total ?? 0);
+  const prevOrderCount = Number(prevRev?.count ?? 0);
+  const totalOrdersCount = Number(totalOrdersInRange?.count ?? 0);
+  const failedCount = Number(failedInRange?.count ?? 0);
+
+  return {
+    revenueToday: Number(todayRev?.total ?? 0),
+    revenueMTD: Number(mtdRev?.total ?? 0),
+    revenueYTD: Number(ytdRev?.total ?? 0),
+    revenueInRange: rangeRevTotal,
+    ordersToday: Number(todayRev?.count ?? 0),
+    ordersInRange: rangeOrderCount,
+    aov: rangeOrderCount > 0 ? Math.round(rangeRevTotal / rangeOrderCount) : 0,
+    newCustomersInRange: Number(newCust?.count ?? 0),
+    totalCustomers: Number(totalCust?.count ?? 0),
+    repeatCustomers: repeatRows.length,
+    repeatRate: rangeOrderCount > 0 ? Math.round((repeatRows.length / rangeOrderCount) * 100) : 0,
+    paymentFailureRate: totalOrdersCount > 0 ? Math.round((failedCount / totalOrdersCount) * 100) : 0,
+    revenueVsPrev: prevRevTotal > 0 ? Math.round(((rangeRevTotal - prevRevTotal) / prevRevTotal) * 100) : 0,
+    ordersVsPrev: prevOrderCount > 0 ? Math.round(((rangeOrderCount - prevOrderCount) / prevOrderCount) * 100) : 0,
+  };
+}
+
+/** Daily revenue array for sparkline/bar chart */
+export async function getRevenueByDay(range: DateRange) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select({
+    day: sql<string>`DATE(${orders.createdAt})`,
+    revenue: sql<number>`COALESCE(SUM(CAST(${orders.totalAmount} AS DECIMAL(10,2))), 0)`,
+    orderCount: sql<number>`COUNT(*)`,
+  }).from(orders)
+    .where(and(
+      eq(orders.paymentStatus, "paid"),
+      gte(orders.createdAt, range.startAt),
+      lte(orders.createdAt, range.endAt),
+    ))
+    .groupBy(sql`DATE(${orders.createdAt})`)
+    .orderBy(sql`DATE(${orders.createdAt})`);
+  return rows.map(r => ({ day: String(r.day), revenue: Number(r.revenue), orderCount: Number(r.orderCount) }));
+}
+
+/** Revenue split by category */
+export async function getRevenueByCategory(range: DateRange) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select({
+    category: orderItems.collection,
+    revenue: sql<number>`COALESCE(SUM(CAST(${orderItems.lineTotal} AS DECIMAL(10,2))), 0)`,
+    units: sql<number>`SUM(${orderItems.quantity})`,
+  }).from(orderItems)
+    .innerJoin(orders, eq(orderItems.orderId, orders.id))
+    .where(and(
+      eq(orders.paymentStatus, "paid"),
+      gte(orders.createdAt, range.startAt),
+      lte(orders.createdAt, range.endAt),
+    ))
+    .groupBy(orderItems.collection)
+    .orderBy(sql`SUM(CAST(${orderItems.lineTotal} AS DECIMAL(10,2))) DESC`);
+  return rows.map(r => ({ category: r.category ?? "Uncategorised", revenue: Number(r.revenue), units: Number(r.units) }));
+}
+
+/** Top 10 products by revenue */
+export async function getTopProducts(range: DateRange) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select({
+    productName: orderItems.productName,
+    productSlug: orderItems.productSlug,
+    productImage: orderItems.productImage,
+    revenue: sql<number>`COALESCE(SUM(CAST(${orderItems.lineTotal} AS DECIMAL(10,2))), 0)`,
+    units: sql<number>`SUM(${orderItems.quantity})`,
+    orderCount: sql<number>`COUNT(DISTINCT ${orderItems.orderId})`,
+  }).from(orderItems)
+    .innerJoin(orders, eq(orderItems.orderId, orders.id))
+    .where(and(
+      eq(orders.paymentStatus, "paid"),
+      gte(orders.createdAt, range.startAt),
+      lte(orders.createdAt, range.endAt),
+    ))
+    .groupBy(orderItems.productName, orderItems.productSlug, orderItems.productImage)
+    .orderBy(sql`SUM(CAST(${orderItems.lineTotal} AS DECIMAL(10,2))) DESC`)
+    .limit(10);
+  return rows.map(r => ({
+    productName: r.productName,
+    productSlug: r.productSlug ?? "",
+    productImage: r.productImage ?? "",
+    revenue: Number(r.revenue),
+    units: Number(r.units),
+    orderCount: Number(r.orderCount),
+  }));
+}
+
+/** Inventory health — stock status, dead stock, sell-through */
+export async function getInventoryHealth() {
+  const db = await getDb();
+  if (!db) return { products: [], summary: { total: 0, inStock: 0, lowStock: 0, outOfStock: 0, deadStock: 0, totalStockValue: 0 } };
+
+  const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
+
+  // All active products
+  const allProducts = await db.select({
+    id: products.id,
+    name: products.name,
+    slug: products.slug,
+    sku: products.sku,
+    category: products.category,
+    stock: products.stock,
+    price: products.price,
+    images: products.images,
+    isActive: products.isActive,
+  }).from(products).where(eq(products.isActive, true));
+
+  // Units sold per product in last 60 days
+  const soldRows = await db.select({
+    productId: orderItems.productId,
+    unitsSold: sql<number>`SUM(${orderItems.quantity})`,
+    lastSoldAt: sql<Date>`MAX(${orders.createdAt})`,
+  }).from(orderItems)
+    .innerJoin(orders, eq(orderItems.orderId, orders.id))
+    .where(and(eq(orders.paymentStatus, "paid"), gte(orders.createdAt, sixtyDaysAgo)))
+    .groupBy(orderItems.productId);
+
+  const soldMap = new Map(soldRows.map(r => [r.productId, { unitsSold: Number(r.unitsSold), lastSoldAt: r.lastSoldAt }]));
+
+  const enriched = allProducts.map(p => {
+    const sold = soldMap.get(p.id);
+    const stock = Number(p.stock ?? 0);
+    const price = Number(p.price ?? 0);
+    const unitsSold60d = sold?.unitsSold ?? 0;
+    const avgDailySales = unitsSold60d / 60;
+    const daysOfSupply = avgDailySales > 0 ? Math.round(stock / avgDailySales) : null;
+    const isDeadStock = unitsSold60d === 0 && stock > 0;
+    const status: "in_stock" | "low_stock" | "out_of_stock" = stock === 0 ? "out_of_stock" : stock <= 3 ? "low_stock" : "in_stock";
+    return {
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      sku: p.sku ?? "",
+      category: p.category,
+      stock,
+      price,
+      stockValue: stock * price,
+      unitsSold60d,
+      daysOfSupply,
+      isDeadStock,
+      status,
+      image: (p.images as string[] | null)?.[0] ?? "",
+    };
+  });
+
+  const summary = {
+    total: enriched.length,
+    inStock: enriched.filter(p => p.status === "in_stock").length,
+    lowStock: enriched.filter(p => p.status === "low_stock").length,
+    outOfStock: enriched.filter(p => p.status === "out_of_stock").length,
+    deadStock: enriched.filter(p => p.isDeadStock).length,
+    totalStockValue: enriched.reduce((sum, p) => sum + p.stockValue, 0),
+  };
+
+  return { products: enriched, summary };
+}
+
+/** Fulfilment pipeline metrics */
+export async function getFulfilmentMetrics(range: DateRange) {
+  const db = await getDb();
+  if (!db) return {
+    pipeline: { pending: 0, packed: 0, shipped: 0, out_for_delivery: 0, delivered: 0, returned: 0 },
+    avgDispatchHours: null as number | null,
+    returnRate: 0,
+    paymentFailureRate: 0,
+    expressVsStandard: { express: 0, standard: 0 },
+    ordersInRange: 0,
+  };
+
+  // Pipeline counts (all time for operational view)
+  const pipelineRows = await db.select({
+    status: orders.deliveryStatus,
+    count: sql<number>`COUNT(*)`,
+  }).from(orders)
+    .where(eq(orders.paymentStatus, "paid"))
+    .groupBy(orders.deliveryStatus);
+
+  const pipeline = { pending: 0, packed: 0, shipped: 0, out_for_delivery: 0, delivered: 0, returned: 0 };
+  for (const row of pipelineRows) {
+    const s = row.status as keyof typeof pipeline;
+    if (s in pipeline) pipeline[s] = Number(row.count);
+  }
+
+  // Avg dispatch time (createdAt → shippedAt) in range
+  const [dispatchResult] = await db.select({
+    avgHours: sql<number>`AVG(TIMESTAMPDIFF(HOUR, ${orders.createdAt}, ${orders.shippedAt}))`,
+  }).from(orders)
+    .where(and(
+      eq(orders.paymentStatus, "paid"),
+      gte(orders.createdAt, range.startAt),
+      lte(orders.createdAt, range.endAt),
+      sql`${orders.shippedAt} IS NOT NULL`,
+    ));
+
+  // Return rate in range
+  const [totalPaid] = await db.select({ count: sql<number>`COUNT(*)` })
+    .from(orders).where(and(
+      eq(orders.paymentStatus, "paid"),
+      gte(orders.createdAt, range.startAt),
+      lte(orders.createdAt, range.endAt),
+    ));
+  const [returned] = await db.select({ count: sql<number>`COUNT(*)` })
+    .from(orders).where(and(
+      eq(orders.deliveryStatus, "returned"),
+      gte(orders.createdAt, range.startAt),
+      lte(orders.createdAt, range.endAt),
+    ));
+
+  // Payment failure rate in range
+  const [totalOrders] = await db.select({ count: sql<number>`COUNT(*)` })
+    .from(orders).where(and(
+      gte(orders.createdAt, range.startAt),
+      lte(orders.createdAt, range.endAt),
+    ));
+  const [failed] = await db.select({ count: sql<number>`COUNT(*)` })
+    .from(orders).where(and(
+      eq(orders.paymentStatus, "failed"),
+      gte(orders.createdAt, range.startAt),
+      lte(orders.createdAt, range.endAt),
+    ));
+
+  // Express vs Standard in range
+  const shippingRows = await db.select({
+    method: orders.shippingMethod,
+    count: sql<number>`COUNT(*)`,
+  }).from(orders)
+    .where(and(
+      eq(orders.paymentStatus, "paid"),
+      gte(orders.createdAt, range.startAt),
+      lte(orders.createdAt, range.endAt),
+    ))
+    .groupBy(orders.shippingMethod);
+
+  const expressVsStandard = { express: 0, standard: 0 };
+  for (const row of shippingRows) {
+    if (row.method === "express") expressVsStandard.express = Number(row.count);
+    if (row.method === "standard") expressVsStandard.standard = Number(row.count);
+  }
+
+  const totalPaidCount = Number(totalPaid?.count ?? 0);
+  const totalOrdersCount = Number(totalOrders?.count ?? 0);
+
+  return {
+    pipeline,
+    avgDispatchHours: dispatchResult?.avgHours != null ? Math.round(Number(dispatchResult.avgHours)) : null,
+    returnRate: totalPaidCount > 0 ? Math.round((Number(returned?.count ?? 0) / totalPaidCount) * 100) : 0,
+    paymentFailureRate: totalOrdersCount > 0 ? Math.round((Number(failed?.count ?? 0) / totalOrdersCount) * 100) : 0,
+    expressVsStandard,
+    ordersInRange: totalPaidCount,
+  };
+}
+
+/** CEO Alerts — actionable items requiring attention */
+export async function getCeoAlerts() {
+  const db = await getDb();
+  if (!db) return [];
+
+  const alerts: Array<{ type: "critical" | "warning" | "info"; title: string; detail: string; count?: number }> = [];
+
+  // Out of stock active products
+  const outOfStockRows = await db.select({ count: sql<number>`COUNT(*)` })
+    .from(products).where(and(eq(products.isActive, true), eq(products.stock, 0)));
+  const outOfStockCount = Number(outOfStockRows[0]?.count ?? 0);
+  if (outOfStockCount > 0) {
+    alerts.push({ type: "critical", title: "Out of Stock", detail: `${outOfStockCount} active product${outOfStockCount > 1 ? "s" : ""} have zero stock`, count: outOfStockCount });
+  }
+
+  // Low stock (1–3 units)
+  const lowStockRows = await db.select({ count: sql<number>`COUNT(*)` })
+    .from(products).where(and(eq(products.isActive, true), sql`${products.stock} > 0 AND ${products.stock} <= 3`));
+  const lowStockCount = Number(lowStockRows[0]?.count ?? 0);
+  if (lowStockCount > 0) {
+    alerts.push({ type: "warning", title: "Low Stock Warning", detail: `${lowStockCount} product${lowStockCount > 1 ? "s" : ""} have 3 or fewer units remaining`, count: lowStockCount });
+  }
+
+  // Pending dispatch backlog (>12 hours old)
+  const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+  const backlogRows = await db.select({ count: sql<number>`COUNT(*)` })
+    .from(orders).where(and(
+      eq(orders.deliveryStatus, "pending"),
+      eq(orders.paymentStatus, "paid"),
+      lte(orders.createdAt, twelveHoursAgo),
+    ));
+  const backlogCount = Number(backlogRows[0]?.count ?? 0);
+  if (backlogCount > 0) {
+    alerts.push({ type: "warning", title: "Dispatch Backlog", detail: `${backlogCount} paid order${backlogCount > 1 ? "s" : ""} pending dispatch for over 12 hours`, count: backlogCount });
+  }
+
+  // Payment failures in last 24 hours
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const recentFailures = await db.select({ count: sql<number>`COUNT(*)` })
+    .from(orders).where(and(eq(orders.paymentStatus, "failed"), gte(orders.createdAt, oneDayAgo)));
+  const failCount = Number(recentFailures[0]?.count ?? 0);
+  if (failCount > 0) {
+    alerts.push({ type: "warning", title: "Payment Failures (24h)", detail: `${failCount} payment${failCount > 1 ? "s" : ""} failed in the last 24 hours`, count: failCount });
+  }
+
+  // Dead stock (active products, 0 sales in 60 days, stock > 0)
+  const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
+  const soldProductIds = await db.select({ productId: orderItems.productId })
+    .from(orderItems)
+    .innerJoin(orders, eq(orderItems.orderId, orders.id))
+    .where(and(eq(orders.paymentStatus, "paid"), gte(orders.createdAt, sixtyDaysAgo)));
+  const soldIds = new Set(soldProductIds.map(r => r.productId).filter(Boolean));
+
+  const allActiveWithStock = await db.select({ id: products.id })
+    .from(products).where(and(eq(products.isActive, true), sql`${products.stock} > 0`));
+  const deadStockCount = allActiveWithStock.filter(p => !soldIds.has(p.id)).length;
+  if (deadStockCount > 0) {
+    alerts.push({ type: "info", title: "Dead Stock", detail: `${deadStockCount} product${deadStockCount > 1 ? "s" : ""} with stock but no sales in 60 days`, count: deadStockCount });
+  }
+
+  return alerts;
+}
