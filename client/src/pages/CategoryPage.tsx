@@ -35,7 +35,7 @@ const SORT_OPTIONS = [
   { label: "Newest", value: "newest" },
 ];
 
-const MATERIAL_OPTIONS = ["All", "Sterling Silver", "18K Gold", "Rose Gold", "Platinum"];
+
 const SUBCATEGORY_MAP: Record<string, string[]> = {
   rings: ["All", "Solitaire", "Cocktail", "Stackable", "Engagement", "Statement"],
   necklaces: ["All", "Pendant", "Choker", "Layered", "Chain", "Statement"],
@@ -48,7 +48,7 @@ export default function CategoryPage() {
   const category = params.category as "rings" | "necklaces" | "earrings" | "bracelets";
   const [, navigate] = useLocation();
   const [sortBy, setSortBy] = useState("featured");
-  const [material, setMaterial] = useState("All");
+
   const [subcategory, setSubcategory] = useState("All");
 
   const meta = CATEGORY_META[category] ?? {
@@ -72,9 +72,7 @@ export default function CategoryPage() {
     return 0;
   }) : [];
 
-  const filteredProducts = material === "All"
-    ? sortedProducts
-    : sortedProducts.filter((p) => p.material?.toLowerCase().includes(material.toLowerCase()));
+  const filteredProducts = sortedProducts;
 
   return (
     <StorefrontLayout>
@@ -127,17 +125,6 @@ export default function CategoryPage() {
 
       {/* Filter Bar */}
       <div className="filter-bar">
-        <span className="filter-label">Filter:</span>
-        <select
-          className="filter-select"
-          value={material}
-          onChange={(e) => setMaterial(e.target.value)}
-        >
-          {MATERIAL_OPTIONS.map((m) => (
-            <option key={m} value={m}>{m === "All" ? "All Materials" : m}</option>
-          ))}
-        </select>
-
         <div style={{ marginLeft: "auto", display: "flex", gap: "8px", alignItems: "center" }}>
           <span className="filter-label">Sort:</span>
           {SORT_OPTIONS.map((opt) => (
@@ -182,7 +169,7 @@ export default function CategoryPage() {
         <div className="empty-state" style={{ padding: "80px 60px" }}>
           <h3>No Pieces Found</h3>
           <p>Try adjusting your filters or explore our other collections.</p>
-          <button className="btn-primary" style={{ marginTop: "24px" }} onClick={() => { setMaterial("All"); setSubcategory("All"); }}>
+          <button className="btn-primary" style={{ marginTop: "24px" }} onClick={() => { setSubcategory("All"); }}>
             Clear Filters
           </button>
         </div>

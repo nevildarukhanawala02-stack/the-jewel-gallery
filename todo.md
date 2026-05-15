@@ -181,3 +181,6 @@
 ## Store Photo - Crafted with Luxury Section
 - [x] Upload store photo (The Jewel Gallery kiosk) to Manus storage
 - [x] Replace broken placeholder image in "Crafted with Legacy" homepage section with real store photo
+
+## UI Cleanup
+- [x] Remove "All Materials" filter dropdown from all category pages (CategoryPage.tsx)
