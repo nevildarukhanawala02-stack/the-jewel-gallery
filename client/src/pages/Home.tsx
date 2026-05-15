@@ -346,8 +346,8 @@ export default function Home() {
         </div>
         <div style={{ position: "relative", overflow: "hidden" }}>
           <img
-            src="https://images.unsplash.com/photo-1573408301185-9519f94815b1?w=700&q=80"
-            alt="Master artisan crafting jewellery"
+            src="/manus-storage/jewel-gallery-store_f3105046.jpg"
+            alt="The Jewel Gallery store"
             style={{ width: "100%", height: "500px", objectFit: "cover" }}
           />
           <div style={{

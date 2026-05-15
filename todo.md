@@ -177,3 +177,7 @@
 ## Subcategory Assignment Fix
 - [x] Run LLM vision script to classify all 47 products into correct subcategories (pendant/choker/layered/chain/statement for necklaces; bangle/cuff/charm/tennis/stackable for bracelets; solitaire/cocktail/stackable/engagement/statement for rings; studs/hoops/drops/chandeliers/jhumkas for earrings)
 - [x] Verify subcategory tabs on all 4 category pages show correct products — Pendant:12, Chain:8, Layered:4 (necklaces); Stackable:9, Tennis:2 (bracelets); Statement:7 (rings); Drops:5 (earrings)
+
+## Store Photo - Crafted with Luxury Section
+- [x] Upload store photo (The Jewel Gallery kiosk) to Manus storage
+- [x] Replace broken placeholder image in "Crafted with Legacy" homepage section with real store photo
