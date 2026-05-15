@@ -350,12 +350,59 @@ export default function Home() {
             Discover Our Story
           </button>
         </div>
-        <div style={{ position: "relative", overflow: "hidden" }}>
-          <img
-            src="/manus-storage/jewel-gallery-store_f3105046.jpg"
-            alt="The Jewel Gallery store"
-            style={{ width: "100%", height: "500px", objectFit: "cover" }}
-          />
+        <div style={{ position: "relative", overflow: "hidden", height: "500px" }}>
+          {/* Ken Burns crossfade slideshow */}
+          <style>{`
+            @keyframes kenBurns1 {
+              0%   { transform: scale(1.08) translate(0%, 0%); opacity: 1; }
+              28%  { opacity: 1; }
+              33%  { opacity: 0; }
+              100% { transform: scale(1.18) translate(-2%, -1%); opacity: 0; }
+            }
+            @keyframes kenBurns2 {
+              0%   { transform: scale(1.08) translate(1%, 0%); opacity: 0; }
+              28%  { opacity: 0; }
+              33%  { opacity: 1; }
+              61%  { opacity: 1; }
+              66%  { opacity: 0; }
+              100% { transform: scale(1.18) translate(-1%, -2%); opacity: 0; }
+            }
+            @keyframes kenBurns3 {
+              0%   { transform: scale(1.08) translate(-1%, 1%); opacity: 0; }
+              61%  { opacity: 0; }
+              66%  { opacity: 1; }
+              94%  { opacity: 1; }
+              100% { transform: scale(1.18) translate(1%, -1%); opacity: 1; }
+            }
+          `}</style>
+          {[
+            { src: "/manus-storage/26645fd1-22b1-4c2a-81a0-216a90951a19_14da8fd8.jpg", anim: "kenBurns1" },
+            { src: "/manus-storage/2a5948fc-1ebb-4d8c-b7a1-ec3f922242e9_383065c3.jpg", anim: "kenBurns2" },
+            { src: "/manus-storage/9e0b2ca6-6e2c-494f-96a6-a420ad039ffb_133a30ec.jpg", anim: "kenBurns3" },
+          ].map((img, i) => (
+            <img
+              key={i}
+              src={img.src}
+              alt={`The Jewel Gallery store ${i + 1}`}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                animation: `${img.anim} 18s ease-in-out infinite`,
+                animationDelay: `${i === 0 ? "0s" : i === 1 ? "0s" : "0s"}`,
+                willChange: "transform, opacity",
+              }}
+            />
+          ))}
+          {/* Subtle dark vignette overlay */}
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(to top, rgba(0,0,0,0.35) 0%, transparent 50%)",
+            pointerEvents: "none",
+          }} />
           <div style={{
             position: "absolute",
             bottom: "24px",
@@ -365,7 +412,7 @@ export default function Home() {
             maxWidth: "220px",
           }}>
             <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "var(--gold)", marginBottom: "4px" }}>
-              Since 2018
+              Since 2014
             </div>
             <div style={{ fontFamily: "var(--font-display)", fontSize: "16px", color: "var(--text-dark)" }}>
               Handcrafted in India
