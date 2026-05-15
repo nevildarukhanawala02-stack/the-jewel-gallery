@@ -1,5 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { getLoginUrl } from "../const";
 import { useLocation } from "wouter";
 import { Package, TrendingUp, ShoppingBag, AlertTriangle, Truck, CreditCard, Users, BarChart2, FileSpreadsheet, Upload, ImageIcon, Star } from "lucide-react";
 import { useState, useRef } from "react";
@@ -238,24 +239,12 @@ export default function AdminDashboard() {
   }
 
   if (!user) {
-    const loginUrl = (() => {
-      const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
-      const appId = import.meta.env.VITE_APP_ID;
-      const redirectUri = `${window.location.origin}/api/oauth/callback`;
-      const state = btoa(redirectUri);
-      const url = new URL(`${oauthPortalUrl}/app-auth`);
-      url.searchParams.set("appId", appId);
-      url.searchParams.set("redirectUri", redirectUri);
-      url.searchParams.set("state", state);
-      url.searchParams.set("type", "signIn");
-      return url.toString();
-    })();
     return (
       <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "100vh", background: "#0F0F0F", gap: "24px" }}>
         <div style={{ color: "var(--gold)", fontSize: "48px" }}>◆</div>
         <h2 style={{ color: "#fff", fontFamily: "var(--font-serif)", fontSize: "24px", margin: 0 }}>Session Expired</h2>
         <p style={{ color: "#aaa", fontSize: "14px", margin: 0, textAlign: "center", maxWidth: "320px" }}>Your session has expired. Please sign in again to access the admin dashboard.</p>
-        <a href={loginUrl} style={{ background: "var(--gold)", color: "#0F0F0F", padding: "12px 32px", borderRadius: "4px", textDecoration: "none", fontWeight: 600, fontSize: "13px", letterSpacing: "0.1em" }}>SIGN IN</a>
+        <a href={getLoginUrl("/admin")} style={{ background: "var(--gold)", color: "#0F0F0F", padding: "12px 32px", borderRadius: "4px", textDecoration: "none", fontWeight: 600, fontSize: "13px", letterSpacing: "0.1em" }}>SIGN IN</a>
         <a href="/" style={{ color: "#aaa", fontSize: "13px", textDecoration: "none" }}>Go to Homepage</a>
       </div>
     );
