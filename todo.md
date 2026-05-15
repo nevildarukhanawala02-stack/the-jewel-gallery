@@ -168,3 +168,8 @@
 ## Products Needing Re-photography (No Product Close-Up Available)
 - [ ] TJG 025 — only has lifestyle shots; needs product-only close-up images
 - [ ] TJG 026 — only has lifestyle shots; needs product-only close-up images
+
+## Category Assignment Fix
+- [x] Use LLM vision to identify correct category for all products (rings/necklaces/earrings/bracelets)
+- [x] Update database with correct category assignments
+- [x] Verify all 4 category pages show only correct product types — Rings: 7, Necklaces: 24, Bracelets: 11, Earrings: 5
