@@ -164,8 +164,6 @@ export default function Home() {
                 "FREE SHIPPING IN INDIA",
                 "WORN BY 200+ CELEBRITIES",
                 "LIFETIME SERVICE",
-                "HALLMARKED 925 STERLING SILVER",
-                "CERTIFIED GEMSTONES",
               ].map((item, j) => (
                 <span key={j} style={{ display: "inline-flex", alignItems: "center" }}>
                   <span style={{
