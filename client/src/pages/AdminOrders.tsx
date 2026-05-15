@@ -44,9 +44,23 @@ export default function AdminOrders() {
   const updateTrackingMutation = trpc.admin.updateOrderTracking.useMutation();
   const utils = trpc.useUtils();
 
-  if (loading || !user) {
-    if (!loading) navigate("/");
-    return null;
+  if (loading) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", background: "#0F0F0F" }}>
+        <div style={{ color: "var(--gold)", fontSize: "24px" }}>◆</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "100vh", background: "#0F0F0F", gap: "24px" }}>
+        <div style={{ color: "var(--gold)", fontSize: "48px" }}>◆</div>
+        <h2 style={{ color: "#fff", fontFamily: "var(--font-serif)", fontSize: "24px", margin: 0 }}>Session Expired</h2>
+        <p style={{ color: "#aaa", fontSize: "14px", margin: 0, textAlign: "center", maxWidth: "320px" }}>Your session has expired. Please sign out and sign back in.</p>
+        <a href="/" style={{ background: "var(--gold)", color: "#0F0F0F", padding: "12px 32px", borderRadius: "4px", textDecoration: "none", fontWeight: 600, fontSize: "13px", letterSpacing: "0.1em" }}>GO TO HOMEPAGE</a>
+      </div>
+    );
   }
 
   const formatPrice = (p: number) =>
