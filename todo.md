@@ -239,3 +239,9 @@
 - [x] Fix footer on mobile
 - [x] Fix typography scaling (headings too large on mobile)
 - [x] Fix horizontal overflow / scroll issues
+
+## Swipe Gesture Support (Mobile)
+- [x] Create reusable useSwipe hook (touchstart/touchend, min 50px threshold, horizontal-only)
+- [x] Apply swipe to store slideshow on Home page (Crafted with Devotion section)
+- [x] Apply swipe to product image gallery on ProductPage (prev/next image)
+- [x] Apply swipe to horizontal product sliders (bestsellers use CSS grid — swipe N/A; celebrity shop-the-look uses CSS grid — swipe N/A)

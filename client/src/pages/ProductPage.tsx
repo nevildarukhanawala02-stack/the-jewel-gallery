@@ -3,10 +3,11 @@ import ProductCard from "@/components/ProductCard";
 import { useCart } from "@/contexts/CartContext";
 import { trpc } from "@/lib/trpc";
 import { ChevronDown, ChevronUp, Star, Wrench, Truck, RefreshCw } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useLocation, useParams } from "wouter";
 import { toast } from "sonner";
 import { getCardImage } from "@/lib/productImage";
+import { useSwipe } from "@/hooks/useSwipe";
 
 export default function ProductPage() {
   const params = useParams<{ slug: string }>();
@@ -15,6 +16,16 @@ export default function ProductPage() {
   const [activeImg, setActiveImg] = useState(0);
   const [openAccordion, setOpenAccordion] = useState<string | null>("details");
   const [qty, setQty] = useState(1);
+
+  // Use a ref to hold the current displayImages length so the swipe callbacks
+  // can reference it without being re-created after early returns.
+  const displayImagesLenRef = useRef(1);
+
+  // Gallery swipe — called unconditionally (before any early returns) per React hook rules
+  const gallerySwipe = useSwipe({
+    onSwipeLeft: () => setActiveImg(prev => Math.min(prev + 1, displayImagesLenRef.current - 1)),
+    onSwipeRight: () => setActiveImg(prev => Math.max(prev - 1, 0)),
+  });
 
   const { data: product, isLoading } = trpc.products.bySlug.useQuery(
     { slug: params.slug },
@@ -78,6 +89,9 @@ export default function ProductPage() {
     "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80",
   ];
 
+  // Keep the ref in sync with the actual length so swipe callbacks are always accurate
+  displayImagesLenRef.current = displayImages.length;
+
   const relatedProducts = (related ?? []).filter((r) => r.id !== product.id).slice(0, 4);
 
   const ACCORDION_ITEMS = [
@@ -139,8 +153,46 @@ export default function ProductPage() {
               </div>
             ))}
           </div>
-          <div className="gallery-main">
-            <img src={displayImages[activeImg]} alt={product.name} />
+          <div
+            className="gallery-main"
+            {...gallerySwipe}
+            style={{ touchAction: "pan-y", cursor: "grab", position: "relative" }}
+          >
+            <img
+              src={displayImages[activeImg]}
+              alt={product.name}
+              style={{ userSelect: "none", pointerEvents: "none" }}
+            />
+            {/* Swipe dot indicators — visible on mobile */}
+            {displayImages.length > 1 && (
+              <div style={{
+                position: "absolute",
+                bottom: "12px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                display: "flex",
+                gap: "6px",
+                zIndex: 2,
+              }}>
+                {displayImages.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveImg(i)}
+                    style={{
+                      width: i === activeImg ? "20px" : "6px",
+                      height: "6px",
+                      borderRadius: "3px",
+                      background: i === activeImg ? "var(--gold)" : "rgba(0,0,0,0.25)",
+                      border: "none",
+                      cursor: "pointer",
+                      padding: 0,
+                      transition: "width 0.3s ease, background 0.3s ease",
+                    }}
+                    aria-label={`View image ${i + 1}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

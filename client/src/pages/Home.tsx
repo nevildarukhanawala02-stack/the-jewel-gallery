@@ -1,10 +1,11 @@
 import StorefrontLayout from "@/components/StorefrontLayout";
 import ProductCard from "@/components/ProductCard";
 import { trpc } from "@/lib/trpc";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { getCardImage } from "@/lib/productImage";
+import { useSwipe } from "@/hooks/useSwipe";
 
 const TICKER_ITEMS = [
   "Hallmarked 925 Sterling Silver",
@@ -31,6 +32,35 @@ export default function Home() {
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState("All");
   const [email, setEmail] = useState("");
+
+  // Store slideshow state (swipe-controlled)
+  const storeImages = [
+    { src: "/manus-storage/26645fd1-22b1-4c2a-81a0-216a90951a19_14da8fd8.jpg", alt: "The Jewel Gallery store 1" },
+    { src: "/manus-storage/2a5948fc-1ebb-4d8c-b7a1-ec3f922242e9_383065c3.jpg", alt: "The Jewel Gallery store 2" },
+    { src: "/manus-storage/9e0b2ca6-6e2c-494f-96a6-a420ad039ffb_133a30ec.jpg", alt: "The Jewel Gallery store 3" },
+  ];
+  const [slideIndex, setSlideIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const goToSlide = useCallback((idx: number) => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setSlideIndex((idx + storeImages.length) % storeImages.length);
+    setTimeout(() => setIsTransitioning(false), 600);
+  }, [isTransitioning, storeImages.length]);
+
+  // Auto-advance every 6 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSlideIndex(prev => (prev + 1) % storeImages.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [storeImages.length]);
+
+  const storeSwipe = useSwipe({
+    onSwipeLeft: () => goToSlide(slideIndex + 1),
+    onSwipeRight: () => goToSlide(slideIndex - 1),
+  });
 
   const { data: celebrities } = trpc.celebrities.list.useQuery({});
 
@@ -350,52 +380,49 @@ export default function Home() {
             Discover Our Story
           </button>
         </div>
-        <div style={{ position: "relative", overflow: "hidden", height: "500px" }}>
-          {/* Ken Burns crossfade slideshow */}
-          <style>{`
-            @keyframes kenBurns1 {
-              0%   { transform: scale(1.08) translate(0%, 0%); opacity: 1; }
-              28%  { opacity: 1; }
-              33%  { opacity: 0; }
-              100% { transform: scale(1.18) translate(-2%, -1%); opacity: 0; }
-            }
-            @keyframes kenBurns2 {
-              0%   { transform: scale(1.08) translate(1%, 0%); opacity: 0; }
-              28%  { opacity: 0; }
-              33%  { opacity: 1; }
-              61%  { opacity: 1; }
-              66%  { opacity: 0; }
-              100% { transform: scale(1.18) translate(-1%, -2%); opacity: 0; }
-            }
-            @keyframes kenBurns3 {
-              0%   { transform: scale(1.08) translate(-1%, 1%); opacity: 0; }
-              61%  { opacity: 0; }
-              66%  { opacity: 1; }
-              94%  { opacity: 1; }
-              100% { transform: scale(1.18) translate(1%, -1%); opacity: 1; }
-            }
-          `}</style>
-          {[
-            { src: "/manus-storage/26645fd1-22b1-4c2a-81a0-216a90951a19_14da8fd8.jpg", anim: "kenBurns1" },
-            { src: "/manus-storage/2a5948fc-1ebb-4d8c-b7a1-ec3f922242e9_383065c3.jpg", anim: "kenBurns2" },
-            { src: "/manus-storage/9e0b2ca6-6e2c-494f-96a6-a420ad039ffb_133a30ec.jpg", anim: "kenBurns3" },
-          ].map((img, i) => (
+        <div
+          style={{ position: "relative", overflow: "hidden", height: "500px", cursor: "grab", touchAction: "pan-y" }}
+          {...storeSwipe}
+        >
+          {/* React state-driven crossfade slideshow with Ken Burns + swipe support */}
+          {storeImages.map((img, i) => (
             <img
               key={i}
               src={img.src}
-              alt={`The Jewel Gallery store ${i + 1}`}
+              alt={img.alt}
               style={{
                 position: "absolute",
                 inset: 0,
                 width: "100%",
                 height: "100%",
                 objectFit: "cover",
-                animation: `${img.anim} 18s ease-in-out infinite`,
-                animationDelay: `${i === 0 ? "0s" : i === 1 ? "0s" : "0s"}`,
+                opacity: i === slideIndex ? 1 : 0,
+                transform: i === slideIndex ? "scale(1.06)" : "scale(1.0)",
+                transition: "opacity 0.7s ease-in-out, transform 7s ease-out",
                 willChange: "transform, opacity",
               }}
             />
           ))}
+          {/* Dot indicators */}
+          <div style={{ position: "absolute", bottom: "80px", right: "16px", display: "flex", gap: "6px", zIndex: 2 }}>
+            {storeImages.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goToSlide(i)}
+                style={{
+                  width: i === slideIndex ? "20px" : "6px",
+                  height: "6px",
+                  borderRadius: "3px",
+                  background: i === slideIndex ? "var(--gold)" : "rgba(255,255,255,0.6)",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 0,
+                  transition: "width 0.3s ease, background 0.3s ease",
+                }}
+                aria-label={`Go to slide ${i + 1}`}
+              />
+            ))}
+          </div>
           {/* Subtle dark vignette overlay */}
           <div style={{
             position: "absolute",
