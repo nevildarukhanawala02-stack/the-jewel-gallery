@@ -605,27 +605,25 @@ button {
    FOOTER
    ============================================================ */
 .footer {
-  background: var(--charcoal-mid);
+  background: #faf6f0;
   padding: 60px 60px 32px;
-  color: rgba(250,246,240,0.8);
+  color: #3a2e24;
+  border-top: 1px solid rgba(0,0,0,0.08);
 }
-.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 60px; margin-bottom: 48px; }
-.footer-logo-main { font-family: var(--font-display); font-size: 22px; font-weight: 400; letter-spacing: 3px; color: var(--ivory); text-transform: uppercase; margin-bottom: 4px; }
-.footer-logo-main span { color: var(--gold); font-style: italic; }
-.footer-logo-sub { font-size: 7px; letter-spacing: 3px; text-transform: uppercase; color: rgba(250,246,240,0.5); margin-bottom: 16px; }
-.footer-tagline { font-size: 12px; color: rgba(250,246,240,0.6); line-height: 1.7; max-width: 280px; }
-.footer-col-title { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 20px; }
+.footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; max-width: 480px; margin-bottom: 48px; }
+.footer-col-title { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #3a2e24; margin-bottom: 20px; }
 .footer-links { display: flex; flex-direction: column; gap: 10px; }
-.footer-link { font-size: 12px; color: rgba(250,246,240,0.7); transition: color 0.3s ease; cursor: pointer; }
+.footer-link { font-size: 13px; color: #6b5c4e; transition: color 0.2s ease; cursor: pointer; text-decoration: none; }
 .footer-link:hover { color: var(--gold); }
 .footer-bottom {
-  border-top: 1px solid rgba(201,169,110,0.2);
+  border-top: 1px solid rgba(0,0,0,0.08);
   padding-top: 24px;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  font-size: 11px;
-  color: rgba(250,246,240,0.4);
+  font-size: 12px;
+  color: #9a8878;
+  letter-spacing: 0.3px;
 }
 
 /* ============================================================
@@ -1111,7 +1109,8 @@ button {
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .admin-sidebar { width: 220px; }
   .admin-main { margin-left: 220px; }
-  .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; max-width: 100%; }
+  .footer { padding: 40px 24px 24px; }
 }
 
 @media (max-width: 640px) {

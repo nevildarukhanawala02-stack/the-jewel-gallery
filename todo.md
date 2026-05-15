@@ -210,13 +210,16 @@
 - [x] Update celebrity product count to reflect assignments
 
 ## Cart & Checkout Image Fix
-- [ ] Fix broken product images in cart sidebar
-- [ ] Fix broken product images in checkout/shipping order summary
-- [ ] Fix broken product images in order confirmation page
-- [ ] Fix broken product images in order history page
+- [x] Fix broken product images in cart sidebar (images load correctly on dev server; was old published version issue)
+- [x] Fix broken product images in checkout/shipping order summary (images load correctly on dev server)
+- [x] Fix broken product images in order confirmation page (images load correctly on dev server)
+- [x] Fix broken product images in order history page (images load correctly on dev server)
 
 ## Background Color Detection & Image Reclassification
 - [x] Write Python script to sample corner pixels of each product image and detect if background is white/neutral or colored
 - [x] Reclassify images with colored/dark backgrounds from 'product' to 'lifestyle' in imageTypes DB column
 - [x] Only white/grey/off-white background images shown on home, category, subcategory pages
 - [x] Colored background images still visible on product detail pages
+
+## Footer Redesign
+- [x] Replace dark footer with clean minimal light footer: cream background, SHOP + LEGAL columns, thin copyright bar
