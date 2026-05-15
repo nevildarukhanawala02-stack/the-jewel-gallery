@@ -324,24 +324,30 @@ export default function Home() {
         <div className="brand-story-text">
           <div className="section-eyebrow">Our Story</div>
           <h2>
-            Crafted with <em>Legacy</em>,<br />
-            Worn with <em>Pride</em>
+            Crafted with <em>Devotion</em>, Worn with <em>Pride</em>
           </h2>
           <p>
-            The Jewel Gallery was born from a deep reverence for India's rich jewellery-making tradition.
-            Every piece we create honours the centuries-old craft of our master artisans, who bring
-            generations of skill and passion to each creation.
+            At The Jewel Gallery, we believe that a piece of jewellery is never merely an accessory — it is a declaration.
+            Founded in 2014 in the heart of Mumbai, we have spent over a decade perfecting the art of translating
+            emotion into metal and stone.
           </p>
-          <blockquote>
-            "We don't just make jewellery. We craft heirlooms — pieces that carry stories,
-            mark milestones, and are passed down through generations."
-          </blockquote>
-          <p>
-            From the delicate filigree of our Mughal-inspired collection to the bold geometry of our
-            contemporary line, every piece is a dialogue between tradition and modernity.
-          </p>
-          <button className="btn-primary" onClick={() => navigate("/collections")} style={{ marginTop: "16px" }}>
-            Explore Our Story
+
+          <div style={{ margin: "32px 0 8px" }}>
+            <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--gold)", marginBottom: "20px" }}>Visit Us</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "14px 0", borderBottom: "1px solid var(--linen)" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--text-dark)", letterSpacing: "0.02em" }}>Lokhandwala Market, Mumbai</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "14px 0", borderBottom: "1px solid var(--linen)" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--text-dark)", letterSpacing: "0.02em" }}>InOrbit Mall, Hyderabad</span>
+              </div>
+            </div>
+          </div>
+
+          <button className="btn-primary" onClick={() => navigate("/collections")} style={{ marginTop: "28px" }}>
+            Discover Our Story
           </button>
         </div>
         <div style={{ position: "relative", overflow: "hidden" }}>

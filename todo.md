@@ -191,3 +191,9 @@
 - [x] Add "Celebrities" nav item to admin sidebar (Star icon)
 - [x] Register /admin/celebrities route in App.tsx
 - [x] Verify celebrity detail page "Shop the Look" reads from celebrity_products join table (already wired via bySlug)
+
+## Homepage "Crafted with Legacy" Section Update
+- [x] Replace verbose copy (artisan quote + Mughal collection paragraph) with shorter paragraph
+- [x] Change heading to "Crafted with Devotion, Worn with Pride"
+- [x] Add "Visit Us" label with two store location pins: Lokhandwala Market Mumbai + InOrbit Mall Hyderabad
+- [x] Replace "Explore Our Story" CTA with "Discover Our Story" button
