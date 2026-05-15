@@ -181,7 +181,7 @@ export default function AdminProducts() {
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid rgba(201,169,110,0.1)" }}>
-              {["Product", "SKU", "Category", "Price", "Stock", "Status", "Actions"].map((h) => (
+              {["Product", "SKU", "Category", "Price", "Stock", "Bestseller", "Status", "Actions"].map((h) => (
                 <th key={h} style={{
                   padding: "12px 16px",
                   textAlign: "left",
@@ -199,13 +199,13 @@ export default function AdminProducts() {
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={7} style={{ padding: "60px", textAlign: "center", color: "rgba(255,255,255,0.3)" }}>
+                  <td colSpan={8} style={{ padding: "60px", textAlign: "center", color: "rgba(255,255,255,0.3)" }}>
                   Loading products...
                 </td>
               </tr>
             ) : filteredProducts.length === 0 ? (
               <tr>
-                <td colSpan={7} style={{ padding: "60px", textAlign: "center", color: "rgba(255,255,255,0.3)" }}>
+                <td colSpan={8} style={{ padding: "60px", textAlign: "center", color: "rgba(255,255,255,0.3)" }}>
                   No products found
                 </td>
               </tr>
@@ -318,6 +318,36 @@ export default function AdminProducts() {
                         {product.stock}
                       </span>
                     )}
+                  </td>
+
+                  {/* Bestseller */}
+                  <td style={{ padding: "14px 16px", textAlign: "center" }}>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await updateProductMutation.mutateAsync({ id: product.id, isBestseller: !product.isBestseller });
+                          utils.admin.getAllProducts.invalidate();
+                          toast.success(product.isBestseller ? "Removed from bestsellers" : "Added to bestsellers");
+                        } catch {
+                          toast.error("Failed to update");
+                        }
+                      }}
+                      title={product.isBestseller ? "Remove from bestsellers" : "Mark as bestseller"}
+                      style={{
+                        padding: "4px 10px",
+                        background: product.isBestseller ? "rgba(201,169,110,0.15)" : "transparent",
+                        border: `1px solid ${product.isBestseller ? "rgba(201,169,110,0.5)" : "rgba(255,255,255,0.1)"}`,
+                        color: product.isBestseller ? "var(--gold)" : "rgba(255,255,255,0.25)",
+                        cursor: "pointer",
+                        fontSize: "9px",
+                        fontWeight: 700,
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      {product.isBestseller ? "★ Yes" : "☆ No"}
+                    </button>
                   </td>
 
                   {/* Status */}

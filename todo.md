@@ -197,3 +197,10 @@
 - [x] Change heading to "Crafted with Devotion, Worn with Pride"
 - [x] Add "Visit Us" label with two store location pins: Lokhandwala Market Mumbai + InOrbit Mall Hyderabad
 - [x] Replace "Explore Our Story" CTA with "Discover Our Story" button
+
+## Bestseller Section Improvement
+- [x] Select 4-6 visually strong products across 2-3 categories (necklaces, bracelets, earrings) as bestsellers
+- [x] Update isBestseller flags in DB — clear old flags, set new ones
+- [x] Fix bestseller card image zoom/display (object-fit: cover, full zoom)
+- [x] Update bestseller query limit from 5 to 6
+- [x] Add isBestseller toggle column to AdminProducts page for easy management

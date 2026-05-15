@@ -485,7 +485,7 @@ button {
   background: linear-gradient(135deg, var(--ivory) 0%, var(--linen) 50%, var(--ivory) 100%);
   border-top: 1px solid var(--linen-dark);
 }
-.bestsellers-grid-v3 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 50px; }
+.bestsellers-grid-v3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 50px; }
 .bestseller-card-v3 {
   background: white;
   border: 1px solid var(--linen-dark);
@@ -494,9 +494,9 @@ button {
   overflow: hidden;
 }
 .bestseller-card-v3:hover { border-color: var(--gold); transform: translateY(-4px); box-shadow: 0 8px 24px rgba(201,169,110,0.15); }
-.bestseller-img-wrap-v3 { position: relative; aspect-ratio: 1; overflow: hidden; background: var(--linen); }
-.bestseller-img-wrap-v3 img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
-.bestseller-card-v3:hover .bestseller-img-wrap-v3 img { transform: scale(1.08); }
+.bestseller-img-wrap-v3 { position: relative; aspect-ratio: 1; overflow: hidden; background: #fff; }
+.bestseller-img-wrap-v3 img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
+.bestseller-card-v3:hover .bestseller-img-wrap-v3 img { transform: scale(1.12); }
 .bestseller-badge-v3 {
   position: absolute;
   top: 12px;
@@ -1100,7 +1100,7 @@ button {
   .collections { padding: 60px 24px; }
   .celebrity-section { padding: 60px 24px; }
   .bestsellers-section-v3 { padding: 60px 24px; }
-  .bestsellers-grid-v3 { grid-template-columns: repeat(2, 1fr); }
+  .bestsellers-grid-v3 { grid-template-columns: repeat(2, 1fr); gap: 16px; }
   .brand-story { grid-template-columns: 1fr; padding: 60px 24px; }
   .product-grid { grid-template-columns: repeat(2, 1fr); padding: 40px 24px; }
   .product-detail { grid-template-columns: 1fr; }

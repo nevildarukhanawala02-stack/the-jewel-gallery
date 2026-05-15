@@ -46,7 +46,7 @@ export default function Home() {
 
   const { data: bestsellers, isLoading: loadingBest } = trpc.products.list.useQuery({
     isBestseller: true,
-    limit: 5,
+    limit: 6,
   });
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
