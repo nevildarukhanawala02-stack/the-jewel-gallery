@@ -155,7 +155,7 @@
 - [x] Convert celebrity HEIC images to JPEG
 - [x] Upload celebrity images to Manus storage
 - [x] Populate celebrity DB records (name, bio, title, photo URL)
-- [ ] Create celebrity_products join table entries (pending product mapping from user)
+- [x] Create celebrity_products join table entries (done with placeholder assignments; admin can update via UI)
 - [x] Update CelebrityPage.tsx to match reference design (grid, search by name, filter by style/occasion)
 - [x] Update CelebrityProfilePage.tsx to match reference design (hero photo, bio, product count, "Shop the Look" grid, "Explore Other Celebrity Looks" section)
 - [x] Update homepage celebrity section to show real celebrity photos
@@ -208,3 +208,15 @@
 ## Celebrity Product Assignments
 - [x] Assign 3-4 products to each celebrity in celebrity_products join table
 - [x] Update celebrity product count to reflect assignments
+
+## Cart & Checkout Image Fix
+- [ ] Fix broken product images in cart sidebar
+- [ ] Fix broken product images in checkout/shipping order summary
+- [ ] Fix broken product images in order confirmation page
+- [ ] Fix broken product images in order history page
+
+## Background Color Detection & Image Reclassification
+- [x] Write Python script to sample corner pixels of each product image and detect if background is white/neutral or colored
+- [x] Reclassify images with colored/dark backgrounds from 'product' to 'lifestyle' in imageTypes DB column
+- [x] Only white/grey/off-white background images shown on home, category, subcategory pages
+- [x] Colored background images still visible on product detail pages
