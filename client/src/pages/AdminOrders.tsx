@@ -110,9 +110,9 @@ export default function AdminOrders() {
   return (
     <AdminLayout title="Orders">
       {/* Filters */}
-      <div style={{ display: "flex", gap: "16px", marginBottom: "24px", flexWrap: "wrap", alignItems: "center" }}>
+      <div style={{ marginBottom: "20px" }}>
         {/* Search */}
-        <div style={{ position: "relative", flex: "1", minWidth: "200px" }}>
+        <div style={{ position: "relative", marginBottom: "12px" }}>
           <Search size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.3)" }} />
           <input
             type="text"
@@ -121,25 +121,25 @@ export default function AdminOrders() {
             onChange={(e) => setSearch(e.target.value)}
             style={{
               width: "100%",
-              padding: "10px 12px 10px 36px",
+              padding: "11px 12px 11px 36px",
               background: "#1A1A1A",
               border: "1px solid rgba(201,169,110,0.2)",
               color: "rgba(255,255,255,0.7)",
-              fontSize: "12px",
+              fontSize: "13px",
               outline: "none",
               boxSizing: "border-box",
             }}
           />
         </div>
 
-        {/* Status Filter */}
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+        {/* Status Filter — horizontal scroll on mobile */}
+        <div style={{ display: "flex", gap: "8px", overflowX: "auto", paddingBottom: "4px", WebkitOverflowScrolling: "touch" as React.CSSProperties["WebkitOverflowScrolling"] }}>
           {STATUS_OPTIONS.map((opt) => (
             <button
               key={opt.value}
               onClick={() => setStatusFilter(opt.value)}
               style={{
-                padding: "8px 14px",
+                padding: "9px 14px",
                 fontSize: "9px",
                 fontWeight: 700,
                 letterSpacing: "1px",
@@ -149,19 +149,21 @@ export default function AdminOrders() {
                 color: statusFilter === opt.value ? "var(--gold)" : "rgba(255,255,255,0.4)",
                 cursor: "pointer",
                 transition: "all 0.2s ease",
+                whiteSpace: "nowrap",
+                flexShrink: 0,
+                minHeight: "40px",
               }}
             >
               {opt.label}
             </button>
           ))}
-        </div>
-
-        <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)", marginLeft: "auto" }}>
-          {filteredOrders.length} order{filteredOrders.length !== 1 ? "s" : ""}
+          <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)", display: "flex", alignItems: "center", paddingLeft: "8px", whiteSpace: "nowrap", flexShrink: 0 }}>
+            {filteredOrders.length} order{filteredOrders.length !== 1 ? "s" : ""}
+          </div>
         </div>
       </div>
 
-      {/* Orders Table */}
+      {/* Orders List */}
       <div style={{ background: "#1A1A1A", border: "1px solid rgba(201,169,110,0.1)" }}>
         {isLoading ? (
           <div style={{ padding: "60px", textAlign: "center", color: "rgba(255,255,255,0.3)" }}>
@@ -174,37 +176,50 @@ export default function AdminOrders() {
         ) : (
           filteredOrders.map((order) => (
             <div key={order.id} style={{ borderBottom: "1px solid rgba(201,169,110,0.05)" }}>
-              {/* Order Row */}
+              {/* Order Row — card layout on mobile, grid on desktop */}
               <div
+                className="admin-order-row"
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr 120px 160px 180px 40px",
-                  gap: "16px",
-                  padding: "16px 20px",
-                  alignItems: "center",
+                  padding: "16px 18px",
                   cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
                 }}
                 onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
               >
-                <div>
-                  <div style={{ fontSize: "13px", color: "var(--gold)", fontFamily: "var(--font-body)", marginBottom: "2px" }}>
-                    {order.orderNumber}
+                {/* Top line: order number + date + chevron */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div>
+                    <div style={{ fontSize: "14px", color: "var(--gold)", fontFamily: "var(--font-body)", marginBottom: "2px" }}>
+                      {order.orderNumber}
+                    </div>
+                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)" }}>
+                      {new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                    </div>
                   </div>
-                  <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)" }}>
-                    {new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                  <div style={{ color: "rgba(255,255,255,0.3)", flexShrink: 0 }}>
+                    {expandedOrder === order.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </div>
                 </div>
 
-                <div>
-                  <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)" }}>{order.customerName ?? "Guest"}</div>
-                  <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)" }}>{order.customerEmail ?? ""}</div>
+                {/* Middle line: customer + amount */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px" }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.75)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {order.customerName ?? "Guest"}
+                    </div>
+                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {order.customerEmail ?? ""}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: "14px", color: "rgba(255,255,255,0.85)", fontFamily: "var(--font-display)", flexShrink: 0 }}>
+                    {formatPrice(Number(order.totalAmount))}
+                  </div>
                 </div>
 
-                <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-display)" }}>
-                  {formatPrice(Number(order.totalAmount))}
-                </div>
-
-                <div>
+                {/* Bottom line: status badge + status select */}
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
                   <span style={{
                     padding: "4px 10px",
                     fontSize: "9px",
@@ -214,47 +229,44 @@ export default function AdminOrders() {
                     background: `${STATUS_COLORS[order.deliveryStatus ?? "pending"]}20`,
                     color: STATUS_COLORS[order.deliveryStatus ?? "pending"],
                     border: `1px solid ${STATUS_COLORS[order.deliveryStatus ?? "pending"]}40`,
+                    whiteSpace: "nowrap",
                   }}>
                     {STATUS_OPTIONS.find((s) => s.value === order.deliveryStatus)?.label ?? "Pending"}
                   </span>
-                </div>
-
-                {/* Inline Status Update */}
-                <select
-                  style={{
-                    background: "#0F0F0F",
-                    border: "1px solid rgba(201,169,110,0.2)",
-                    color: "rgba(255,255,255,0.6)",
-                    fontSize: "10px",
-                    padding: "6px 8px",
-                    cursor: "pointer",
-                    width: "100%",
-                  }}
-                  value={order.deliveryStatus ?? "pending"}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    handleStatusUpdate(order.id, e.target.value);
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {STATUS_OPTIONS.filter((s) => s.value !== "all").map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-
-                <div style={{ color: "rgba(255,255,255,0.3)" }}>
-                  {expandedOrder === order.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  <select
+                    style={{
+                      background: "#0F0F0F",
+                      border: "1px solid rgba(201,169,110,0.2)",
+                      color: "rgba(255,255,255,0.6)",
+                      fontSize: "11px",
+                      padding: "6px 8px",
+                      cursor: "pointer",
+                      flex: 1,
+                      minWidth: "140px",
+                      maxWidth: "220px",
+                    }}
+                    value={order.deliveryStatus ?? "pending"}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      handleStatusUpdate(order.id, e.target.value);
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {STATUS_OPTIONS.filter((s) => s.value !== "all").map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
               {/* Expanded Details */}
               {expandedOrder === order.id && (
                 <div style={{
-                  padding: "20px",
+                  padding: "20px 18px",
                   background: "#0F0F0F",
                   borderTop: "1px solid rgba(201,169,110,0.08)",
                 }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "24px" }}>
+                  <div className="admin-orders-expanded" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "20px" }}>
                     {/* Shipping Address */}
                     <div>
                       <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: "12px" }}>
@@ -298,11 +310,11 @@ export default function AdminOrders() {
                             [order.id]: { ...prev[order.id], tracking: e.target.value },
                           }))}
                           style={{
-                            padding: "8px 12px",
+                            padding: "9px 12px",
                             background: "#1A1A1A",
                             border: "1px solid rgba(201,169,110,0.2)",
                             color: "rgba(255,255,255,0.7)",
-                            fontSize: "11px",
+                            fontSize: "12px",
                             outline: "none",
                           }}
                         />
@@ -315,21 +327,21 @@ export default function AdminOrders() {
                             [order.id]: { ...prev[order.id], courier: e.target.value },
                           }))}
                           style={{
-                            padding: "8px 12px",
+                            padding: "9px 12px",
                             background: "#1A1A1A",
                             border: "1px solid rgba(201,169,110,0.2)",
                             color: "rgba(255,255,255,0.7)",
-                            fontSize: "11px",
+                            fontSize: "12px",
                             outline: "none",
                           }}
                         />
                         <button
                           onClick={() => handleTrackingUpdate(order.id)}
                           style={{
-                            padding: "8px 16px",
-                            background: "var(--gold)",
-                            border: "none",
-                            color: "white",
+                            padding: "9px 16px",
+                            background: "rgba(201,169,110,0.15)",
+                            border: "1px solid rgba(201,169,110,0.4)",
+                            color: "var(--gold)",
                             fontSize: "10px",
                             fontWeight: 700,
                             letterSpacing: "1px",

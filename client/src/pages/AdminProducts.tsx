@@ -122,29 +122,54 @@ export default function AdminProducts() {
   return (
     <AdminLayout title="Products">
       {/* Controls */}
-      <div style={{ display: "flex", gap: "16px", marginBottom: "24px", alignItems: "center", flexWrap: "wrap" }}>
-        <div style={{ position: "relative", flex: 1, minWidth: "200px" }}>
-          <Search size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.3)" }} />
-          <input
-            type="text"
-            placeholder="Search by name or SKU..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+      <div style={{ marginBottom: "20px" }}>
+        {/* Search + Add button row */}
+        <div style={{ display: "flex", gap: "12px", marginBottom: "12px", alignItems: "center" }}>
+          <div style={{ position: "relative", flex: 1 }}>
+            <Search size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.3)" }} />
+            <input
+              type="text"
+              placeholder="Search by name or SKU..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "11px 12px 11px 36px",
+                background: "#1A1A1A",
+                border: "1px solid rgba(201,169,110,0.2)",
+                color: "rgba(255,255,255,0.7)",
+                fontSize: "13px",
+                outline: "none",
+                boxSizing: "border-box",
+              }}
+            />
+          </div>
+          <button
+            onClick={() => setShowAddModal(true)}
             style={{
-              width: "100%",
-              padding: "10px 12px 10px 36px",
-              background: "#1A1A1A",
-              border: "1px solid rgba(201,169,110,0.2)",
-              color: "rgba(255,255,255,0.7)",
-              fontSize: "12px",
-              outline: "none",
-              boxSizing: "border-box",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "11px 18px",
+              background: "var(--gold)",
+              border: "none",
+              color: "white",
+              fontSize: "10px",
+              fontWeight: 700,
+              letterSpacing: "1px",
+              textTransform: "uppercase",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              flexShrink: 0,
             }}
-          />
+          >
+            <Plus size={14} />
+            Add Product
+          </button>
         </div>
 
-        {/* Category Tabs */}
-        <div style={{ display: "flex", gap: "8px" }}>
+        {/* Category Tabs — horizontal scroll on mobile */}
+        <div style={{ display: "flex", gap: "8px", overflowX: "auto", paddingBottom: "4px", WebkitOverflowScrolling: "touch" as React.CSSProperties["WebkitOverflowScrolling"], alignItems: "center" }}>
           {CATEGORY_TABS.map((tab) => (
             <button
               key={tab.label}
@@ -159,305 +184,375 @@ export default function AdminProducts() {
                 border: `1px solid ${category === tab.value ? "var(--gold)" : "rgba(255,255,255,0.1)"}`,
                 color: category === tab.value ? "var(--gold)" : "rgba(255,255,255,0.4)",
                 cursor: "pointer",
+                whiteSpace: "nowrap",
+                flexShrink: 0,
+                minHeight: "38px",
               }}
             >
               {tab.label}
             </button>
           ))}
-        </div>
-
-        <button
-          onClick={() => setShowAddModal(true)}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "10px 20px",
-            background: "var(--gold)",
-            border: "none",
-            color: "white",
-            fontSize: "10px",
-            fontWeight: 700,
-            letterSpacing: "1px",
-            textTransform: "uppercase",
-            cursor: "pointer",
-          }}
-        >
-          <Plus size={14} />
-          Add Product
-        </button>
-
-        <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)" }}>
-          {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""}
+          <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)", paddingLeft: "8px", whiteSpace: "nowrap", flexShrink: 0 }}>
+            {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""}
+          </div>
         </div>
       </div>
 
-      {/* Products Table */}
+      {/* Products — card list on mobile, table on desktop */}
       <div style={{ background: "#1A1A1A", border: "1px solid rgba(201,169,110,0.1)" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ borderBottom: "1px solid rgba(201,169,110,0.1)" }}>
-              {["Product", "SKU", "Category", "Price", "Stock", "Bestseller", "Status", "Actions"].map((h) => (
-                <th key={h} style={{
-                  padding: "12px 16px",
-                  textAlign: "left",
-                  fontSize: "9px",
-                  fontWeight: 700,
-                  letterSpacing: "1.5px",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.3)",
-                }}>
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <tr>
-                  <td colSpan={8} style={{ padding: "60px", textAlign: "center", color: "rgba(255,255,255,0.3)" }}>
-                  Loading products...
-                </td>
-              </tr>
-            ) : filteredProducts.length === 0 ? (
-              <tr>
-                <td colSpan={8} style={{ padding: "60px", textAlign: "center", color: "rgba(255,255,255,0.3)" }}>
-                  No products found
-                </td>
-              </tr>
-            ) : filteredProducts.map((product) => {
-              const isEditing = editingProduct === product.id;
-              return (
-                <tr key={product.id} style={{ borderBottom: "1px solid rgba(201,169,110,0.05)" }}>
-                  {/* Product Name */}
-                  <td style={{ padding: "14px 16px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                      <div style={{
-                        width: "40px",
-                        height: "40px",
+        {/* Desktop table header — hidden on mobile via CSS */}
+        <div className="admin-products-table-header" style={{ display: "grid", gridTemplateColumns: "2fr 80px 100px 100px 80px 80px 80px 120px", gap: "8px", padding: "10px 16px", borderBottom: "1px solid rgba(201,169,110,0.1)" }}>
+          {["Product", "SKU", "Category", "Price", "Stock", "Best", "Status", "Actions"].map((h) => (
+            <div key={h} style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}>
+              {h}
+            </div>
+          ))}
+        </div>
+
+        {isLoading ? (
+          <div style={{ padding: "60px", textAlign: "center", color: "rgba(255,255,255,0.3)" }}>
+            Loading products...
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div style={{ padding: "60px", textAlign: "center", color: "rgba(255,255,255,0.3)" }}>
+            No products found
+          </div>
+        ) : filteredProducts.map((product) => {
+          const isEditing = editingProduct === product.id;
+          return (
+            <div key={product.id} className="admin-product-item" style={{ borderBottom: "1px solid rgba(201,169,110,0.05)", padding: "14px 16px" }}>
+              {/* Desktop row layout */}
+              <div className="admin-products-row" style={{ display: "grid", gridTemplateColumns: "2fr 80px 100px 100px 80px 80px 80px 120px", gap: "8px", alignItems: "center" }}>
+                {/* Product Name */}
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
+                  <div style={{
+                    width: "36px",
+                    height: "36px",
+                    background: "#0F0F0F",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--gold)",
+                    fontSize: "14px",
+                    flexShrink: 0,
+                    overflow: "hidden",
+                  }}>
+                    {Array.isArray(product.images) && product.images.length > 0 ? (
+                      <img src={product.images[0]} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : "◆"}
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.8)", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{product.name}</div>
+                    {product.collection && (
+                      <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{product.collection}</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* SKU */}
+                <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)" }}>{"—"}</div>
+
+                {/* Category */}
+                <div>
+                  <span style={{
+                    padding: "3px 8px",
+                    fontSize: "9px",
+                    fontWeight: 700,
+                    letterSpacing: "1px",
+                    textTransform: "uppercase",
+                    background: "rgba(201,169,110,0.1)",
+                    color: "var(--gold)",
+                    border: "1px solid rgba(201,169,110,0.2)",
+                  }}>
+                    {product.category}
+                  </span>
+                </div>
+
+                {/* Price */}
+                <div>
+                  {isEditing ? (
+                    <input
+                      type="number"
+                      value={editValues[product.id]?.price ?? String(product.price)}
+                      onChange={(e) => setEditValues((prev) => ({
+                        ...prev,
+                        [product.id]: { ...prev[product.id], price: e.target.value },
+                      }))}
+                      style={{
+                        width: "80px",
+                        padding: "6px 8px",
                         background: "#0F0F0F",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "var(--gold)",
-                        fontSize: "16px",
-                        flexShrink: 0,
-                        overflow: "hidden",
-                      }}>
-                        {Array.isArray(product.images) && product.images.length > 0 ? (
-                          <img src={product.images[0]} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        ) : "◆"}
-                      </div>
-                      <div>
-                        <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.8)", marginBottom: "2px" }}>{product.name}</div>
-                        {product.collection && (
-                          <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)" }}>{product.collection}</div>
-                        )}
-                      </div>
-                    </div>
-                  </td>
+                        border: "1px solid rgba(201,169,110,0.4)",
+                        color: "white",
+                        fontSize: "12px",
+                        outline: "none",
+                      }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-display)" }}>
+                      {formatPrice(Number(product.price))}
+                    </span>
+                  )}
+                </div>
 
-                  {/* SKU */}
-                  <td style={{ padding: "14px 16px", fontSize: "11px", color: "rgba(255,255,255,0.3)" }}>
-                    {"—"}
-                  </td>
-
-                  {/* Category */}
-                  <td style={{ padding: "14px 16px" }}>
+                {/* Stock */}
+                <div>
+                  {isEditing ? (
+                    <input
+                      type="number"
+                      value={editValues[product.id]?.stock ?? String(product.stock)}
+                      onChange={(e) => setEditValues((prev) => ({
+                        ...prev,
+                        [product.id]: { ...prev[product.id], stock: e.target.value },
+                      }))}
+                      style={{
+                        width: "60px",
+                        padding: "6px 8px",
+                        background: "#0F0F0F",
+                        border: "1px solid rgba(201,169,110,0.4)",
+                        color: "white",
+                        fontSize: "12px",
+                        outline: "none",
+                      }}
+                    />
+                  ) : (
                     <span style={{
-                      padding: "3px 8px",
+                      fontSize: "13px",
+                      color: product.stock === 0 ? "#EF4444" : product.stock <= 5 ? "#F97316" : "rgba(255,255,255,0.7)",
+                      fontWeight: product.stock <= 5 ? 700 : 400,
+                    }}>
+                      {product.stock}
+                    </span>
+                  )}
+                </div>
+
+                {/* Bestseller */}
+                <div style={{ textAlign: "center" }}>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await updateProductMutation.mutateAsync({ id: product.id, isBestseller: !product.isBestseller });
+                        utils.admin.getAllProducts.invalidate();
+                        toast.success(product.isBestseller ? "Removed from bestsellers" : "Added to bestsellers");
+                      } catch {
+                        toast.error("Failed to update");
+                      }
+                    }}
+                    title={product.isBestseller ? "Remove from bestsellers" : "Mark as bestseller"}
+                    style={{
+                      padding: "4px 8px",
+                      background: product.isBestseller ? "rgba(201,169,110,0.15)" : "transparent",
+                      border: `1px solid ${product.isBestseller ? "rgba(201,169,110,0.5)" : "rgba(255,255,255,0.1)"}`,
+                      color: product.isBestseller ? "var(--gold)" : "rgba(255,255,255,0.25)",
+                      cursor: "pointer",
                       fontSize: "9px",
                       fontWeight: 700,
                       letterSpacing: "1px",
                       textTransform: "uppercase",
-                      background: "rgba(201,169,110,0.1)",
-                      color: "var(--gold)",
-                      border: "1px solid rgba(201,169,110,0.2)",
-                    }}>
-                      {product.category}
-                    </span>
-                  </td>
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    {product.isBestseller ? "★ Yes" : "☆ No"}
+                  </button>
+                </div>
 
-                  {/* Price */}
-                  <td style={{ padding: "14px 16px" }}>
+                {/* Status */}
+                <div>
+                  <span style={{
+                    padding: "3px 8px",
+                    fontSize: "9px",
+                    fontWeight: 700,
+                    letterSpacing: "1px",
+                    textTransform: "uppercase",
+                    background: product.isActive ? "#10B98120" : "#EF444420",
+                    color: product.isActive ? "#10B981" : "#EF4444",
+                    border: `1px solid ${product.isActive ? "#10B98140" : "#EF444440"}`,
+                  }}>
+                    {product.isActive ? "Active" : "Inactive"}
+                  </span>
+                </div>
+
+                {/* Actions */}
+                <div style={{ display: "flex", gap: "6px" }}>
+                  {isEditing ? (
+                    <>
+                      <button
+                        onClick={() => handleSaveEdit(product.id)}
+                        style={{
+                          padding: "6px 12px",
+                          background: "var(--gold)",
+                          border: "none",
+                          color: "white",
+                          fontSize: "10px",
+                          fontWeight: 700,
+                          cursor: "pointer",
+                        }}
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setEditingProduct(null)}
+                        style={{
+                          padding: "6px 10px",
+                          background: "transparent",
+                          border: "1px solid rgba(255,255,255,0.2)",
+                          color: "rgba(255,255,255,0.5)",
+                          fontSize: "10px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => {
+                          setEditingProduct(product.id);
+                          setEditValues((prev) => ({
+                            ...prev,
+                            [product.id]: { price: String(product.price), stock: String(product.stock) },
+                          }));
+                        }}
+                        title="Edit price & stock"
+                        style={{
+                          padding: "6px",
+                          background: "transparent",
+                          border: "1px solid rgba(255,255,255,0.1)",
+                          color: "rgba(255,255,255,0.5)",
+                          cursor: "pointer",
+                          minWidth: "32px",
+                          minHeight: "32px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Edit2 size={12} />
+                      </button>
+                      <button
+                        onClick={() => handleToggleActive(product.id, product.isActive ?? true)}
+                        title={product.isActive ? "Deactivate" : "Activate"}
+                        style={{
+                          padding: "6px",
+                          background: "transparent",
+                          border: "1px solid rgba(255,255,255,0.1)",
+                          color: product.isActive ? "#10B981" : "rgba(255,255,255,0.3)",
+                          cursor: "pointer",
+                          minWidth: "32px",
+                          minHeight: "32px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {product.isActive ? <Eye size={12} /> : <EyeOff size={12} />}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Mobile card layout — shown only on small screens */}
+              <div className="admin-products-card" style={{ display: "none" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>
+                  <div style={{
+                    width: "48px",
+                    height: "48px",
+                    background: "#0F0F0F",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--gold)",
+                    fontSize: "18px",
+                    flexShrink: 0,
+                    overflow: "hidden",
+                  }}>
+                    {Array.isArray(product.images) && product.images.length > 0 ? (
+                      <img src={product.images[0]} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : "◆"}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.85)", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{product.name}</div>
+                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "4px" }}>
+                      <span style={{ padding: "2px 7px", fontSize: "9px", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", background: "rgba(201,169,110,0.1)", color: "var(--gold)", border: "1px solid rgba(201,169,110,0.2)" }}>
+                        {product.category}
+                      </span>
+                      <span style={{ padding: "2px 7px", fontSize: "9px", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", background: product.isActive ? "#10B98120" : "#EF444420", color: product.isActive ? "#10B981" : "#EF4444", border: `1px solid ${product.isActive ? "#10B98140" : "#EF444440"}` }}>
+                        {product.isActive ? "Active" : "Inactive"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "10px" }}>
+                  <div style={{ background: "#0F0F0F", padding: "10px 12px" }}>
+                    <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "4px" }}>Price</div>
                     {isEditing ? (
                       <input
                         type="number"
                         value={editValues[product.id]?.price ?? String(product.price)}
-                        onChange={(e) => setEditValues((prev) => ({
-                          ...prev,
-                          [product.id]: { ...prev[product.id], price: e.target.value },
-                        }))}
-                        style={{
-                          width: "90px",
-                          padding: "6px 8px",
-                          background: "#0F0F0F",
-                          border: "1px solid rgba(201,169,110,0.4)",
-                          color: "white",
-                          fontSize: "12px",
-                          outline: "none",
-                        }}
+                        onChange={(e) => setEditValues((prev) => ({ ...prev, [product.id]: { ...prev[product.id], price: e.target.value } }))}
+                        style={{ width: "100%", padding: "6px 8px", background: "#1A1A1A", border: "1px solid rgba(201,169,110,0.4)", color: "white", fontSize: "13px", outline: "none", boxSizing: "border-box" }}
                       />
                     ) : (
-                      <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-display)" }}>
-                        {formatPrice(Number(product.price))}
-                      </span>
+                      <div style={{ fontSize: "14px", color: "rgba(255,255,255,0.85)", fontFamily: "var(--font-display)" }}>{formatPrice(Number(product.price))}</div>
                     )}
-                  </td>
-
-                  {/* Stock */}
-                  <td style={{ padding: "14px 16px" }}>
+                  </div>
+                  <div style={{ background: "#0F0F0F", padding: "10px 12px" }}>
+                    <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "4px" }}>Stock</div>
                     {isEditing ? (
                       <input
                         type="number"
                         value={editValues[product.id]?.stock ?? String(product.stock)}
-                        onChange={(e) => setEditValues((prev) => ({
-                          ...prev,
-                          [product.id]: { ...prev[product.id], stock: e.target.value },
-                        }))}
-                        style={{
-                          width: "70px",
-                          padding: "6px 8px",
-                          background: "#0F0F0F",
-                          border: "1px solid rgba(201,169,110,0.4)",
-                          color: "white",
-                          fontSize: "12px",
-                          outline: "none",
-                        }}
+                        onChange={(e) => setEditValues((prev) => ({ ...prev, [product.id]: { ...prev[product.id], stock: e.target.value } }))}
+                        style={{ width: "100%", padding: "6px 8px", background: "#1A1A1A", border: "1px solid rgba(201,169,110,0.4)", color: "white", fontSize: "13px", outline: "none", boxSizing: "border-box" }}
                       />
                     ) : (
-                      <span style={{
-                        fontSize: "13px",
-                        color: product.stock === 0 ? "#EF4444" : product.stock <= 5 ? "#F97316" : "rgba(255,255,255,0.7)",
-                        fontWeight: product.stock <= 5 ? 700 : 400,
-                      }}>
-                        {product.stock}
-                      </span>
+                      <div style={{ fontSize: "14px", color: product.stock === 0 ? "#EF4444" : product.stock <= 5 ? "#F97316" : "rgba(255,255,255,0.7)", fontWeight: product.stock <= 5 ? 700 : 400 }}>{product.stock}</div>
                     )}
-                  </td>
+                  </div>
+                </div>
 
-                  {/* Bestseller */}
-                  <td style={{ padding: "14px 16px", textAlign: "center" }}>
-                    <button
-                      onClick={async () => {
-                        try {
-                          await updateProductMutation.mutateAsync({ id: product.id, isBestseller: !product.isBestseller });
-                          utils.admin.getAllProducts.invalidate();
-                          toast.success(product.isBestseller ? "Removed from bestsellers" : "Added to bestsellers");
-                        } catch {
-                          toast.error("Failed to update");
-                        }
-                      }}
-                      title={product.isBestseller ? "Remove from bestsellers" : "Mark as bestseller"}
-                      style={{
-                        padding: "4px 10px",
-                        background: product.isBestseller ? "rgba(201,169,110,0.15)" : "transparent",
-                        border: `1px solid ${product.isBestseller ? "rgba(201,169,110,0.5)" : "rgba(255,255,255,0.1)"}`,
-                        color: product.isBestseller ? "var(--gold)" : "rgba(255,255,255,0.25)",
-                        cursor: "pointer",
-                        fontSize: "9px",
-                        fontWeight: 700,
-                        letterSpacing: "1px",
-                        textTransform: "uppercase",
-                        transition: "all 0.2s ease",
-                      }}
-                    >
-                      {product.isBestseller ? "★ Yes" : "☆ No"}
-                    </button>
-                  </td>
-
-                  {/* Status */}
-                  <td style={{ padding: "14px 16px" }}>
-                    <span style={{
-                      padding: "3px 8px",
-                      fontSize: "9px",
-                      fontWeight: 700,
-                      letterSpacing: "1px",
-                      textTransform: "uppercase",
-                      background: product.isActive ? "#10B98120" : "#EF444420",
-                      color: product.isActive ? "#10B981" : "#EF4444",
-                      border: `1px solid ${product.isActive ? "#10B98140" : "#EF444440"}`,
-                    }}>
-                      {product.isActive ? "Active" : "Inactive"}
-                    </span>
-                  </td>
-
-                  {/* Actions */}
-                  <td style={{ padding: "14px 16px" }}>
-                    <div style={{ display: "flex", gap: "8px" }}>
-                      {isEditing ? (
-                        <>
-                          <button
-                            onClick={() => handleSaveEdit(product.id)}
-                            style={{
-                              padding: "6px 12px",
-                              background: "var(--gold)",
-                              border: "none",
-                              color: "white",
-                              fontSize: "10px",
-                              fontWeight: 700,
-                              cursor: "pointer",
-                            }}
-                          >
-                            Save
-                          </button>
-                          <button
-                            onClick={() => setEditingProduct(null)}
-                            style={{
-                              padding: "6px 12px",
-                              background: "transparent",
-                              border: "1px solid rgba(255,255,255,0.2)",
-                              color: "rgba(255,255,255,0.5)",
-                              fontSize: "10px",
-                              cursor: "pointer",
-                            }}
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => {
-                              setEditingProduct(product.id);
-                              setEditValues((prev) => ({
-                                ...prev,
-                                [product.id]: { price: String(product.price), stock: String(product.stock) },
-                              }));
-                            }}
-                            title="Edit price & stock"
-                            style={{
-                              padding: "6px",
-                              background: "transparent",
-                              border: "1px solid rgba(255,255,255,0.1)",
-                              color: "rgba(255,255,255,0.5)",
-                              cursor: "pointer",
-                            }}
-                          >
-                            <Edit2 size={12} />
-                          </button>
-                          <button
-                            onClick={() => handleToggleActive(product.id, product.isActive ?? true)}
-                            title={product.isActive ? "Deactivate" : "Activate"}
-                            style={{
-                              padding: "6px",
-                              background: "transparent",
-                              border: "1px solid rgba(255,255,255,0.1)",
-                              color: product.isActive ? "#10B981" : "rgba(255,255,255,0.3)",
-                              cursor: "pointer",
-                            }}
-                          >
-                            {product.isActive ? <Eye size={12} /> : <EyeOff size={12} />}
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                  {isEditing ? (
+                    <>
+                      <button onClick={() => handleSaveEdit(product.id)} style={{ flex: 1, padding: "10px", background: "var(--gold)", border: "none", color: "white", fontSize: "11px", fontWeight: 700, cursor: "pointer", letterSpacing: "1px", textTransform: "uppercase" }}>Save</button>
+                      <button onClick={() => setEditingProduct(null)} style={{ padding: "10px 16px", background: "transparent", border: "1px solid rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.5)", fontSize: "11px", cursor: "pointer" }}>Cancel</button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => { setEditingProduct(product.id); setEditValues((prev) => ({ ...prev, [product.id]: { price: String(product.price), stock: String(product.stock) } })); }}
+                        style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 14px", background: "transparent", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.6)", fontSize: "11px", cursor: "pointer" }}
+                      >
+                        <Edit2 size={12} /> Edit
+                      </button>
+                      <button
+                        onClick={() => handleToggleActive(product.id, product.isActive ?? true)}
+                        style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 14px", background: "transparent", border: "1px solid rgba(255,255,255,0.15)", color: product.isActive ? "#10B981" : "rgba(255,255,255,0.3)", fontSize: "11px", cursor: "pointer" }}
+                      >
+                        {product.isActive ? <><Eye size={12} /> Active</> : <><EyeOff size={12} /> Inactive</>}
+                      </button>
+                      <button
+                        onClick={async () => {
+                          try {
+                            await updateProductMutation.mutateAsync({ id: product.id, isBestseller: !product.isBestseller });
+                            utils.admin.getAllProducts.invalidate();
+                            toast.success(product.isBestseller ? "Removed from bestsellers" : "Added to bestsellers");
+                          } catch { toast.error("Failed to update"); }
+                        }}
+                        style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 14px", background: product.isBestseller ? "rgba(201,169,110,0.15)" : "transparent", border: `1px solid ${product.isBestseller ? "rgba(201,169,110,0.4)" : "rgba(255,255,255,0.15)"}`, color: product.isBestseller ? "var(--gold)" : "rgba(255,255,255,0.3)", fontSize: "11px", cursor: "pointer" }}
+                      >
+                        {product.isBestseller ? "★ Bestseller" : "☆ Bestseller"}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Add Product Modal */}
@@ -465,35 +560,39 @@ export default function AdminProducts() {
         <div style={{
           position: "fixed",
           inset: 0,
-          background: "rgba(0,0,0,0.8)",
+          background: "rgba(0,0,0,0.85)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           zIndex: 1000,
+          padding: "16px",
+          boxSizing: "border-box",
         }}>
-          <div style={{
+          <div className="admin-products-modal" style={{
             background: "#1A1A1A",
             border: "1px solid rgba(201,169,110,0.2)",
-            padding: "32px",
+            padding: "28px",
             width: "600px",
-            maxHeight: "80vh",
+            maxWidth: "100%",
+            maxHeight: "90vh",
             overflowY: "auto",
+            boxSizing: "border-box",
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 300, color: "white" }}>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 300, color: "white", margin: 0 }}>
                 Add New Product
               </h2>
-              <button onClick={() => setShowAddModal(false)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: "20px" }}>×</button>
+              <button onClick={() => setShowAddModal(false)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: "24px", lineHeight: 1, padding: "4px", minWidth: "36px", minHeight: "36px" }}>×</button>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+            <div className="admin-products-modal-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
               {[
                 { label: "Product Name *", key: "name", type: "text", placeholder: "e.g. Celestial Solitaire Ring" },
                 { label: "Slug *", key: "slug", type: "text", placeholder: "e.g. celestial-solitaire-ring" },
                 { label: "Price (₹) *", key: "price", type: "number", placeholder: "e.g. 4500" },
                 { label: "Stock", key: "stock", type: "number", placeholder: "e.g. 10" },
                 { label: "Collection", key: "collection", type: "text", placeholder: "e.g. Celestial Collection" },
-                { label: "Material", key: "material", type: "text", placeholder: "e.g. 925 Sterling Silver" },
+                { label: "Material", key: "material", type: "text", placeholder: "e.g. Gold Plated" },
                 { label: "SKU", key: "sku", type: "text", placeholder: "e.g. TJG-RNG-001" },
               ].map((field) => (
                 <div key={field.key} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
@@ -510,7 +609,7 @@ export default function AdminProducts() {
                       background: "#0F0F0F",
                       border: "1px solid rgba(201,169,110,0.2)",
                       color: "rgba(255,255,255,0.7)",
-                      fontSize: "12px",
+                      fontSize: "13px",
                       outline: "none",
                     }}
                   />
@@ -529,7 +628,7 @@ export default function AdminProducts() {
                     background: "#0F0F0F",
                     border: "1px solid rgba(201,169,110,0.2)",
                     color: "rgba(255,255,255,0.7)",
-                    fontSize: "12px",
+                    fontSize: "13px",
                     outline: "none",
                   }}
                 >
@@ -554,7 +653,7 @@ export default function AdminProducts() {
                     background: "#0F0F0F",
                     border: "1px solid rgba(201,169,110,0.2)",
                     color: "rgba(255,255,255,0.7)",
-                    fontSize: "12px",
+                    fontSize: "13px",
                     outline: "none",
                     resize: "vertical",
                     fontFamily: "var(--font-body)",
@@ -568,7 +667,7 @@ export default function AdminProducts() {
                 onClick={handleCreateProduct}
                 style={{
                   flex: 1,
-                  padding: "12px",
+                  padding: "13px",
                   background: "var(--gold)",
                   border: "none",
                   color: "white",
@@ -584,7 +683,7 @@ export default function AdminProducts() {
               <button
                 onClick={() => setShowAddModal(false)}
                 style={{
-                  padding: "12px 24px",
+                  padding: "13px 20px",
                   background: "transparent",
                   border: "1px solid rgba(255,255,255,0.2)",
                   color: "rgba(255,255,255,0.5)",

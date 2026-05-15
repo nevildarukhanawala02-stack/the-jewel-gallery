@@ -259,3 +259,10 @@
 ## Admin Access Fix
 - [x] Nav "NEVIL" button should go to /admin for Manus OAuth admin users (not /account)
 - [x] Admin button on /account page should show based on Manus OAuth role, not customer login
+
+## Admin Dashboard Mobile Responsiveness
+- [x] AdminLayout: collapsible hamburger sidebar with slide-in overlay on mobile (≤768px)
+- [x] AdminDashboard: 2-column metrics grid on mobile, stacked dashboard sections
+- [x] AdminOrders: card-based order rows with expandable details, horizontal-scroll filter tabs
+- [x] AdminProducts: mobile card view (hide desktop table columns), responsive Add Product modal
+- [x] All admin pages: sticky top bar with hamburger, touch-friendly 44px+ tap targets

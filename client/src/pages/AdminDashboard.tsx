@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { getLoginUrl } from "../const";
 import { useLocation } from "wouter";
-import { Package, TrendingUp, ShoppingBag, AlertTriangle, Truck, CreditCard, Users, BarChart2, FileSpreadsheet, Upload, ImageIcon, Star } from "lucide-react";
+import { Package, TrendingUp, ShoppingBag, AlertTriangle, Truck, CreditCard, Users, BarChart2, FileSpreadsheet, Upload, ImageIcon, Star, Menu, X } from "lucide-react";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 
@@ -29,6 +29,7 @@ const STATUS_COLORS: Record<string, string> = {
 function AdminLayout({ children, title }: { children: React.ReactNode; title: string }) {
   const [location, navigate] = useLocation();
   const { logout } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const NAV_ITEMS = [
     { href: "/admin", label: "Dashboard", icon: BarChart2 },
@@ -38,22 +39,17 @@ function AdminLayout({ children, title }: { children: React.ReactNode; title: st
     { href: "/admin/celebrities", label: "Celebrities", icon: Star },
   ];
 
-  return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#0F0F0F" }}>
-      {/* Sidebar */}
-      <aside style={{
-        width: "240px",
-        background: "#1A1A1A",
-        borderRight: "1px solid rgba(201,169,110,0.15)",
+  const SidebarContent = () => (
+    <>
+      {/* Logo */}
+      <div style={{
+        padding: "28px 24px",
+        borderBottom: "1px solid rgba(201,169,110,0.15)",
         display: "flex",
-        flexDirection: "column",
-        flexShrink: 0,
+        alignItems: "center",
+        justifyContent: "space-between",
       }}>
-        {/* Logo */}
-        <div style={{
-          padding: "28px 24px",
-          borderBottom: "1px solid rgba(201,169,110,0.15)",
-        }}>
+        <div>
           <div style={{
             fontFamily: "var(--font-display)",
             fontSize: "16px",
@@ -67,100 +63,241 @@ function AdminLayout({ children, title }: { children: React.ReactNode; title: st
             Admin Console
           </div>
         </div>
+        {/* Close button — only visible on mobile */}
+        <button
+          onClick={() => setSidebarOpen(false)}
+          className="admin-sidebar-close"
+          style={{
+            background: "none",
+            border: "none",
+            color: "rgba(255,255,255,0.4)",
+            cursor: "pointer",
+            padding: "4px",
+            display: "none",
+          }}
+        >
+          <X size={20} />
+        </button>
+      </div>
 
-        {/* Nav */}
-        <nav style={{ flex: 1, padding: "16px 0" }}>
+      {/* Nav */}
+      <nav style={{ flex: 1, padding: "16px 0" }}>
+        {NAV_ITEMS.map((item) => {
+          const Icon = item.icon;
+          const isActive = location === item.href || (item.href !== "/admin" && location.startsWith(item.href));
+          return (
+            <button
+              key={item.href}
+              onClick={() => { navigate(item.href); setSidebarOpen(false); }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                width: "100%",
+                padding: "14px 24px",
+                background: isActive ? "rgba(201,169,110,0.1)" : "transparent",
+                border: "none",
+                borderLeft: `3px solid ${isActive ? "var(--gold)" : "transparent"}`,
+                color: isActive ? "var(--gold)" : "rgba(255,255,255,0.5)",
+                fontSize: "12px",
+                fontWeight: 600,
+                letterSpacing: "1px",
+                textTransform: "uppercase",
+                cursor: "pointer",
+                textAlign: "left",
+                transition: "all 0.2s ease",
+                minHeight: "48px",
+              }}
+            >
+              <Icon size={16} />
+              {item.label}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Bottom */}
+      <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(201,169,110,0.15)" }}>
+        <button
+          onClick={() => { navigate("/"); setSidebarOpen(false); }}
+          style={{
+            display: "block",
+            width: "100%",
+            padding: "10px 0",
+            background: "none",
+            border: "none",
+            color: "rgba(255,255,255,0.3)",
+            fontSize: "11px",
+            cursor: "pointer",
+            textAlign: "left",
+            marginBottom: "8px",
+          }}
+        >
+          ← View Storefront
+        </button>
+        <button
+          onClick={logout}
+          style={{
+            display: "block",
+            width: "100%",
+            padding: "10px 0",
+            background: "none",
+            border: "none",
+            color: "rgba(255,255,255,0.3)",
+            fontSize: "11px",
+            cursor: "pointer",
+            textAlign: "left",
+          }}
+        >
+          Sign Out
+        </button>
+      </div>
+    </>
+  );
+
+  return (
+    <div style={{ display: "flex", minHeight: "100vh", background: "#0F0F0F" }}>
+      {/* ── Desktop Sidebar ── */}
+      <aside className="admin-sidebar-desktop" style={{
+        width: "240px",
+        background: "#1A1A1A",
+        borderRight: "1px solid rgba(201,169,110,0.15)",
+        display: "flex",
+        flexDirection: "column",
+        flexShrink: 0,
+      }}>
+        <SidebarContent />
+      </aside>
+
+      {/* ── Mobile Sidebar Overlay ── */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.7)",
+            zIndex: 200,
+          }}
+        />
+      )}
+      <aside
+        className="admin-sidebar-mobile"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          bottom: 0,
+          width: "280px",
+          background: "#1A1A1A",
+          borderRight: "1px solid rgba(201,169,110,0.15)",
+          display: "flex",
+          flexDirection: "column",
+          zIndex: 201,
+          transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)",
+          transition: "transform 0.28s cubic-bezier(0.23,1,0.32,1)",
+        }}
+      >
+        <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid rgba(201,169,110,0.15)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "16px", fontWeight: 400, color: "white", letterSpacing: "1px" }}>
+              The Jewel <span style={{ color: "var(--gold)", fontStyle: "italic" }}>Gallery</span>
+            </div>
+            <div style={{ fontSize: "9px", fontWeight: 600, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginTop: "4px" }}>
+              Admin Console
+            </div>
+          </div>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", padding: "4px" }}
+          >
+            <X size={20} />
+          </button>
+        </div>
+        <nav style={{ flex: 1, padding: "16px 0", overflowY: "auto" }}>
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = location === item.href || (item.href !== "/admin" && location.startsWith(item.href));
             return (
               <button
                 key={item.href}
-                onClick={() => navigate(item.href)}
+                onClick={() => { navigate(item.href); setSidebarOpen(false); }}
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: "12px",
                   width: "100%",
-                  padding: "12px 24px",
+                  padding: "14px 24px",
                   background: isActive ? "rgba(201,169,110,0.1)" : "transparent",
                   border: "none",
                   borderLeft: `3px solid ${isActive ? "var(--gold)" : "transparent"}`,
                   color: isActive ? "var(--gold)" : "rgba(255,255,255,0.5)",
-                  fontSize: "12px",
+                  fontSize: "13px",
                   fontWeight: 600,
                   letterSpacing: "1px",
                   textTransform: "uppercase",
                   cursor: "pointer",
                   textAlign: "left",
-                  transition: "all 0.2s ease",
+                  minHeight: "52px",
                 }}
               >
-                <Icon size={16} />
+                <Icon size={18} />
                 {item.label}
               </button>
             );
           })}
         </nav>
-
-        {/* Bottom */}
         <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(201,169,110,0.15)" }}>
-          <button
-            onClick={() => navigate("/")}
-            style={{
-              display: "block",
-              width: "100%",
-              padding: "8px 0",
-              background: "none",
-              border: "none",
-              color: "rgba(255,255,255,0.3)",
-              fontSize: "11px",
-              cursor: "pointer",
-              textAlign: "left",
-              marginBottom: "8px",
-            }}
-          >
+          <button onClick={() => { navigate("/"); setSidebarOpen(false); }} style={{ display: "block", width: "100%", padding: "10px 0", background: "none", border: "none", color: "rgba(255,255,255,0.3)", fontSize: "12px", cursor: "pointer", textAlign: "left", marginBottom: "8px" }}>
             ← View Storefront
           </button>
-          <button
-            onClick={logout}
-            style={{
-              display: "block",
-              width: "100%",
-              padding: "8px 0",
-              background: "none",
-              border: "none",
-              color: "rgba(255,255,255,0.3)",
-              fontSize: "11px",
-              cursor: "pointer",
-              textAlign: "left",
-            }}
-          >
+          <button onClick={logout} style={{ display: "block", width: "100%", padding: "10px 0", background: "none", border: "none", color: "rgba(255,255,255,0.3)", fontSize: "12px", cursor: "pointer", textAlign: "left" }}>
             Sign Out
           </button>
         </div>
       </aside>
 
-      {/* Main */}
-      <main style={{ flex: 1, overflow: "auto" }}>
+      {/* ── Main Content ── */}
+      <main style={{ flex: 1, overflow: "auto", minWidth: 0 }}>
         {/* Top bar */}
         <div style={{
-          padding: "20px 32px",
+          padding: "0 24px",
           borderBottom: "1px solid rgba(201,169,110,0.1)",
           background: "#1A1A1A",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          height: "60px",
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
         }}>
-          <h1 style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 300, color: "white" }}>
-            {title}
-          </h1>
-          <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            {/* Hamburger — only on mobile */}
+            <button
+              className="admin-hamburger"
+              onClick={() => setSidebarOpen(true)}
+              style={{
+                background: "none",
+                border: "none",
+                color: "rgba(255,255,255,0.6)",
+                cursor: "pointer",
+                padding: "4px",
+                display: "none",
+              }}
+            >
+              <Menu size={22} />
+            </button>
+            <h1 style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 300, color: "white", margin: 0 }}>
+              {title}
+            </h1>
+          </div>
+          <div className="admin-topbar-date" style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)" }}>
             {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
           </div>
         </div>
 
-        <div style={{ padding: "32px" }}>
+        <div className="admin-content-padding" style={{ padding: "32px" }}>
           {children}
         </div>
       </main>
@@ -210,11 +347,9 @@ export default function AdminDashboard() {
   const handleHeroFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    // Preview locally
     const reader = new FileReader();
     reader.onload = (ev) => setHeroPreview(ev.target?.result as string);
     reader.readAsDataURL(file);
-    // Upload via multipart form to the storage endpoint
     setHeroUploading(true);
     try {
       const formData = new FormData();
@@ -300,12 +435,12 @@ export default function AdminDashboard() {
 
   return (
     <AdminLayout title="Operations Dashboard">
-      {/* Metric Cards */}
-      <div style={{
+      {/* Metric Cards — responsive grid */}
+      <div className="admin-metrics-grid" style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-        gap: "16px",
-        marginBottom: "32px",
+        gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+        gap: "12px",
+        marginBottom: "28px",
       }}>
         {METRIC_CARDS.map((card) => {
           const Icon = card.icon;
@@ -313,28 +448,29 @@ export default function AdminDashboard() {
             <div key={card.label} style={{
               background: "#1A1A1A",
               border: "1px solid rgba(201,169,110,0.1)",
-              padding: "20px",
+              padding: "16px",
             }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
-                <div style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "1.5px", textTransform: "uppercase", color: "rgba(255,255,255,0.4)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
+                <div style={{ fontSize: "9px", fontWeight: 600, letterSpacing: "1.5px", textTransform: "uppercase", color: "rgba(255,255,255,0.4)" }}>
                   {card.label}
                 </div>
-                <Icon size={16} color={card.color} />
+                <Icon size={14} color={card.color} />
               </div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "28px", fontWeight: 300, color: "white", marginBottom: "4px" }}>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 300, color: "white", marginBottom: "4px" }}>
                 {card.value}
               </div>
-              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)" }}>{card.sub}</div>
+              <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)" }}>{card.sub}</div>
             </div>
           );
         })}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "24px" }}>
+      {/* Recent Orders + Low Stock — stack on mobile */}
+      <div className="admin-dashboard-grid" style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: "20px", marginBottom: "28px" }}>
         {/* Recent Orders */}
-        <div style={{ background: "#1A1A1A", border: "1px solid rgba(201,169,110,0.1)" }}>
+        <div style={{ background: "#1A1A1A", border: "1px solid rgba(201,169,110,0.1)", overflow: "hidden" }}>
           <div style={{
-            padding: "16px 20px",
+            padding: "14px 18px",
             borderBottom: "1px solid rgba(201,169,110,0.1)",
             display: "flex",
             justifyContent: "space-between",
@@ -351,18 +487,19 @@ export default function AdminDashboard() {
             </button>
           </div>
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "480px" }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid rgba(201,169,110,0.08)" }}>
                   {["Order", "Customer", "Amount", "Status", "Action"].map((h) => (
                     <th key={h} style={{
-                      padding: "10px 16px",
+                      padding: "10px 14px",
                       textAlign: "left",
                       fontSize: "9px",
                       fontWeight: 700,
                       letterSpacing: "1.5px",
                       textTransform: "uppercase",
                       color: "rgba(255,255,255,0.3)",
+                      whiteSpace: "nowrap",
                     }}>
                       {h}
                     </th>
@@ -372,16 +509,16 @@ export default function AdminDashboard() {
               <tbody>
                 {recentOrders && recentOrders.length > 0 ? recentOrders.map((order) => (
                   <tr key={order.id} style={{ borderBottom: "1px solid rgba(201,169,110,0.05)" }}>
-                    <td style={{ padding: "12px 16px", fontSize: "12px", color: "var(--gold)", fontFamily: "var(--font-body)" }}>
+                    <td style={{ padding: "10px 14px", fontSize: "12px", color: "var(--gold)", fontFamily: "var(--font-body)", whiteSpace: "nowrap" }}>
                       {order.orderNumber}
                     </td>
-                    <td style={{ padding: "12px 16px", fontSize: "12px", color: "rgba(255,255,255,0.7)" }}>
+                    <td style={{ padding: "10px 14px", fontSize: "12px", color: "rgba(255,255,255,0.7)", whiteSpace: "nowrap" }}>
                       {order.customerName ?? "Guest"}
                     </td>
-                    <td style={{ padding: "12px 16px", fontSize: "12px", color: "rgba(255,255,255,0.7)" }}>
+                    <td style={{ padding: "10px 14px", fontSize: "12px", color: "rgba(255,255,255,0.7)", whiteSpace: "nowrap" }}>
                       {formatPrice(Number(order.totalAmount))}
                     </td>
-                    <td style={{ padding: "12px 16px" }}>
+                    <td style={{ padding: "10px 14px" }}>
                       <span style={{
                         padding: "3px 8px",
                         fontSize: "9px",
@@ -391,11 +528,12 @@ export default function AdminDashboard() {
                         background: `${STATUS_COLORS[order.deliveryStatus ?? "pending"]}20`,
                         color: STATUS_COLORS[order.deliveryStatus ?? "pending"],
                         border: `1px solid ${STATUS_COLORS[order.deliveryStatus ?? "pending"]}40`,
+                        whiteSpace: "nowrap",
                       }}>
                         {STATUS_LABELS[order.deliveryStatus ?? "pending"]}
                       </span>
                     </td>
-                    <td style={{ padding: "12px 16px" }}>
+                    <td style={{ padding: "10px 14px" }}>
                       <select
                         style={{
                           background: "#0F0F0F",
@@ -435,7 +573,7 @@ export default function AdminDashboard() {
         {/* Low Stock Alerts */}
         <div style={{ background: "#1A1A1A", border: "1px solid rgba(201,169,110,0.1)", height: "fit-content" }}>
           <div style={{
-            padding: "16px 20px",
+            padding: "14px 18px",
             borderBottom: "1px solid rgba(201,169,110,0.1)",
             display: "flex",
             justifyContent: "space-between",
@@ -449,14 +587,15 @@ export default function AdminDashboard() {
           <div>
             {lowStockProducts && lowStockProducts.length > 0 ? lowStockProducts.map((p) => (
               <div key={p.id} style={{
-                padding: "12px 20px",
+                padding: "12px 18px",
                 borderBottom: "1px solid rgba(201,169,110,0.05)",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
+                gap: "8px",
               }}>
-                <div>
-                  <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)", marginBottom: "2px" }}>{p.name}</div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
                   <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)" }}>{"—"}</div>
                 </div>
                 <span style={{
@@ -466,12 +605,14 @@ export default function AdminDashboard() {
                   background: p.stock === 0 ? "#EF444420" : "#F9731620",
                   color: p.stock === 0 ? "#EF4444" : "#F97316",
                   border: `1px solid ${p.stock === 0 ? "#EF444440" : "#F9731640"}`,
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
                 }}>
                   {p.stock === 0 ? "Out of Stock" : `${p.stock} left`}
                 </span>
               </div>
             )) : (
-              <div style={{ padding: "32px 20px", textAlign: "center", color: "rgba(255,255,255,0.2)", fontSize: "12px" }}>
+              <div style={{ padding: "32px 18px", textAlign: "center", color: "rgba(255,255,255,0.2)", fontSize: "12px" }}>
                 All products well-stocked
               </div>
             )}
@@ -484,8 +625,8 @@ export default function AdminDashboard() {
         background: "#1A1A1A",
         border: "1px solid rgba(201,169,110,0.15)",
         borderRadius: "4px",
-        padding: "28px",
-        marginTop: "32px",
+        padding: "24px",
+        marginBottom: "24px",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
           <ImageIcon size={16} color="var(--gold)" />
@@ -493,8 +634,7 @@ export default function AdminDashboard() {
             Homepage Hero Image
           </h3>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", alignItems: "start" }}>
-          {/* Current image preview */}
+        <div className="admin-hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", alignItems: "start" }}>
           <div>
             <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "10px" }}>Current Image</div>
             <div style={{ width: "100%", aspectRatio: "16/9", background: "#111", borderRadius: "4px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)" }}>
@@ -505,7 +645,6 @@ export default function AdminDashboard() {
               />
             </div>
           </div>
-          {/* Upload control */}
           <div>
             <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "10px" }}>Upload New Image</div>
             <input
@@ -541,18 +680,18 @@ export default function AdminDashboard() {
               {heroUploading ? "Uploading..." : "Choose Image File"}
             </button>
             <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)", marginTop: "10px", lineHeight: 1.6 }}>
-              Recommended: 1920×1080px or wider, JPEG/WebP format. The image will be displayed as the right-side panel of the homepage hero section.
+              Recommended: 1920×1080px or wider, JPEG/WebP format.
             </p>
           </div>
         </div>
       </div>
+
       {/* Migrate Product Images */}
       <div style={{
         background: "#1A1A1A",
         border: "1px solid rgba(201,169,110,0.15)",
         borderRadius: "4px",
-        padding: "28px",
-        marginTop: "32px",
+        padding: "24px",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
           <ImageIcon size={16} color="var(--gold)" />
