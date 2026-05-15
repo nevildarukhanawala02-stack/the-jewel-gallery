@@ -52,11 +52,6 @@ const BRAND_PILLARS = [
     desc: "Every piece is shaped by hand in our Mumbai atelier, where master artisans trained in generations-old techniques bring each design to life.",
   },
   {
-    icon: "✦",
-    title: "Hallmarked Integrity",
-    desc: "We use only BIS-hallmarked sterling silver and 18K gold, paired with certified gemstones — because trust is the foundation of every heirloom.",
-  },
-  {
     icon: "❋",
     title: "Celebrity Endorsed",
     desc: "Worn by 200+ celebrities and style icons across India, our pieces have graced red carpets, award shows, and editorial spreads.",
@@ -101,8 +96,7 @@ export default function OurStory() {
           maxWidth: "620px",
           margin: "0 auto",
         }}>
-          At The Jewel Gallery, we believe that a piece of jewellery is never merely an accessory — it is a declaration.
-          Founded in 2014 in the heart of Mumbai, we have spent over a decade perfecting the art of translating emotion into metal and stone.
+          At The Jewel Gallery, we believe that a piece of jewellery is never merely an accessory — it is a declaration. Founded in 2014 in the heart of Mumbai, we have spent over a decade perfecting the art of translating emotion into design and form.
         </p>
       </section>
 
@@ -158,10 +152,10 @@ export default function OurStory() {
             The Jewel Gallery was born from a simple but powerful belief: that every woman deserves to wear jewellery that feels like it was made for her — not mass-produced for the masses, but crafted with intention, precision, and love.
           </p>
           <p style={{ fontSize: "14px", color: "var(--text-muted)", lineHeight: 1.9, marginBottom: "20px" }}>
-            Our founder, inspired by the rich tradition of Indian jewellery-making and the vibrant energy of Mumbai's jewellery bazaars, set out to create a brand that bridges heritage craftsmanship with contemporary design sensibility.
+            Our founder, inspired by the rich tradition of Indian jewellery-making and the vibrant energy of Mumbai's creative scene, set out to create a brand that bridges artistic craftsmanship with contemporary design sensibility.
           </p>
           <p style={{ fontSize: "14px", color: "var(--text-muted)", lineHeight: 1.9 }}>
-            Today, with over 2,400 pieces crafted, 18 collections launched, and jewellery worn by 200+ celebrities and style icons, The Jewel Gallery stands as a testament to what happens when devotion meets craft.
+            Today, with over 2,400 pieces crafted, 18 collections launched, and jewellery worn by 200+ celebrities and style icons, The Jewel Gallery stands as a testament to what happens when artistic vision meets devotion.
           </p>
         </div>
       </section>
