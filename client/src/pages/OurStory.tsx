@@ -1,5 +1,6 @@
 import StorefrontLayout from "@/components/StorefrontLayout";
 import { useLocation } from "wouter";
+import { useState, useEffect, useRef } from "react";
 
 const CELEBRITIES = [
   {
@@ -39,10 +40,10 @@ const CELEBRITIES = [
   },
 ];
 
-const STORE_IMAGES = [
-  "/manus-storage/26645fd1-22b1-4c2a-81a0-216a90951a19_14da8fd8.jpg",
-  "/manus-storage/2a5948fc-1ebb-4d8c-b7a1-ec3f922242e9_383065c3.jpg",
-  "/manus-storage/9e0b2ca6-6e2c-494f-96a6-a420ad039ffb_133a30ec.jpg",
+const STORY_CAROUSEL_IMAGES = [
+  { src: "/manus-storage/jewel-necklace-set_284826f4.jpeg", alt: "Lakshmi necklace set with jhumka earrings" },
+  { src: "/manus-storage/jewel-pendant-closeup_59672be1.jpeg", alt: "Lakshmi pendant closeup — intricate gold craftsmanship" },
+  { src: "/manus-storage/jewel-earrings_ac342940.jpeg", alt: "Lakshmi jhumka earrings with emerald beads" },
 ];
 
 const BRAND_PILLARS = [
@@ -62,6 +63,92 @@ const BRAND_PILLARS = [
     desc: "We stand behind every piece with complimentary lifetime servicing — because jewellery that lasts a lifetime deserves care that does too.",
   },
 ];
+
+function StoryCarousel() {
+  const [active, setActive] = useState(0);
+  const [animating, setAnimating] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const goTo = (idx: number) => {
+    if (animating) return;
+    setAnimating(true);
+    setTimeout(() => {
+      setActive(idx);
+      setAnimating(false);
+    }, 400);
+  };
+
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setActive((prev) => (prev + 1) % STORY_CAROUSEL_IMAGES.length);
+    }, 3500);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, []);
+
+  return (
+    <div style={{ position: "relative", overflow: "hidden", minHeight: "420px", background: "#f5f0ea" }}>
+      {STORY_CAROUSEL_IMAGES.map((img, i) => (
+        <img
+          key={img.src}
+          src={img.src}
+          alt={img.alt}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center",
+            opacity: i === active ? 1 : 0,
+            transition: "opacity 0.7s cubic-bezier(0.23,1,0.32,1)",
+            display: "block",
+          }}
+        />
+      ))}
+      {/* Badge */}
+      <div style={{
+        position: "absolute",
+        bottom: "24px",
+        left: "24px",
+        background: "var(--ivory)",
+        padding: "16px 24px",
+        borderLeft: "3px solid var(--gold)",
+        zIndex: 2,
+      }}>
+        <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "var(--gold)", marginBottom: "4px" }}>Since 2014</div>
+        <div style={{ fontFamily: "var(--font-heading)", fontSize: "18px", color: "var(--text-dark)" }}>Handcrafted in India</div>
+      </div>
+      {/* Dot indicators */}
+      <div style={{
+        position: "absolute",
+        bottom: "24px",
+        right: "16px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "8px",
+        zIndex: 2,
+      }}>
+        {STORY_CAROUSEL_IMAGES.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => goTo(i)}
+            aria-label={`View image ${i + 1}`}
+            style={{
+              width: i === active ? "8px" : "6px",
+              height: i === active ? "24px" : "6px",
+              borderRadius: i === active ? "4px" : "50%",
+              background: i === active ? "var(--gold)" : "rgba(255,255,255,0.6)",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
+              transition: "all 0.3s ease",
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function OurStory() {
   const [, navigate] = useLocation();
@@ -109,25 +196,8 @@ export default function OurStory() {
       }}
         className="story-origin-grid"
       >
-        {/* Image */}
-        <div style={{ position: "relative", overflow: "hidden", minHeight: "420px" }}>
-          <img
-            src={STORE_IMAGES[0]}
-            alt="The Jewel Gallery store"
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-          />
-          <div style={{
-            position: "absolute",
-            bottom: "24px",
-            left: "24px",
-            background: "var(--ivory)",
-            padding: "16px 24px",
-            borderLeft: "3px solid var(--gold)",
-          }}>
-            <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "var(--gold)", marginBottom: "4px" }}>Since 2014</div>
-            <div style={{ fontFamily: "var(--font-heading)", fontSize: "18px", color: "var(--text-dark)" }}>Handcrafted in India</div>
-          </div>
-        </div>
+        {/* Jewellery Carousel */}
+        <StoryCarousel />
 
         {/* Text */}
         <div style={{
@@ -398,7 +468,7 @@ export default function OurStory() {
           }}>
             <div style={{ height: "280px", overflow: "hidden" }}>
               <img
-                src={STORE_IMAGES[1]}
+                src="/manus-storage/2a5948fc-1ebb-4d8c-b7a1-ec3f922242e9_383065c3.jpg"
                 alt="The Jewel Gallery — Lokhandwala Market, Mumbai"
                 style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.6s ease" }}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1.04)"; }}
@@ -455,7 +525,7 @@ export default function OurStory() {
           }}>
             <div style={{ height: "280px", overflow: "hidden" }}>
               <img
-                src={STORE_IMAGES[2]}
+                src="/manus-storage/9e0b2ca6-6e2c-494f-96a6-a420ad039ffb_133a30ec.jpg"
                 alt="The Jewel Gallery — InOrbit Mall, Hyderabad"
                 style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.6s ease" }}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1.04)"; }}
