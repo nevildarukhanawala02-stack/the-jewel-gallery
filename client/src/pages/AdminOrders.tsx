@@ -53,12 +53,23 @@ export default function AdminOrders() {
   }
 
   if (!user) {
+    const loginUrl = (() => {
+      const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
+      const appId = import.meta.env.VITE_APP_ID;
+      const redirectUri = `${window.location.origin}/api/oauth/callback`;
+      const state = btoa(`${redirectUri}?returnPath=/admin/orders`);
+      const url = new URL(`${oauthPortalUrl}/app-auth`);
+      url.searchParams.set("appId", appId);
+      url.searchParams.set("state", state);
+      return url.toString();
+    })();
     return (
       <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "100vh", background: "#0F0F0F", gap: "24px" }}>
         <div style={{ color: "var(--gold)", fontSize: "48px" }}>◆</div>
         <h2 style={{ color: "#fff", fontFamily: "var(--font-serif)", fontSize: "24px", margin: 0 }}>Session Expired</h2>
-        <p style={{ color: "#aaa", fontSize: "14px", margin: 0, textAlign: "center", maxWidth: "320px" }}>Your session has expired. Please sign out and sign back in.</p>
-        <a href="/" style={{ background: "var(--gold)", color: "#0F0F0F", padding: "12px 32px", borderRadius: "4px", textDecoration: "none", fontWeight: 600, fontSize: "13px", letterSpacing: "0.1em" }}>GO TO HOMEPAGE</a>
+        <p style={{ color: "#aaa", fontSize: "14px", margin: 0, textAlign: "center", maxWidth: "320px" }}>Your session has expired. Please sign in again.</p>
+        <a href={loginUrl} style={{ background: "var(--gold)", color: "#0F0F0F", padding: "12px 32px", borderRadius: "4px", textDecoration: "none", fontWeight: 600, fontSize: "13px", letterSpacing: "0.1em" }}>SIGN IN</a>
+        <a href="/" style={{ color: "#aaa", fontSize: "13px", textDecoration: "none" }}>Go to Homepage</a>
       </div>
     );
   }
