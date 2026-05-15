@@ -291,3 +291,19 @@
 - [x] Add tRPC products.imagesByIds procedure to fetch fresh image URLs for cart items
 - [x] Add getProductsByIds DB helper with inArray query
 - [x] Cart images confirmed working on live site — stale localStorage was the root cause, resolved by re-adding items
+
+## Admin Theme — White/Cream Rework
+- [ ] Replace dark admin sidebar with white/cream background and dark text
+- [ ] Replace dark admin layout/content area with cream/white background
+- [ ] Retheme all admin KPI cards, tables, modals to light palette
+- [ ] Retheme CEO Command Centre (Pulse Bar, charts, alerts) to light palette
+
+## Admin Theme — White/Cream Retheme
+- [x] AdminLayout sidebar: white background, charcoal text, linen-dark borders, gold active state
+- [x] AdminLayout topbar: white background, dark title and nav items
+- [x] AdminDashboard: white metric cards, white order/low-stock panels, linen table headers
+- [x] AdminOrders: white cards, linen filter tabs, dark text throughout
+- [x] AdminProducts: white cards, linen category tabs, dark text, linen borders on buttons
+- [x] AdminCEO: white/cream topbar, white chart tooltips, linen card backgrounds
+- [x] CEO Alerts sidebar: white background, dark text
+- [x] All dark rgba(255,255,255,*) and #1A1A1A/#0F0F0F references replaced with CSS variables

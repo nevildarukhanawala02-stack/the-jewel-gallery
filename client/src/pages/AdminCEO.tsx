@@ -267,7 +267,7 @@ export default function AdminCEO() {
                       <Tooltip
                         formatter={(v: number) => [fmt(v), "Revenue"]}
                         labelFormatter={l => new Date(l).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
-                        contentStyle={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 6, fontSize: 12 }}
+                        contentStyle={{ background: "#fff", border: "1px solid var(--linen-dark)", borderRadius: 6, fontSize: 12, color: "var(--text-dark)" }}
                       />
                       <Bar dataKey="revenue" fill="#C9A96E" radius={[3, 3, 0, 0]} />
                     </BarChart>
@@ -301,7 +301,7 @@ export default function AdminCEO() {
                       </Pie>
                       <Tooltip
                         formatter={(v: number) => [fmt(v), "Revenue"]}
-                        contentStyle={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 6, fontSize: 12 }}
+                        contentStyle={{ background: "#fff", border: "1px solid var(--linen-dark)", borderRadius: 6, fontSize: 12, color: "var(--text-dark)" }}
                       />
                       <Legend
                         iconType="circle"

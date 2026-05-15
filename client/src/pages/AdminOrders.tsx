@@ -47,7 +47,7 @@ export default function AdminOrders() {
 
   if (loading) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", background: "#0F0F0F" }}>
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", background: "#F8F5F0" }}>
         <div style={{ color: "var(--gold)", fontSize: "24px" }}>◆</div>
       </div>
     );
@@ -55,11 +55,11 @@ export default function AdminOrders() {
 
   if (!user) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "100vh", background: "#0F0F0F", gap: "24px" }}>
+      <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "100vh", background: "#F8F5F0", gap: "24px" }}>
         <div style={{ color: "var(--gold)", fontSize: "48px" }}>◆</div>
-        <h2 style={{ color: "#fff", fontFamily: "var(--font-serif)", fontSize: "24px", margin: 0 }}>Session Expired</h2>
+        <h2 style={{ color: "var(--text-dark)", fontFamily: "var(--font-serif)", fontSize: "24px", margin: 0 }}>Session Expired</h2>
         <p style={{ color: "#aaa", fontSize: "14px", margin: 0, textAlign: "center", maxWidth: "320px" }}>Your session has expired. Please sign in again.</p>
-        <a href={getLoginUrl("/admin/orders")} style={{ background: "var(--gold)", color: "#0F0F0F", padding: "12px 32px", borderRadius: "4px", textDecoration: "none", fontWeight: 600, fontSize: "13px", letterSpacing: "0.1em" }}>SIGN IN</a>
+        <a href={getLoginUrl("/admin/orders")} style={{ background: "var(--gold)", color: "#fff", padding: "12px 32px", borderRadius: "4px", textDecoration: "none", fontWeight: 600, fontSize: "13px", letterSpacing: "0.1em" }}>SIGN IN</a>
         <a href="/" style={{ color: "#aaa", fontSize: "13px", textDecoration: "none" }}>Go to Homepage</a>
       </div>
     );
@@ -113,7 +113,7 @@ export default function AdminOrders() {
       <div style={{ marginBottom: "20px" }}>
         {/* Search */}
         <div style={{ position: "relative", marginBottom: "12px" }}>
-          <Search size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.3)" }} />
+          <Search size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
           <input
             type="text"
             placeholder="Search by order number, customer..."
@@ -122,9 +122,9 @@ export default function AdminOrders() {
             style={{
               width: "100%",
               padding: "11px 12px 11px 36px",
-              background: "#1A1A1A",
+              background: "#fff",
               border: "1px solid rgba(201,169,110,0.2)",
-              color: "rgba(255,255,255,0.7)",
+              color: "var(--text-dark)",
               fontSize: "13px",
               outline: "none",
               boxSizing: "border-box",
@@ -145,8 +145,8 @@ export default function AdminOrders() {
                 letterSpacing: "1px",
                 textTransform: "uppercase",
                 background: statusFilter === opt.value ? "rgba(201,169,110,0.15)" : "transparent",
-                border: `1px solid ${statusFilter === opt.value ? "var(--gold)" : "rgba(255,255,255,0.1)"}`,
-                color: statusFilter === opt.value ? "var(--gold)" : "rgba(255,255,255,0.4)",
+                border: `1px solid ${statusFilter === opt.value ? "var(--gold)" : "var(--linen-dark)"}`,
+                color: statusFilter === opt.value ? "var(--gold)" : "var(--text-muted)",
                 cursor: "pointer",
                 transition: "all 0.2s ease",
                 whiteSpace: "nowrap",
@@ -157,25 +157,25 @@ export default function AdminOrders() {
               {opt.label}
             </button>
           ))}
-          <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)", display: "flex", alignItems: "center", paddingLeft: "8px", whiteSpace: "nowrap", flexShrink: 0 }}>
+          <div style={{ fontSize: "11px", color: "var(--text-muted)", display: "flex", alignItems: "center", paddingLeft: "8px", whiteSpace: "nowrap", flexShrink: 0 }}>
             {filteredOrders.length} order{filteredOrders.length !== 1 ? "s" : ""}
           </div>
         </div>
       </div>
 
       {/* Orders List */}
-      <div style={{ background: "#1A1A1A", border: "1px solid rgba(201,169,110,0.1)" }}>
+      <div style={{ background: "#fff", border: "1px solid var(--linen-dark)" }}>
         {isLoading ? (
-          <div style={{ padding: "60px", textAlign: "center", color: "rgba(255,255,255,0.3)" }}>
+          <div style={{ padding: "60px", textAlign: "center", color: "var(--text-muted)" }}>
             Loading orders...
           </div>
         ) : filteredOrders.length === 0 ? (
-          <div style={{ padding: "60px", textAlign: "center", color: "rgba(255,255,255,0.3)" }}>
+          <div style={{ padding: "60px", textAlign: "center", color: "var(--text-muted)" }}>
             No orders found
           </div>
         ) : (
           filteredOrders.map((order) => (
-            <div key={order.id} style={{ borderBottom: "1px solid rgba(201,169,110,0.05)" }}>
+            <div key={order.id} style={{ borderBottom: "1px solid var(--linen-dark)" }}>
               {/* Order Row — card layout on mobile, grid on desktop */}
               <div
                 className="admin-order-row"
@@ -194,11 +194,11 @@ export default function AdminOrders() {
                     <div style={{ fontSize: "14px", color: "var(--gold)", fontFamily: "var(--font-body)", marginBottom: "2px" }}>
                       {order.orderNumber}
                     </div>
-                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)" }}>
+                    <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>
                       {new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                     </div>
                   </div>
-                  <div style={{ color: "rgba(255,255,255,0.3)", flexShrink: 0 }}>
+                  <div style={{ color: "var(--text-muted)", flexShrink: 0 }}>
                     {expandedOrder === order.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </div>
                 </div>
@@ -206,14 +206,14 @@ export default function AdminOrders() {
                 {/* Middle line: customer + amount */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px" }}>
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.75)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <div style={{ fontSize: "13px", color: "var(--text-dark)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {order.customerName ?? "Guest"}
                     </div>
-                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <div style={{ fontSize: "11px", color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {order.customerEmail ?? ""}
                     </div>
                   </div>
-                  <div style={{ fontSize: "14px", color: "rgba(255,255,255,0.85)", fontFamily: "var(--font-display)", flexShrink: 0 }}>
+                  <div style={{ fontSize: "14px", color: "var(--text-dark)", fontFamily: "var(--font-display)", flexShrink: 0 }}>
                     {formatPrice(Number(order.totalAmount))}
                   </div>
                 </div>
@@ -235,9 +235,9 @@ export default function AdminOrders() {
                   </span>
                   <select
                     style={{
-                      background: "#0F0F0F",
+                      background: "#F8F5F0",
                       border: "1px solid rgba(201,169,110,0.2)",
-                      color: "rgba(255,255,255,0.6)",
+                      color: "var(--text-muted)",
                       fontSize: "11px",
                       padding: "6px 8px",
                       cursor: "pointer",
@@ -263,17 +263,17 @@ export default function AdminOrders() {
               {expandedOrder === order.id && (
                 <div style={{
                   padding: "20px 18px",
-                  background: "#0F0F0F",
+                  background: "#F8F5F0",
                   borderTop: "1px solid rgba(201,169,110,0.08)",
                 }}>
                   <div className="admin-orders-expanded" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "20px" }}>
                     {/* Shipping Address */}
                     <div>
-                      <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: "12px" }}>
+                      <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "12px" }}>
                         Delivery Address
                       </div>
                       {order.shippingAddress ? (
-                        <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)", lineHeight: 1.7 }}>
+                        <div style={{ fontSize: "12px", color: "var(--text-muted)", lineHeight: 1.7 }}>
                           {typeof order.shippingAddress === "object" && (
                             <>
                               <div>{(order.shippingAddress as Record<string, string>).firstName} {(order.shippingAddress as Record<string, string>).lastName}</div>
@@ -285,17 +285,17 @@ export default function AdminOrders() {
                           )}
                         </div>
                       ) : (
-                        <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.3)" }}>No address on file</div>
+                        <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>No address on file</div>
                       )}
                     </div>
 
                     {/* Tracking */}
                     <div>
-                      <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: "12px" }}>
+                      <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "12px" }}>
                         Tracking Information
                       </div>
                       {order.trackingNumber ? (
-                        <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)", marginBottom: "12px" }}>
+                        <div style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "12px" }}>
                           <div>Tracking: <span style={{ color: "var(--gold)" }}>{order.trackingNumber}</span></div>
                           {order.courierName && <div>Courier: {order.courierName}</div>}
                         </div>
@@ -311,9 +311,9 @@ export default function AdminOrders() {
                           }))}
                           style={{
                             padding: "9px 12px",
-                            background: "#1A1A1A",
+                            background: "#fff",
                             border: "1px solid rgba(201,169,110,0.2)",
-                            color: "rgba(255,255,255,0.7)",
+                            color: "var(--text-dark)",
                             fontSize: "12px",
                             outline: "none",
                           }}
@@ -328,9 +328,9 @@ export default function AdminOrders() {
                           }))}
                           style={{
                             padding: "9px 12px",
-                            background: "#1A1A1A",
+                            background: "#fff",
                             border: "1px solid rgba(201,169,110,0.2)",
-                            color: "rgba(255,255,255,0.7)",
+                            color: "var(--text-dark)",
                             fontSize: "12px",
                             outline: "none",
                           }}
@@ -356,10 +356,10 @@ export default function AdminOrders() {
 
                     {/* Payment */}
                     <div>
-                      <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: "12px" }}>
+                      <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "12px" }}>
                         Payment Details
                       </div>
-                      <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)", lineHeight: 1.8 }}>
+                      <div style={{ fontSize: "12px", color: "var(--text-muted)", lineHeight: 1.8 }}>
                         <div>Method: {order.paymentMethod ?? "Razorpay"}</div>
                         <div>Status: <span style={{ color: order.paymentStatus === "paid" ? "#10B981" : "#F59E0B" }}>{order.paymentStatus ?? "pending"}</span></div>
                         {order.razorpayPaymentId && (
@@ -371,7 +371,7 @@ export default function AdminOrders() {
                           <div>Subtotal: {formatPrice(Number(order.subtotalAmount ?? 0))}</div>
                           <div>Shipping: {formatPrice(Number(order.shippingCost ?? 0))}</div>
                           <div>GST: {formatPrice(Number(order.gstAmount ?? 0))}</div>
-                          <div style={{ fontWeight: 700, color: "white", marginTop: "4px" }}>
+                          <div style={{ fontWeight: 700, color: "var(--text-dark)", marginTop: "4px" }}>
                             Total: {formatPrice(Number(order.totalAmount))}
                           </div>
                         </div>
