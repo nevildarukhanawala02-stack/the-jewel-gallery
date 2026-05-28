@@ -1095,3 +1095,67 @@ export async function getCeoAlerts() {
 
   return alerts;
 }
+
+// ── Full product update (admin editor) ───────────────────────────────────────
+export async function updateProductFull(id: number, data: {
+  name?: string;
+  slug?: string;
+  sku?: string;
+  category?: "rings" | "necklaces" | "earrings" | "bracelets";
+  collection?: string;
+  subcategory?: string;
+  description?: string;
+  shortDescription?: string;
+  price?: number;
+  comparePrice?: number;
+  stock?: number;
+  material?: string;
+  gemstone?: string;
+  weight?: string;
+  dimensions?: string;
+  isFeatured?: boolean;
+  isNewArrival?: boolean;
+  isBestseller?: boolean;
+  isActive?: boolean;
+  part1Headline?: string;
+  part2WhatsInside?: string;
+  part3AsWorn?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  images?: string[];
+  imageTypes?: Array<"product" | "model" | "lifestyle">;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const updateData: Record<string, unknown> = {};
+  if (data.name !== undefined) updateData.name = data.name;
+  if (data.slug !== undefined) updateData.slug = data.slug;
+  if (data.sku !== undefined) updateData.sku = data.sku;
+  if (data.category !== undefined) updateData.category = data.category;
+  if (data.collection !== undefined) updateData.collection = data.collection;
+  if (data.subcategory !== undefined) updateData.subcategory = data.subcategory;
+  if (data.description !== undefined) updateData.description = data.description;
+  if (data.shortDescription !== undefined) updateData.shortDescription = data.shortDescription;
+  if (data.price !== undefined) updateData.price = String(data.price);
+  if (data.comparePrice !== undefined) updateData.comparePrice = String(data.comparePrice);
+  if (data.stock !== undefined) updateData.stock = data.stock;
+  if (data.material !== undefined) updateData.material = data.material;
+  if (data.gemstone !== undefined) updateData.gemstone = data.gemstone;
+  if (data.weight !== undefined) updateData.weight = data.weight;
+  if (data.dimensions !== undefined) updateData.dimensions = data.dimensions;
+  if (data.isFeatured !== undefined) updateData.isFeatured = data.isFeatured;
+  if (data.isNewArrival !== undefined) updateData.isNewArrival = data.isNewArrival;
+  if (data.isBestseller !== undefined) updateData.isBestseller = data.isBestseller;
+  if (data.isActive !== undefined) updateData.isActive = data.isActive;
+  if (data.part1Headline !== undefined) updateData.part1Headline = data.part1Headline;
+  if (data.part2WhatsInside !== undefined) updateData.part2WhatsInside = data.part2WhatsInside;
+  if (data.part3AsWorn !== undefined) updateData.part3AsWorn = data.part3AsWorn;
+  if (data.metaTitle !== undefined) updateData.metaTitle = data.metaTitle;
+  if (data.metaDescription !== undefined) updateData.metaDescription = data.metaDescription;
+  if (data.images !== undefined) updateData.images = JSON.stringify(data.images);
+  if (data.imageTypes !== undefined) updateData.imageTypes = JSON.stringify(data.imageTypes);
+  if (Object.keys(updateData).length > 0) {
+    await db.update(products).set(updateData).where(eq(products.id, id));
+  }
+  return { success: true };
+}

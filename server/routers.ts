@@ -35,6 +35,7 @@ import {
   updateOrderStatus,
   updateOrderTracking,
   updateProduct,
+  updateProductFull,
   decrementProductStock,
   getExistingSkus,
   bulkImportSkus,
@@ -649,7 +650,57 @@ const adminRouter = router({
       };
     }),
 
-  /** Return recent import logs */
+  updateProductFull: adminProcedure
+    .input(z.object({
+      id: z.number(),
+      name: z.string().optional(),
+      slug: z.string().optional(),
+      sku: z.string().optional(),
+      category: z.enum(["rings", "necklaces", "earrings", "bracelets"]).optional(),
+      collection: z.string().optional(),
+      subcategory: z.string().optional(),
+      description: z.string().optional(),
+      shortDescription: z.string().optional(),
+      price: z.number().optional(),
+      comparePrice: z.number().optional(),
+      stock: z.number().optional(),
+      material: z.string().optional(),
+      gemstone: z.string().optional(),
+      weight: z.string().optional(),
+      dimensions: z.string().optional(),
+      isFeatured: z.boolean().optional(),
+      isNewArrival: z.boolean().optional(),
+      isBestseller: z.boolean().optional(),
+      isActive: z.boolean().optional(),
+      part1Headline: z.string().optional(),
+      part2WhatsInside: z.string().optional(),
+      part3AsWorn: z.string().optional(),
+      metaTitle: z.string().optional(),
+      metaDescription: z.string().optional(),
+      images: z.array(z.string()).optional(),
+      imageTypes: z.array(z.enum(["product", "model", "lifestyle"])).optional(),
+    }))
+    .mutation(async ({ input }) => {
+      const { id, ...data } = input;
+      return updateProductFull(id, data);
+    }),
+
+  uploadProductImage: adminProcedure
+    .input(z.object({
+      productId: z.number(),
+      base64: z.string(),
+      mimeType: z.string().default("image/jpeg"),
+      filename: z.string().default("product-image.jpg"),
+    }))
+    .mutation(async ({ input }) => {
+      const { storagePut } = await import("./storage");
+      const buffer = Buffer.from(input.base64, "base64");
+      const ext = input.mimeType.split("/")[1]?.replace("jpeg", "jpg") ?? "jpg";
+      const key = `products/${input.productId}/${Date.now()}-${input.filename.replace(/[^a-zA-Z0-9._-]/g, "_")}.${ext}`;
+      const { url } = await storagePut(key, buffer, input.mimeType);
+      return { url };
+    }),
+
   getSkuImportLogs: adminProcedure
     .input(z.object({ limit: z.number().optional() }))
     .query(async ({ input }) => {

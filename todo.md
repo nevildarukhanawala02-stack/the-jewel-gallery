@@ -307,3 +307,12 @@
 - [x] AdminCEO: white/cream topbar, white chart tooltips, linen card backgrounds
 - [x] CEO Alerts sidebar: white background, dark text
 - [x] All dark rgba(255,255,255,*) and #1A1A1A/#0F0F0F references replaced with CSS variables
+
+## Admin Product Editor (Full Edit)
+- [x] Full-page product editor modal: name, slug, description, price, compareAtPrice, stock, category, collection, subcategory, SKU, materials, dimensions, weight, isFeatured, isNewArrival, isBestseller, isActive
+- [x] Photo management panel: upload new images (multi-file), reorder (move up/down), delete individual images, set primary (first) image
+- [x] tRPC admin.updateProductFull procedure — accepts all fields + updated images array
+- [x] tRPC admin.uploadProductImage procedure — uploads file to S3 and returns URL
+- [x] Full Edit button on each product row opens AdminProductEditor slide-over pre-filled with current data
+- [x] Image type classification (product/model/lifestyle) editable per image
+- [x] Vitest tests for updateProductFull and uploadProductImage — 9 tests, all passing

@@ -1,4 +1,5 @@
 import { AdminLayout } from "./AdminDashboard";
+import AdminProductEditor from "./AdminProductEditor";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -22,6 +23,7 @@ export default function AdminProducts() {
   const [search, setSearch] = useState("");
   const [editingProduct, setEditingProduct] = useState<number | null>(null);
   const [editValues, setEditValues] = useState<Record<number, { price: string; stock: string }>>({});
+  const [fullEditProductId, setFullEditProductId] = useState<number | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newProduct, setNewProduct] = useState({
     name: "", slug: "", category: "rings", collection: "", price: "", stock: "0",
@@ -120,6 +122,7 @@ export default function AdminProducts() {
   };
 
   return (
+    <>
     <AdminLayout title="Products">
       {/* Controls */}
       <div style={{ marginBottom: "20px" }}>
@@ -523,10 +526,10 @@ export default function AdminProducts() {
                   ) : (
                     <>
                       <button
-                        onClick={() => { setEditingProduct(product.id); setEditValues((prev) => ({ ...prev, [product.id]: { price: String(product.price), stock: String(product.stock) } })); }}
-                        style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 14px", background: "transparent", border: "1px solid var(--linen-dark)", color: "var(--text-muted)", fontSize: "11px", cursor: "pointer" }}
+                        onClick={() => setFullEditProductId(product.id)}
+                        style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 14px", background: "var(--gold)", border: "1px solid var(--gold)", color: "#fff", fontSize: "11px", cursor: "pointer", fontWeight: 600 }}
                       >
-                        <Edit2 size={12} /> Edit
+                        <Edit2 size={12} /> Full Edit
                       </button>
                       <button
                         onClick={() => handleToggleActive(product.id, product.isActive ?? true)}
@@ -698,5 +701,48 @@ export default function AdminProducts() {
         </div>
       )}
     </AdminLayout>
+
+    {/* Full Product Editor slide-over */}
+
+    {fullEditProductId !== null && (() => {
+      const p = products?.find((x) => x.id === fullEditProductId);
+      if (!p) return null;
+      return (
+        <AdminProductEditor
+          product={{
+            ...p,
+            price: String(p.price),
+            comparePrice: p.comparePrice ? String(p.comparePrice) : null,
+            sku: p.sku ?? null,
+            collection: p.collection ?? null,
+            subcategory: p.subcategory ?? null,
+            description: p.description ?? null,
+            shortDescription: p.shortDescription ?? null,
+            material: p.material ?? null,
+            gemstone: p.gemstone ?? null,
+            weight: p.weight ?? null,
+            dimensions: p.dimensions ?? null,
+            images: Array.isArray(p.images) ? p.images : null,
+            imageTypes: Array.isArray(p.imageTypes) ? p.imageTypes as Array<'product'|'model'|'lifestyle'> : null,
+            isFeatured: p.isFeatured ?? false,
+            isNewArrival: p.isNewArrival ?? false,
+            isBestseller: p.isBestseller ?? false,
+            isActive: p.isActive ?? true,
+            part1Headline: p.part1Headline ?? null,
+            part2WhatsInside: p.part2WhatsInside ?? null,
+            part3AsWorn: p.part3AsWorn ?? null,
+            metaTitle: p.metaTitle ?? null,
+            metaDescription: p.metaDescription ?? null,
+          }}
+          onClose={() => setFullEditProductId(null)}
+          onSaved={() => {
+            setFullEditProductId(null);
+            utils.admin.getAllProducts.invalidate();
+            toast.success("Product saved successfully");
+          }}
+        />
+      );
+    })()}
+    </>
   );
 }
