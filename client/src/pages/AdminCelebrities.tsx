@@ -3,7 +3,8 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
-import { Search, ChevronRight, X, Check, ImageIcon } from "lucide-react";
+import { Search, ChevronRight, X, Check, ImageIcon, Edit2 } from "lucide-react";
+import AdminCelebrityEditor from "./AdminCelebrityEditor";
 import { AdminLayout } from "./AdminDashboard";
 
 // ── Product Assignment Panel ─────────────────────────────────────────────────
@@ -201,6 +202,8 @@ export default function AdminCelebrities() {
   const { user, loading } = useAuth();
   const [, navigate] = useLocation();
   const [selected, setSelected] = useState<{ id: number; name: string; imageUrl?: string | null } | null>(null);
+  const [editingCeleb, setEditingCeleb] = useState<(typeof celebrities)[0] | null>(null);
+  const utils = trpc.useUtils();
 
   const { data: celebrities = [], isLoading: celebLoading } = trpc.celebrities.adminList.useQuery(
     undefined,
@@ -215,6 +218,17 @@ export default function AdminCelebrities() {
     <AdminLayout title="Celebrity Management">
       {selected && (
         <ProductAssignPanel celebrity={selected} onClose={() => setSelected(null)} />
+      )}
+
+      {editingCeleb && (
+        <AdminCelebrityEditor
+          celebrity={editingCeleb as Parameters<typeof AdminCelebrityEditor>[0]["celebrity"]}
+          onClose={() => setEditingCeleb(null)}
+          onSaved={() => {
+            utils.celebrities.adminList.invalidate();
+            utils.celebrities.bySlug.invalidate();
+          }}
+        />
       )}
 
       <div style={{ marginBottom: "24px" }}>
@@ -259,20 +273,35 @@ export default function AdminCelebrities() {
                 <div style={{ fontSize: "11px", color: "rgba(201,169,110,0.7)", letterSpacing: "0.5px", marginBottom: "16px" }}>
                   {celeb.designation ?? "Celebrity"}
                 </div>
-                <button
-                  onClick={() => setSelected({ id: celeb.id, name: celeb.name, imageUrl: celeb.imageUrl })}
-                  style={{
-                    display: "flex", alignItems: "center", justifyContent: "space-between",
-                    width: "100%", padding: "10px 14px",
-                    background: "rgba(201,169,110,0.08)", border: "1px solid rgba(201,169,110,0.25)",
-                    borderRadius: "8px", cursor: "pointer", color: "var(--gold)",
-                    fontSize: "12px", fontWeight: 500, letterSpacing: "0.5px",
-                    transition: "all 0.15s",
-                  }}
-                >
-                  <span>Assign Products</span>
-                  <ChevronRight size={14} />
-                </button>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button
+                    onClick={() => setSelected({ id: celeb.id, name: celeb.name, imageUrl: celeb.imageUrl })}
+                    style={{
+                      flex: 1, display: "flex", alignItems: "center", justifyContent: "space-between",
+                      padding: "10px 14px",
+                      background: "rgba(201,169,110,0.08)", border: "1px solid rgba(201,169,110,0.25)",
+                      borderRadius: "8px", cursor: "pointer", color: "var(--gold)",
+                      fontSize: "12px", fontWeight: 500, letterSpacing: "0.5px",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    <span>Assign Products</span>
+                    <ChevronRight size={14} />
+                  </button>
+                  <button
+                    onClick={() => setEditingCeleb(celeb)}
+                    title="Full Edit"
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      padding: "10px 12px",
+                      background: "rgba(201,169,110,0.08)", border: "1px solid rgba(201,169,110,0.25)",
+                      borderRadius: "8px", cursor: "pointer", color: "var(--gold)",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    <Edit2 size={14} />
+                  </button>
+                </div>
               </div>
             </div>
           ))}

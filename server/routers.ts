@@ -17,6 +17,7 @@ import {
   getCelebrityProductIds,
   assignCelebrityProduct,
   unassignCelebrityProduct,
+  updateCelebrity,
   getCustomerAddresses,
   getCustomerByEmail,
   getCustomerById,
@@ -200,6 +201,40 @@ const celebritiesRouter = router({
     .mutation(async ({ input }) => {
       await unassignCelebrityProduct(input.celebrityId, input.productId);
       return { success: true };
+    }),
+
+  // Admin: full celebrity edit (all fields + gallery images)
+  updateCelebrity: adminProcedure
+    .input(z.object({
+      id: z.number(),
+      name: z.string().min(1).optional(),
+      slug: z.string().min(1).optional(),
+      designation: z.string().optional(),
+      bio: z.string().optional(),
+      style: z.string().optional(),
+      occasion: z.string().optional(),
+      imageUrl: z.string().optional(),
+      galleryImages: z.array(z.string()).optional(),
+      isActive: z.boolean().optional(),
+    }))
+    .mutation(async ({ input }) => {
+      const { id, ...data } = input;
+      return updateCelebrity(id, data);
+    }),
+
+  // Admin: upload a celebrity image (profile or gallery) to S3
+  uploadCelebrityImage: adminProcedure
+    .input(z.object({
+      base64: z.string(),
+      mimeType: z.string().default("image/jpeg"),
+      filename: z.string().default("celebrity.jpg"),
+    }))
+    .mutation(async ({ input }) => {
+      const buffer = Buffer.from(input.base64, "base64");
+      const ext = input.filename.split(".").pop() ?? "jpg";
+      const key = `celebrities/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { url } = await storagePut(key, buffer, input.mimeType);
+      return { url, key };
     }),
 });
 

@@ -81,6 +81,7 @@ export const celebrities = mysqlTable("celebrities", {
   bio: text("bio"),
   style: varchar("style", { length: 100 }),
   occasion: varchar("occasion", { length: 100 }),
+  galleryImages: text("galleryImages"),
   isActive: boolean("isActive").default(true),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });

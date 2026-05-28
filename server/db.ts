@@ -1159,3 +1159,35 @@ export async function updateProductFull(id: number, data: {
   }
   return { success: true };
 }
+
+// ============================================================
+// CELEBRITY EDITOR HELPERS
+// ============================================================
+export async function updateCelebrity(id: number, data: {
+  name?: string;
+  slug?: string;
+  designation?: string;
+  bio?: string;
+  style?: string;
+  occasion?: string;
+  imageUrl?: string;
+  galleryImages?: string[];
+  isActive?: boolean;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const updateData: Record<string, unknown> = {};
+  if (data.name !== undefined) updateData.name = data.name;
+  if (data.slug !== undefined) updateData.slug = data.slug;
+  if (data.designation !== undefined) updateData.designation = data.designation;
+  if (data.bio !== undefined) updateData.bio = data.bio;
+  if (data.style !== undefined) updateData.style = data.style;
+  if (data.occasion !== undefined) updateData.occasion = data.occasion;
+  if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl;
+  if (data.galleryImages !== undefined) updateData.galleryImages = JSON.stringify(data.galleryImages);
+  if (data.isActive !== undefined) updateData.isActive = data.isActive;
+  if (Object.keys(updateData).length > 0) {
+    await db.update(celebrities).set(updateData).where(eq(celebrities.id, id));
+  }
+  return { success: true };
+}

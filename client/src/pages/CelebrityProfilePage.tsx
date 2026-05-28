@@ -4,6 +4,32 @@ import { trpc } from "@/lib/trpc";
 import { useLocation, useParams } from "wouter";
 import { getCardImage } from "@/lib/productImage";
 
+// Gallery image tile component
+function GalleryImageItem({ url, featured }: { url: string; featured: boolean }) {
+  return (
+    <div style={{
+      overflow: "hidden",
+      borderRadius: "4px",
+      aspectRatio: featured ? "3/4" : "4/5",
+      background: "#f5f0eb",
+    }}>
+      <img
+        src={url}
+        alt="Celebrity gallery"
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: "top",
+          transition: "transform 0.4s cubic-bezier(0.23, 1, 0.32, 1)",
+        }}
+        onMouseEnter={e => { (e.currentTarget as HTMLImageElement).style.transform = "scale(1.04)"; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLImageElement).style.transform = "scale(1)"; }}
+      />
+    </div>
+  );
+}
+
 export default function CelebrityProfilePage() {
   const params = useParams<{ slug: string }>();
   const [, navigate] = useLocation();
@@ -229,6 +255,52 @@ export default function CelebrityProfilePage() {
             </div>
           </div>
         </div>
+
+        {/* Gallery Section — shown only if galleryImages exist */}
+        {(() => {
+          let galleryUrls: string[] = [];
+          try {
+            const raw = (profile as { galleryImages?: string | null }).galleryImages;
+            if (raw) galleryUrls = JSON.parse(raw);
+          } catch { /* ignore */ }
+          if (!galleryUrls.length) return null;
+          return (
+            <div style={{ marginBottom: "72px" }}>
+              <div style={{ marginBottom: "24px" }}>
+                <h2 style={{
+                  fontFamily: "var(--font-heading)",
+                  fontSize: "clamp(22px, 3vw, 30px)",
+                  fontWeight: 400,
+                  color: "var(--text-dark)",
+                  marginBottom: "6px",
+                }}>Gallery</h2>
+                <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>
+                  {profile.name} wearing The Jewel Gallery
+                </p>
+              </div>
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: galleryUrls.length === 1
+                  ? "1fr"
+                  : galleryUrls.length === 2
+                  ? "1fr 1fr"
+                  : galleryUrls.length === 3
+                  ? "2fr 1fr 1fr"
+                  : galleryUrls.length === 4
+                  ? "1fr 1fr 1fr 1fr"
+                  : galleryUrls.length === 5
+                  ? "2fr 1fr 1fr 1fr 1fr"
+                  : "2fr 1fr 1fr 1fr 1fr 1fr",
+                gap: "12px",
+                alignItems: "stretch",
+              }}>
+                {galleryUrls.map((url, idx) => (
+                  <GalleryImageItem key={url} url={url} featured={idx === 0} />
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Products Section */}
         <div style={{ marginBottom: "40px" }}>

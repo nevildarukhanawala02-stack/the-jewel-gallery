@@ -293,10 +293,10 @@
 - [x] Cart images confirmed working on live site — stale localStorage was the root cause, resolved by re-adding items
 
 ## Admin Theme — White/Cream Rework
-- [ ] Replace dark admin sidebar with white/cream background and dark text
-- [ ] Replace dark admin layout/content area with cream/white background
-- [ ] Retheme all admin KPI cards, tables, modals to light palette
-- [ ] Retheme CEO Command Centre (Pulse Bar, charts, alerts) to light palette
+- [x] Replace dark admin sidebar with white/cream background and dark text
+- [x] Replace dark admin layout/content area with cream/white background
+- [x] Retheme all admin KPI cards, tables, modals to light palette
+- [x] Retheme CEO Command Centre (Pulse Bar, charts, alerts) to light palette
 
 ## Admin Theme — White/Cream Retheme
 - [x] AdminLayout sidebar: white background, charcoal text, linen-dark borders, gold active state
@@ -316,3 +316,28 @@
 - [x] Full Edit button on each product row opens AdminProductEditor slide-over pre-filled with current data
 - [x] Image type classification (product/model/lifestyle) editable per image
 - [x] Vitest tests for updateProductFull and uploadProductImage — 9 tests, all passing
+
+## Celebrity Editor & Gallery Feature
+- [ ] Add galleryImages column (JSON array of URLs) to celebrities table in Drizzle schema
+- [ ] Run db:push migration
+- [ ] tRPC admin.updateCelebrity procedure — all fields: name, slug, title, bio, photo, galleryImages, style, occasion
+- [ ] tRPC admin.uploadCelebrityImage procedure — upload to S3, return URL
+- [ ] AdminCelebrityEditor slide-over: edit name, slug, title, bio, style tags, occasion tags
+- [ ] AdminCelebrityEditor: photo management — upload/replace main profile photo
+- [ ] AdminCelebrityEditor: gallery management — upload 2-6 gallery images, reorder, delete
+- [ ] Wire Full Edit button in AdminCelebrities to open AdminCelebrityEditor
+- [ ] CelebrityProfilePage: add gallery section between header and products (masonry/grid, 2-6 images)
+- [ ] Gallery lightbox: click image to open full-size view with prev/next navigation
+- [ ] Vitest tests for updateCelebrity and uploadCelebrityImage procedures
+
+## Celebrity Editor & Gallery
+- [x] galleryImages column added to celebrities table (ALTER TABLE migration)
+- [x] updateCelebrity DB helper (all fields + galleryImages JSON array)
+- [x] tRPC celebrities.updateCelebrity procedure (admin-protected)
+- [x] tRPC celebrities.uploadCelebrityImage procedure (base64 → S3)
+- [x] AdminCelebrityEditor.tsx slide-over: Details tab (name, slug, designation, bio, style, occasion, isActive) + Photos tab (profile photo + 2-6 gallery images with reorder/delete)
+- [x] Edit (pencil) button on each celebrity card in AdminCelebrities opens the editor
+- [x] GalleryImageItem component added to CelebrityProfilePage
+- [x] Celebrity gallery section between hero header and products grid on public profile page
+- [x] Gallery layout adapts: 1-col, 2-col, 3-col (featured first), 4-6 col grids based on image count
+- [x] All 53 tests passing
