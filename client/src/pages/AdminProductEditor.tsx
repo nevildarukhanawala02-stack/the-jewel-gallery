@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { trpc } from "@/lib/trpc";
 
 type ImageType = "product" | "model" | "lifestyle";
@@ -219,7 +220,7 @@ export default function AdminProductEditor({ product, onClose, onSaved }: Props)
   };
   const fieldStyle: React.CSSProperties = { marginBottom: 18 };
 
-  return (
+  return createPortal(
     <div style={{
       position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)",
       zIndex: 2000, display: "flex", alignItems: "stretch", justifyContent: "flex-end",
@@ -603,6 +604,7 @@ export default function AdminProductEditor({ product, onClose, onSaved }: Props)
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
