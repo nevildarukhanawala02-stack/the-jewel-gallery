@@ -42,8 +42,8 @@ interface Props {
 const CATEGORIES = ["rings", "necklaces", "earrings", "bracelets", "accessories"] as const;
 const SUBCATEGORIES: Record<string, string[]> = {
   rings: ["solitaire", "cocktail", "stackable", "engagement", "statement"],
-  necklaces: ["pendant", "choker", "layered", "chain", "statement"],
-  earrings: ["studs", "hoops", "drops", "chandeliers", "jhumkas"],
+  necklaces: ["pendant", "choker", "layered", "chain", "statement", "pearl"],
+  earrings: ["studs", "hoops", "drops", "chandeliers", "jhumkas", "pearl"],
   bracelets: ["bangle", "cuff", "charm", "tennis", "stackable"],
   accessories: ["nose ring", "hair accessory", "maang tikka", "waist belt", "anklet"],
 };

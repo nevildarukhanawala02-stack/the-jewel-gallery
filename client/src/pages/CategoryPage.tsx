@@ -43,8 +43,8 @@ const SORT_OPTIONS = [
 
 const SUBCATEGORY_MAP: Record<string, string[]> = {
   rings: ["All", "Solitaire", "Cocktail", "Stackable", "Engagement", "Statement"],
-  necklaces: ["All", "Pendant", "Choker", "Layered", "Chain", "Statement"],
-  earrings: ["All", "Studs", "Hoops", "Drops", "Chandeliers", "Jhumkas"],
+  necklaces: ["All", "Pendant", "Choker", "Layered", "Chain", "Statement", "Pearl"],
+  earrings: ["All", "Studs", "Hoops", "Drops", "Chandeliers", "Jhumkas", "Pearl"],
   bracelets: ["All", "Bangles", "Cuffs", "Charm", "Tennis", "Stackable"],
   accessories: ["All", "Nose Ring", "Mangalsutra", "Necklace Set"],
 };
