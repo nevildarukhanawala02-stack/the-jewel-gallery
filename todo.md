@@ -349,3 +349,8 @@
 - [x] Upload all 198 images to Manus storage (0 failures)
 - [x] Insert all 61 products into DB (price ₹1500, stock 10, isActive true)
 - [x] Verify all products visible on storefront (earrings:17, necklaces:17, bracelets:10, rings:3, accessories:5 = 52 + 9 others)
+
+## Image Background Re-classification & Reordering
+- [x] Run pixel analysis on all product images to detect white/grey background vs coloured/lifestyle backgrounds
+- [x] Reorder images array in DB: white/grey background close-ups always first, lifestyle/model images last (33 products updated)
+- [x] Verify home page, category pages, and subcategory pages show clean white-background images (products with no white bg still show coloured — no alternative available)
