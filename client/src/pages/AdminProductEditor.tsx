@@ -45,7 +45,7 @@ const SUBCATEGORIES: Record<string, string[]> = {
   necklaces: ["pendant", "choker", "layered", "chain", "statement", "pearl"],
   earrings: ["studs", "hoops", "drops", "chandeliers", "jhumkas", "pearl"],
   bracelets: ["bangle", "cuff", "charm", "tennis", "stackable"],
-  accessories: ["nose ring", "hair accessory", "maang tikka", "waist belt", "anklet"],
+  accessories: ["nose ring"],
 };
 
 export default function AdminProductEditor({ product, onClose, onSaved }: Props) {

@@ -46,7 +46,7 @@ const SUBCATEGORY_MAP: Record<string, string[]> = {
   necklaces: ["All", "Pendant", "Choker", "Layered", "Chain", "Statement", "Pearl"],
   earrings: ["All", "Studs", "Hoops", "Drops", "Chandeliers", "Jhumkas", "Pearl"],
   bracelets: ["All", "Bangles", "Cuffs", "Charm", "Tennis", "Stackable"],
-  accessories: ["All", "Nose Ring", "Mangalsutra", "Necklace Set"],
+  accessories: ["All", "Nose Ring"],
 };
 
 export default function CategoryPage() {
