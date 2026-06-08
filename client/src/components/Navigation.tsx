@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { label: "Necklaces", href: "/category/necklaces" },
   { label: "Earrings", href: "/category/earrings" },
   { label: "Bracelets", href: "/category/bracelets" },
+  { label: "Accessories", href: "/category/accessories" },
   { label: "As Worn By", href: "/celebrity" },
 ];
 

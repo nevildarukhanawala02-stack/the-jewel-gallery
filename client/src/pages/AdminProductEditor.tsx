@@ -8,7 +8,7 @@ interface ProductFull {
   name: string;
   slug: string;
   sku: string | null;
-  category: "rings" | "necklaces" | "earrings" | "bracelets";
+  category: "rings" | "necklaces" | "earrings" | "bracelets" | "accessories";
   collection: string | null;
   subcategory: string | null;
   description: string | null;
@@ -39,12 +39,13 @@ interface Props {
   onSaved: () => void;
 }
 
-const CATEGORIES = ["rings", "necklaces", "earrings", "bracelets"] as const;
+const CATEGORIES = ["rings", "necklaces", "earrings", "bracelets", "accessories"] as const;
 const SUBCATEGORIES: Record<string, string[]> = {
   rings: ["solitaire", "cocktail", "stackable", "engagement", "statement"],
   necklaces: ["pendant", "choker", "layered", "chain", "statement"],
   earrings: ["studs", "hoops", "drops", "chandeliers", "jhumkas"],
   bracelets: ["bangle", "cuff", "charm", "tennis", "stackable"],
+  accessories: ["nose ring", "hair accessory", "maang tikka", "waist belt", "anklet"],
 };
 
 export default function AdminProductEditor({ product, onClose, onSaved }: Props) {

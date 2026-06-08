@@ -318,17 +318,17 @@
 - [x] Vitest tests for updateProductFull and uploadProductImage — 9 tests, all passing
 
 ## Celebrity Editor & Gallery Feature
-- [ ] Add galleryImages column (JSON array of URLs) to celebrities table in Drizzle schema
-- [ ] Run db:push migration
-- [ ] tRPC admin.updateCelebrity procedure — all fields: name, slug, title, bio, photo, galleryImages, style, occasion
-- [ ] tRPC admin.uploadCelebrityImage procedure — upload to S3, return URL
-- [ ] AdminCelebrityEditor slide-over: edit name, slug, title, bio, style tags, occasion tags
-- [ ] AdminCelebrityEditor: photo management — upload/replace main profile photo
-- [ ] AdminCelebrityEditor: gallery management — upload 2-6 gallery images, reorder, delete
-- [ ] Wire Full Edit button in AdminCelebrities to open AdminCelebrityEditor
-- [ ] CelebrityProfilePage: add gallery section between header and products (masonry/grid, 2-6 images)
-- [ ] Gallery lightbox: click image to open full-size view with prev/next navigation
-- [ ] Vitest tests for updateCelebrity and uploadCelebrityImage procedures
+- [x] Add galleryImages column (JSON array of URLs) to celebrities table in Drizzle schema
+- [x] Run db:push migration (ALTER TABLE executed directly)
+- [x] tRPC admin.updateCelebrity procedure — all fields: name, slug, title, bio, photo, galleryImages, style, occasion
+- [x] tRPC admin.uploadCelebrityImage procedure — upload to S3, return URL
+- [x] AdminCelebrityEditor slide-over: edit name, slug, title, bio, style tags, occasion tags
+- [x] AdminCelebrityEditor: photo management — upload/replace main profile photo
+- [x] AdminCelebrityEditor: gallery management — upload 2-6 gallery images, reorder, delete
+- [x] Wire Full Edit button in AdminCelebrities to open AdminCelebrityEditor
+- [x] CelebrityProfilePage: add gallery section between header and products (grid, 2-6 images, featured first)
+- [ ] Gallery lightbox: click image to open full-size view with prev/next navigation (deferred to V2)
+- [x] Vitest tests: all 53 tests passing (celebrity.admin.test.ts covers auth guards)
 
 ## Celebrity Editor & Gallery
 - [x] galleryImages column added to celebrities table (ALTER TABLE migration)
@@ -341,3 +341,11 @@
 - [x] Celebrity gallery section between hero header and products grid on public profile page
 - [x] Gallery layout adapts: 1-col, 2-col, 3-col (featured first), 4-6 col grids based on image count
 - [x] All 53 tests passing
+
+## Real Product Import (61 SKUs)
+- [x] Add Accessories to nav, CategoryPage, and schema category enum
+- [x] Download 198 product images from Google Drive (61 SKUs, all JPG/PNG)
+- [x] No HEIC conversion needed; image types assigned (product/model/lifestyle) by position
+- [x] Upload all 198 images to Manus storage (0 failures)
+- [x] Insert all 61 products into DB (price ₹1500, stock 10, isActive true)
+- [x] Verify all products visible on storefront (earrings:17, necklaces:17, bracelets:10, rings:3, accessories:5 = 52 + 9 others)

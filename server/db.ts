@@ -70,7 +70,7 @@ export async function getUserByOpenId(openId: string) {
 // PRODUCT HELPERS
 // ============================================================
 export async function getProducts(opts: {
-  category?: "rings" | "necklaces" | "earrings" | "bracelets";
+  category?: "rings" | "necklaces" | "earrings" | "bracelets" | "accessories";
   subcategory?: string;
   collection?: string;
   isFeatured?: boolean;
@@ -122,7 +122,7 @@ export async function getProductsByIds(ids: number[]) {
 }
 
 export async function createProduct(data: {
-  name: string; slug: string; category: "rings" | "necklaces" | "earrings" | "bracelets";
+  name: string; slug: string; category: "rings" | "necklaces" | "earrings" | "bracelets" | "accessories";
   collection?: string; price: number; stock?: number; material?: string;
   description?: string; sku?: string;
 }) {
@@ -452,7 +452,7 @@ export async function getDashboardMetrics() {
   };
 }
 
-export async function getAllProductsAdmin(opts: { category?: "rings" | "necklaces" | "earrings" | "bracelets" } = {}) {
+export async function getAllProductsAdmin(opts: { category?: "rings" | "necklaces" | "earrings" | "bracelets" | "accessories" } = {}) {
   const db = await getDb();
   if (!db) return [];
   const conditions = [];
@@ -531,12 +531,13 @@ function slugify(text: string): string {
 }
 
 /** Normalize category string to the enum values used in the schema */
-function normalizeCategory(cat: string): "rings" | "necklaces" | "earrings" | "bracelets" | null {
+function normalizeCategory(cat: string): "rings" | "necklaces" | "earrings" | "bracelets" | "accessories" | null {
   const c = cat.toLowerCase().trim();
   if (c === "rings" || c === "ring") return "rings";
   if (c === "necklaces" || c === "necklace") return "necklaces";
   if (c === "earrings" || c === "earring") return "earrings";
   if (c === "bracelets" || c === "bracelet") return "bracelets";
+  if (c === "accessories" || c === "accessory") return "accessories";
   return null;
 }
 
@@ -1101,7 +1102,7 @@ export async function updateProductFull(id: number, data: {
   name?: string;
   slug?: string;
   sku?: string;
-  category?: "rings" | "necklaces" | "earrings" | "bracelets";
+  category?: "rings" | "necklaces" | "earrings" | "bracelets" | "accessories";
   collection?: string;
   subcategory?: string;
   description?: string;

@@ -26,6 +26,11 @@ const CATEGORY_META: Record<string, { title: string; subtitle: string; descripti
     subtitle: "Adorned Wrists",
     description: "Delicate bangles, charm bracelets, and cuffs — each piece designed to catch the light and the eye.",
   },
+  accessories: {
+    title: "Accessories",
+    subtitle: "The Finishing Touch",
+    description: "From delicate nose rings to statement mangalsutras — the pieces that complete every look.",
+  },
 };
 
 const SORT_OPTIONS = [
@@ -41,11 +46,12 @@ const SUBCATEGORY_MAP: Record<string, string[]> = {
   necklaces: ["All", "Pendant", "Choker", "Layered", "Chain", "Statement"],
   earrings: ["All", "Studs", "Hoops", "Drops", "Chandeliers", "Jhumkas"],
   bracelets: ["All", "Bangles", "Cuffs", "Charm", "Tennis", "Stackable"],
+  accessories: ["All", "Nose Ring", "Mangalsutra", "Necklace Set"],
 };
 
 export default function CategoryPage() {
   const params = useParams<{ category: string }>();
-  const category = params.category as "rings" | "necklaces" | "earrings" | "bracelets";
+  const category = params.category as "rings" | "necklaces" | "earrings" | "bracelets" | "accessories";
   const [, navigate] = useLocation();
   const [sortBy, setSortBy] = useState("featured");
 

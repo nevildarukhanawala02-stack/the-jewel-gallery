@@ -43,6 +43,13 @@
       "when": 1779955575986,
       "tag": "0005_furry_sugar_man",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1780910586889,
+      "tag": "0006_spicy_prodigy",
+      "breakpoints": true
     }
   ]
 }

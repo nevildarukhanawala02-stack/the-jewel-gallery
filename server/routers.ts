@@ -114,7 +114,7 @@ const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
 const productsRouter = router({
   list: publicProcedure
     .input(z.object({
-      category: z.enum(["rings", "necklaces", "earrings", "bracelets"]).optional(),
+      category: z.enum(["rings", "necklaces", "earrings", "bracelets", "accessories"]).optional(),
       subcategory: z.string().optional(),
       collection: z.string().optional(),
       isFeatured: z.boolean().optional(),
@@ -136,7 +136,7 @@ const productsRouter = router({
     }),
 
   related: publicProcedure
-    .input(z.object({ category: z.enum(["rings", "necklaces", "earrings", "bracelets"]), excludeId: z.number(), limit: z.number().optional() }))
+    .input(z.object({ category: z.enum(["rings", "necklaces", "earrings", "bracelets", "accessories"]), excludeId: z.number(), limit: z.number().optional() }))
     .query(async ({ input }) => {
       const all = await getProducts({ category: input.category, isActive: true, limit: input.limit ?? 4 });
       return all.filter((p) => p.id !== input.excludeId).slice(0, input.limit ?? 4);
@@ -549,7 +549,7 @@ const adminRouter = router({
 
   getAllProducts: adminProcedure
     .input(z.object({
-      category: z.enum(["rings", "necklaces", "earrings", "bracelets"]).optional(),
+      category: z.enum(["rings", "necklaces", "earrings", "bracelets", "accessories"]).optional(),
     }))
     .query(async ({ input }) => {
       return getAllProductsAdmin({ category: input.category });
@@ -577,7 +577,7 @@ const adminRouter = router({
     .input(z.object({
       name: z.string(),
       slug: z.string(),
-      category: z.enum(["rings", "necklaces", "earrings", "bracelets"]),
+      category: z.enum(["rings", "necklaces", "earrings", "bracelets", "accessories"]),
       collection: z.string().optional(),
       price: z.number(),
       stock: z.number().optional(),
@@ -691,7 +691,7 @@ const adminRouter = router({
       name: z.string().optional(),
       slug: z.string().optional(),
       sku: z.string().optional(),
-      category: z.enum(["rings", "necklaces", "earrings", "bracelets"]).optional(),
+      category: z.enum(["rings", "necklaces", "earrings", "bracelets", "accessories"]).optional(),
       collection: z.string().optional(),
       subcategory: z.string().optional(),
       description: z.string().optional(),

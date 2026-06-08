@@ -37,7 +37,7 @@ export const products = mysqlTable("products", {
   slug: varchar("slug", { length: 255 }).notNull().unique(),
   sku: varchar("sku", { length: 50 }).unique(),
   collection: varchar("collection", { length: 100 }),
-  category: mysqlEnum("category", ["rings", "necklaces", "earrings", "bracelets"]).notNull(),
+  category: mysqlEnum("category", ["rings", "necklaces", "earrings", "bracelets", "accessories"]).notNull(),
   subcategory: varchar("subcategory", { length: 100 }),
   description: text("description"),
   shortDescription: varchar("shortDescription", { length: 500 }),

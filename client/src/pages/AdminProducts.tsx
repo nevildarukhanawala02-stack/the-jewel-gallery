@@ -14,6 +14,7 @@ const CATEGORY_TABS = [
   { label: "Necklaces", value: "necklaces" },
   { label: "Earrings", value: "earrings" },
   { label: "Bracelets", value: "bracelets" },
+  { label: "Accessories", value: "accessories" },
 ];
 
 export default function AdminProducts() {
@@ -31,7 +32,7 @@ export default function AdminProducts() {
   });
 
   const { data: products, isLoading } = trpc.admin.getAllProducts.useQuery(
-    { category: category as "rings" | "necklaces" | "earrings" | "bracelets" | undefined },
+    { category: category as "rings" | "necklaces" | "earrings" | "bracelets" | "accessories" | undefined },
     { enabled: !!user }
   );
 
@@ -104,7 +105,7 @@ export default function AdminProducts() {
       await createProductMutation.mutateAsync({
         name: newProduct.name,
         slug: newProduct.slug,
-        category: newProduct.category as "rings" | "necklaces" | "earrings" | "bracelets",
+        category: newProduct.category as "rings" | "necklaces" | "earrings" | "bracelets" | "accessories",
         collection: newProduct.collection || undefined,
         price: parseFloat(newProduct.price),
         stock: parseInt(newProduct.stock) || 0,
@@ -639,6 +640,7 @@ export default function AdminProducts() {
                   <option value="necklaces">Necklaces</option>
                   <option value="earrings">Earrings</option>
                   <option value="bracelets">Bracelets</option>
+                  <option value="accessories">Accessories</option>
                 </select>
               </div>
 
