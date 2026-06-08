@@ -6,7 +6,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "../const";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
-import { Search, Plus, Edit2, Eye, EyeOff } from "lucide-react";
+import { Search, Plus, Edit2, Eye, EyeOff, Settings } from "lucide-react";
 
 const CATEGORY_TABS = [
   { label: "All", value: undefined },
@@ -410,6 +410,24 @@ export default function AdminProducts() {
                     </>
                   ) : (
                     <>
+                      <button
+                        onClick={() => setFullEditProductId(product.id)}
+                        title="Full Edit"
+                        style={{
+                          padding: "6px",
+                          background: "var(--gold)",
+                          border: "1px solid var(--gold)",
+                          color: "#fff",
+                          cursor: "pointer",
+                          minWidth: "32px",
+                          minHeight: "32px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Settings size={12} />
+                      </button>
                       <button
                         onClick={() => {
                           setEditingProduct(product.id);
