@@ -6,7 +6,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "../const";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
-import { Search, Plus, Edit2, Eye, EyeOff, Settings } from "lucide-react";
+import { Search, Plus, Edit2, Eye, EyeOff, Settings, X, ChevronDown } from "lucide-react";
 
 const CATEGORY_TABS = [
   { label: "All", value: undefined },
@@ -22,6 +22,8 @@ export default function AdminProducts() {
   const [, navigate] = useLocation();
   const [category, setCategory] = useState<string | undefined>(undefined);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
+  const [sortBy, setSortBy] = useState<"name" | "price_asc" | "price_desc" | "newest">("newest");
   const [editingProduct, setEditingProduct] = useState<number | null>(null);
   const [editValues, setEditValues] = useState<Record<number, { price: string; stock: string }>>({});
   const [fullEditProductId, setFullEditProductId] = useState<number | null>(null);
@@ -63,11 +65,32 @@ export default function AdminProducts() {
   const formatPrice = (p: number) =>
     new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", minimumFractionDigits: 0 }).format(p);
 
-  const filteredProducts = (products ?? []).filter((p) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return p.name.toLowerCase().includes(q);
-  });
+  const filteredProducts = (products ?? [])
+    .filter((p) => {
+      // Search across name, SKU, collection, subcategory
+      if (search) {
+        const q = search.toLowerCase();
+        const matches =
+          p.name.toLowerCase().includes(q) ||
+          (p.sku ?? "").toLowerCase().includes(q) ||
+          (p.collection ?? "").toLowerCase().includes(q) ||
+          (p.subcategory ?? "").toLowerCase().includes(q);
+        if (!matches) return false;
+      }
+      // Status filter
+      if (statusFilter === "active" && !p.isActive) return false;
+      if (statusFilter === "inactive" && p.isActive) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === "name") return a.name.localeCompare(b.name);
+      if (sortBy === "price_asc") return Number(a.price) - Number(b.price);
+      if (sortBy === "price_desc") return Number(b.price) - Number(a.price);
+      // newest = descending id
+      return b.id - a.id;
+    });
+
+  const hasActiveFilters = search || statusFilter !== "all" || category !== undefined;
 
   const handleSaveEdit = async (productId: number) => {
     const vals = editValues[productId];
@@ -126,78 +149,145 @@ export default function AdminProducts() {
     <>
     <AdminLayout title="Products">
       {/* Controls */}
-      <div style={{ marginBottom: "20px" }}>
-        {/* Search + Add button row */}
-        <div style={{ display: "flex", gap: "12px", marginBottom: "12px", alignItems: "center" }}>
+      <div style={{ marginBottom: "20px", background: "#fff", border: "1px solid var(--linen-dark)", padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+        {/* Row 1: Search + Add button */}
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
           <div style={{ position: "relative", flex: 1 }}>
-            <Search size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
+            <Search size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
             <input
               type="text"
-              placeholder="Search by name or SKU..."
+              placeholder="Search by name, SKU, collection or subcategory…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={{
                 width: "100%",
-                padding: "11px 12px 11px 36px",
-                background: "#fff",
-                border: "1px solid rgba(201,169,110,0.2)",
+                padding: "10px 36px 10px 36px",
+                background: "#FAFAF8",
+                border: "1px solid rgba(201,169,110,0.25)",
                 color: "var(--text-dark)",
                 fontSize: "13px",
                 outline: "none",
                 boxSizing: "border-box",
+                transition: "border-color 0.2s",
               }}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "var(--gold)")}
+              onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(201,169,110,0.25)")}
             />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", padding: "2px", display: "flex", alignItems: "center" }}
+              >
+                <X size={13} />
+              </button>
+            )}
           </div>
           <button
             onClick={() => setShowAddModal(true)}
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "11px 18px",
-              background: "var(--gold)",
-              border: "none",
-              color: "var(--text-dark)",
-              fontSize: "10px",
-              fontWeight: 700,
-              letterSpacing: "1px",
-              textTransform: "uppercase",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              flexShrink: 0,
+              display: "flex", alignItems: "center", gap: "8px",
+              padding: "10px 18px", background: "var(--gold)", border: "none",
+              color: "var(--text-dark)", fontSize: "10px", fontWeight: 700,
+              letterSpacing: "1px", textTransform: "uppercase", cursor: "pointer",
+              whiteSpace: "nowrap", flexShrink: 0,
             }}
           >
-            <Plus size={14} />
-            Add Product
+            <Plus size={14} /> Add Product
           </button>
         </div>
 
-        {/* Category Tabs — horizontal scroll on mobile */}
-        <div style={{ display: "flex", gap: "8px", overflowX: "auto", paddingBottom: "4px", WebkitOverflowScrolling: "touch" as React.CSSProperties["WebkitOverflowScrolling"], alignItems: "center" }}>
-          {CATEGORY_TABS.map((tab) => (
-            <button
-              key={tab.label}
-              onClick={() => setCategory(tab.value)}
-              style={{
-                padding: "8px 14px",
-                fontSize: "9px",
-                fontWeight: 700,
-                letterSpacing: "1px",
-                textTransform: "uppercase",
-                background: category === tab.value ? "rgba(201,169,110,0.15)" : "transparent",
-                border: `1px solid ${category === tab.value ? "var(--gold)" : "var(--linen-dark)"}`,
-                color: category === tab.value ? "var(--gold)" : "var(--text-muted)",
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-                flexShrink: 0,
-                minHeight: "38px",
-              }}
-            >
-              {tab.label}
-            </button>
-          ))}
-          <div style={{ fontSize: "11px", color: "var(--text-muted)", paddingLeft: "8px", whiteSpace: "nowrap", flexShrink: 0 }}>
-            {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""}
+        {/* Row 2: Category tabs + Status filter + Sort */}
+        <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+          {/* Category tabs */}
+          <div style={{ display: "flex", gap: "6px", overflowX: "auto", flexShrink: 0, alignItems: "center" }}>
+            {CATEGORY_TABS.map((tab) => (
+              <button
+                key={tab.label}
+                onClick={() => setCategory(tab.value)}
+                style={{
+                  padding: "6px 12px", fontSize: "9px", fontWeight: 700,
+                  letterSpacing: "1px", textTransform: "uppercase",
+                  background: category === tab.value ? "rgba(201,169,110,0.15)" : "transparent",
+                  border: `1px solid ${category === tab.value ? "var(--gold)" : "var(--linen-dark)"}`,
+                  color: category === tab.value ? "var(--gold)" : "var(--text-muted)",
+                  cursor: "pointer", whiteSpace: "nowrap", minHeight: "32px",
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Divider */}
+          <div style={{ width: "1px", height: "24px", background: "var(--linen-dark)", flexShrink: 0 }} />
+
+          {/* Status filter */}
+          <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+            <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "var(--text-muted)", whiteSpace: "nowrap" }}>Status:</span>
+            {(["all", "active", "inactive"] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                style={{
+                  padding: "5px 10px", fontSize: "9px", fontWeight: 700,
+                  letterSpacing: "1px", textTransform: "uppercase",
+                  background: statusFilter === s ? (s === "active" ? "rgba(16,185,129,0.12)" : s === "inactive" ? "rgba(239,68,68,0.1)" : "rgba(201,169,110,0.15)") : "transparent",
+                  border: `1px solid ${statusFilter === s ? (s === "active" ? "#10B981" : s === "inactive" ? "#EF4444" : "var(--gold)") : "var(--linen-dark)"}`,
+                  color: statusFilter === s ? (s === "active" ? "#10B981" : s === "inactive" ? "#EF4444" : "var(--gold)") : "var(--text-muted)",
+                  cursor: "pointer", minHeight: "32px",
+                }}
+              >
+                {s === "all" ? "All" : s === "active" ? "Active" : "Inactive"}
+              </button>
+            ))}
+          </div>
+
+          {/* Divider */}
+          <div style={{ width: "1px", height: "24px", background: "var(--linen-dark)", flexShrink: 0 }} />
+
+          {/* Sort */}
+          <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+            <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "var(--text-muted)", whiteSpace: "nowrap" }}>Sort:</span>
+            <div style={{ position: "relative" }}>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                style={{
+                  padding: "5px 28px 5px 10px", fontSize: "9px", fontWeight: 700,
+                  letterSpacing: "1px", textTransform: "uppercase",
+                  background: "transparent", border: "1px solid var(--linen-dark)",
+                  color: "var(--text-muted)", cursor: "pointer", minHeight: "32px",
+                  appearance: "none", outline: "none",
+                }}
+              >
+                <option value="newest">Newest First</option>
+                <option value="name">Name A–Z</option>
+                <option value="price_asc">Price Low–High</option>
+                <option value="price_desc">Price High–Low</option>
+              </select>
+              <ChevronDown size={11} style={{ position: "absolute", right: "8px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "var(--text-muted)" }} />
+            </div>
+          </div>
+
+          {/* Spacer + result count + clear */}
+          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ fontSize: "11px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+              {filteredProducts.length} of {(products ?? []).length} products
+            </span>
+            {hasActiveFilters && (
+              <button
+                onClick={() => { setSearch(""); setCategory(undefined); setStatusFilter("all"); }}
+                style={{
+                  display: "flex", alignItems: "center", gap: "4px",
+                  padding: "4px 10px", background: "transparent",
+                  border: "1px solid rgba(239,68,68,0.4)", color: "#EF4444",
+                  fontSize: "9px", fontWeight: 700, letterSpacing: "1px",
+                  textTransform: "uppercase", cursor: "pointer",
+                }}
+              >
+                <X size={10} /> Clear Filters
+              </button>
+            )}
           </div>
         </div>
       </div>
