@@ -1,7 +1,7 @@
 import StorefrontLayout from "@/components/StorefrontLayout";
 import ProductCard from "@/components/ProductCard";
 import { trpc } from "@/lib/trpc";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useLocation, useParams } from "wouter";
 import { getCardImage } from "@/lib/productImage";
 
@@ -40,13 +40,48 @@ const SORT_OPTIONS = [
   { label: "Newest", value: "newest" },
 ];
 
-
-const SUBCATEGORY_MAP: Record<string, string[]> = {
-  rings: ["All", "Solitaire", "Cocktail", "Stackable", "Engagement", "Statement"],
-  necklaces: ["All", "Pendant", "Choker", "Layered", "Chain", "Statement", "Pearl"],
-  earrings: ["All", "Studs", "Hoops", "Drops", "Chandeliers", "Jhumkas", "Pearl"],
-  bracelets: ["All", "Bangles", "Cuffs", "Charm", "Tennis", "Stackable"],
-  accessories: ["All", "Nose Ring"],
+// Canonical subcategory labels — keys are lowercase DB values, values are display labels
+// "All" is always first and never hidden
+const SUBCATEGORY_DISPLAY: Record<string, Record<string, string>> = {
+  rings: {
+    solitaire: "Solitaire",
+    cocktail: "Cocktail",
+    stackable: "Stackable",
+    engagement: "Engagement",
+    statement: "Statement",
+  },
+  necklaces: {
+    "mangalsutra": "Mangalsutra",
+    "necklace set": "Necklace Set",
+    pendant: "Pendant",
+    choker: "Choker",
+    layered: "Layered",
+    chain: "Chain",
+    pearl: "Pearl",
+  },
+  earrings: {
+    studs: "Studs",
+    hoops: "Hoops",
+    drops: "Drops",
+    chandeliers: "Chandeliers",
+    jhumkas: "Jhumkas",
+    pearl: "Pearl",
+    indian: "Indian",
+    contemporary: "Contemporary",
+  },
+  bracelets: {
+    bangles: "Bangles",
+    cuffs: "Cuffs",
+    charm: "Charm",
+    tennis: "Tennis",
+    stackable: "Stackable",
+    pearl: "Pearl",
+  },
+  accessories: {
+    "nose ring": "Nose Ring",
+    mangalsutra: "Mangalsutra",
+    "hair accessory": "Hair Accessory",
+  },
 };
 
 export default function CategoryPage() {
@@ -54,7 +89,6 @@ export default function CategoryPage() {
   const category = params.category as "rings" | "necklaces" | "earrings" | "bracelets" | "accessories";
   const [, navigate] = useLocation();
   const [sortBy, setSortBy] = useState("featured");
-
   const [subcategory, setSubcategory] = useState("All");
 
   const meta = CATEGORY_META[category] ?? {
@@ -63,12 +97,36 @@ export default function CategoryPage() {
     description: "Discover our handcrafted collection.",
   };
 
-  const subcategories = SUBCATEGORY_MAP[category] ?? ["All"];
+  // Fetch live subcategory counts from DB
+  const { data: subCounts } = trpc.products.subcategoryCounts.useQuery(
+    { category },
+    { staleTime: 60_000 }
+  );
+
+  // Build visible tabs: "All" always shown, others only if count > 0
+  const visibleTabs = useMemo(() => {
+    const displayMap = SUBCATEGORY_DISPLAY[category] ?? {};
+    const tabs: { key: string; label: string }[] = [{ key: "All", label: "All" }];
+    for (const [dbKey, displayLabel] of Object.entries(displayMap)) {
+      const count = subCounts?.[dbKey] ?? 0;
+      if (count > 0) {
+        tabs.push({ key: dbKey, label: displayLabel });
+      }
+    }
+    return tabs;
+  }, [category, subCounts]);
+
+  // Reset subcategory to "All" if the current selection is no longer visible
+  const activeTab = useMemo(() => {
+    if (subcategory === "All") return "All";
+    const found = visibleTabs.find((t) => t.key === subcategory);
+    return found ? subcategory : "All";
+  }, [subcategory, visibleTabs]);
 
   const { data: products, isLoading } = trpc.products.list.useQuery({
     category,
-    subcategory: subcategory !== "All" ? subcategory.toLowerCase() : undefined,
-    limit: 24,
+    subcategory: activeTab !== "All" ? activeTab : undefined,
+    limit: 100,
   });
 
   const sortedProducts = products ? [...products].sort((a, b) => {
@@ -77,8 +135,6 @@ export default function CategoryPage() {
     if (sortBy === "newest") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     return 0;
   }) : [];
-
-  const filteredProducts = sortedProducts;
 
   return (
     <StorefrontLayout>
@@ -96,38 +152,40 @@ export default function CategoryPage() {
         <p className="section-desc" style={{ margin: "0 auto" }}>{meta.description}</p>
       </div>
 
-      {/* Subcategory Tabs */}
-      <div style={{
-        display: "flex",
-        gap: "0",
-        padding: "0 clamp(16px, 5vw, 60px)",
-        background: "var(--ivory)",
-        borderBottom: "1px solid var(--linen-dark)",
-        overflowX: "auto",
-      }}>
-        {subcategories.map((sub) => (
-          <button
-            key={sub}
-            onClick={() => setSubcategory(sub)}
-            style={{
-              padding: "14px 20px",
-              fontSize: "9px",
-              fontWeight: 700,
-              letterSpacing: "2px",
-              textTransform: "uppercase",
-              color: subcategory === sub ? "var(--gold)" : "var(--text-muted)",
-              background: "transparent",
-              border: "none",
-              borderBottom: `2px solid ${subcategory === sub ? "var(--gold)" : "transparent"}`,
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {sub}
-          </button>
-        ))}
-      </div>
+      {/* Subcategory Tabs — only show if there are subcategories beyond "All" */}
+      {visibleTabs.length > 1 && (
+        <div style={{
+          display: "flex",
+          gap: "0",
+          padding: "0 clamp(16px, 5vw, 60px)",
+          background: "var(--ivory)",
+          borderBottom: "1px solid var(--linen-dark)",
+          overflowX: "auto",
+        }}>
+          {visibleTabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setSubcategory(tab.key)}
+              style={{
+                padding: "14px 20px",
+                fontSize: "9px",
+                fontWeight: 700,
+                letterSpacing: "2px",
+                textTransform: "uppercase",
+                color: activeTab === tab.key ? "var(--gold)" : "var(--text-muted)",
+                background: "transparent",
+                border: "none",
+                borderBottom: `2px solid ${activeTab === tab.key ? "var(--gold)" : "transparent"}`,
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Filter Bar */}
       <div className="filter-bar">
@@ -145,7 +203,7 @@ export default function CategoryPage() {
         </div>
 
         <span style={{ fontSize: "11px", color: "var(--text-muted)", marginLeft: "16px" }}>
-          {filteredProducts.length} piece{filteredProducts.length !== 1 ? "s" : ""}
+          {sortedProducts.length} piece{sortedProducts.length !== 1 ? "s" : ""}
         </span>
       </div>
 
@@ -154,9 +212,9 @@ export default function CategoryPage() {
         <div style={{ display: "flex", justifyContent: "center", padding: "clamp(40px, 6vw, 80px)" }}>
           <div className="loading-spinner" />
         </div>
-      ) : filteredProducts.length > 0 ? (
+      ) : sortedProducts.length > 0 ? (
         <div className="product-grid">
-          {filteredProducts.map((p) => (
+          {sortedProducts.map((p) => (
             <ProductCard
               key={p.id}
               id={p.id}
@@ -175,7 +233,7 @@ export default function CategoryPage() {
         <div className="empty-state" style={{ padding: "clamp(40px, 6vw, 80px) clamp(16px, 5vw, 60px)" }}>
           <h3>No Pieces Found</h3>
           <p>Try adjusting your filters or explore our other collections.</p>
-          <button className="btn-primary" style={{ marginTop: "24px" }} onClick={() => { setSubcategory("All"); }}>
+          <button className="btn-primary" style={{ marginTop: "24px" }} onClick={() => setSubcategory("All")}>
             Clear Filters
           </button>
         </div>

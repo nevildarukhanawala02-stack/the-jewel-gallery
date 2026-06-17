@@ -55,7 +55,7 @@ import {
   type SkuRow,
 } from "./db";
 import { products } from "../drizzle/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { COOKIE_NAME } from "@shared/const";
 import { storagePut } from "./storage";
 import { getSessionCookieOptions } from "./_core/cookies";
@@ -140,6 +140,24 @@ const productsRouter = router({
     .query(async ({ input }) => {
       const all = await getProducts({ category: input.category, isActive: true, limit: input.limit ?? 4 });
       return all.filter((p) => p.id !== input.excludeId).slice(0, input.limit ?? 4);
+    }),
+
+  // Returns a map of subcategory -> count for a given category (only active products)
+  subcategoryCounts: publicProcedure
+    .input(z.object({ category: z.enum(["rings", "necklaces", "earrings", "bracelets", "accessories"]) }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) return {} as Record<string, number>;
+      const rows = await db
+        .select({ subcategory: products.subcategory })
+        .from(products)
+        .where(and(eq(products.category, input.category), eq(products.isActive, true)));
+      const counts: Record<string, number> = {};
+      for (const row of rows) {
+        const sub = (row.subcategory ?? "").trim().toLowerCase();
+        if (sub) counts[sub] = (counts[sub] ?? 0) + 1;
+      }
+      return counts;
     }),
 
   // Fetch fresh image URLs for a list of product IDs (used by cart to avoid stale localStorage images)

@@ -354,3 +354,9 @@
 - [x] Run pixel analysis on all product images to detect white/grey background vs coloured/lifestyle backgrounds
 - [x] Reorder images array in DB: white/grey background close-ups always first, lifestyle/model images last (33 products updated)
 - [x] Verify home page, category pages, and subcategory pages show clean white-background images (products with no white bg still show coloured — no alternative available)
+
+## Scroll & Subcategory Fixes
+- [x] Scroll-to-top on every route change (ScrollToTop component in App.tsx using useLocation)
+- [x] Hide empty subcategory tabs dynamically — added products.subcategoryCounts tRPC procedure
+- [x] Fix SUBCATEGORY_DISPLAY map to match actual DB values (mangalsutra, necklace set, indian, contemporary, pearl for bracelets, etc.)
+- [x] Subcategory filter query now passes exact DB key (lowercase) so filtering works correctly
