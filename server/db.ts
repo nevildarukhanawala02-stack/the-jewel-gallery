@@ -66,6 +66,17 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+export async function getAdminByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db
+    .select()
+    .from(users)
+    .where(and(eq(users.email, email), eq(users.role, "admin")))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
 // ============================================================
 // PRODUCT HELPERS
 // ============================================================

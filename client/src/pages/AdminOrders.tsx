@@ -59,7 +59,7 @@ export default function AdminOrders() {
         <div style={{ color: "var(--gold)", fontSize: "48px" }}>◆</div>
         <h2 style={{ color: "var(--text-dark)", fontFamily: "var(--font-serif)", fontSize: "24px", margin: 0 }}>Session Expired</h2>
         <p style={{ color: "#aaa", fontSize: "14px", margin: 0, textAlign: "center", maxWidth: "320px" }}>Your session has expired. Please sign in again.</p>
-        <a href={getLoginUrl("/admin/orders")} style={{ background: "var(--gold)", color: "#fff", padding: "12px 32px", borderRadius: "4px", textDecoration: "none", fontWeight: 600, fontSize: "13px", letterSpacing: "0.1em" }}>SIGN IN</a>
+        <a href="/admin-login" style={{ background: "var(--gold)", color: "#fff", padding: "12px 32px", borderRadius: "4px", textDecoration: "none", fontWeight: 600, fontSize: "13px", letterSpacing: "0.1em" }}>SIGN IN</a>
         <a href="/" style={{ color: "#aaa", fontSize: "13px", textDecoration: "none" }}>Go to Homepage</a>
       </div>
     );

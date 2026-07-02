@@ -1,4 +1,3 @@
-import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { TRPCClientError } from "@trpc/client";
 import { useCallback, useEffect, useMemo } from "react";
@@ -9,7 +8,7 @@ type UseAuthOptions = {
 };
 
 export function useAuth(options?: UseAuthOptions) {
-  const { redirectOnUnauthenticated = false, redirectPath = getLoginUrl() } =
+  const { redirectOnUnauthenticated = false, redirectPath = "/admin-login" } =
     options ?? {};
   const utils = trpc.useUtils();
 
@@ -26,6 +25,8 @@ export function useAuth(options?: UseAuthOptions) {
 
   const logout = useCallback(async () => {
     try {
+      // Clear server-side session cookie
+      await fetch("/api/admin/logout", { method: "POST", credentials: "include" });
       await logoutMutation.mutateAsync();
     } catch (error: unknown) {
       if (
@@ -34,7 +35,6 @@ export function useAuth(options?: UseAuthOptions) {
       ) {
         return;
       }
-      throw error;
     } finally {
       utils.auth.me.setData(undefined, null);
       await utils.auth.me.invalidate();

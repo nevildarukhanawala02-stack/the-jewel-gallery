@@ -15,6 +15,7 @@ import ProductPage from "./pages/ProductPage";
 import CelebrityPage from "./pages/CelebrityPage";
 import CelebrityProfilePage from "./pages/CelebrityProfilePage";
 import LoginPage from "./pages/LoginPage";
+import AdminLoginPage from "./pages/AdminLoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import AccountPage from "./pages/AccountPage";
 import PoliciesPage from "./pages/PoliciesPage";
@@ -56,6 +57,7 @@ function Router() {
       <Route path="/celebrity" component={CelebrityPage} />
       <Route path="/celebrity/:slug" component={CelebrityProfilePage} />
       <Route path="/login" component={LoginPage} />
+      <Route path="/admin-login" component={AdminLoginPage} />
       <Route path="/register" component={RegisterPage} />
       <Route path="/account" component={AccountPage} />
       <Route path="/policies" component={PoliciesPage} />

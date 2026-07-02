@@ -1,65 +1,71 @@
+/**
+ * Admin auth routes - replaces Manus OAuth callback.
+ * POST /api/admin/login  → email + password → JWT session cookie
+ * POST /api/admin/logout → clears cookie
+ */
 import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import type { Express, Request, Response } from "express";
 import * as db from "../db";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
 
-function getQueryParam(req: Request, key: string): string | undefined {
-  const value = req.query[key];
-  return typeof value === "string" ? value : undefined;
-}
-
 export function registerOAuthRoutes(app: Express) {
-  app.get("/api/oauth/callback", async (req: Request, res: Response) => {
-    const code = getQueryParam(req, "code");
-    const state = getQueryParam(req, "state");
+  // ── Admin login ────────────────────────────────────────────
+  app.post("/api/admin/login", async (req: Request, res: Response) => {
+    const { email, password } = req.body as { email?: string; password?: string };
 
-    if (!code || !state) {
-      res.status(400).json({ error: "code and state are required" });
+    if (!email || !password) {
+      res.status(400).json({ error: "Email and password are required" });
       return;
     }
 
     try {
-      const tokenResponse = await sdk.exchangeCodeForToken(code, state);
-      const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
+      // Look up admin user by email
+      const user = await db.getAdminByEmail(email.toLowerCase().trim());
 
-      if (!userInfo.openId) {
-        res.status(400).json({ error: "openId missing from user info" });
+      if (!user || user.role !== "admin") {
+        res.status(401).json({ error: "Invalid credentials" });
         return;
       }
 
-      await db.upsertUser({
-        openId: userInfo.openId,
-        name: userInfo.name || null,
-        email: userInfo.email ?? null,
-        loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
-        lastSignedIn: new Date(),
-      });
+      // Verify password
+      if (!user.passwordHash) {
+        res.status(401).json({ error: "Account not set up for password login" });
+        return;
+      }
 
-      const sessionToken = await sdk.createSessionToken(userInfo.openId, {
-        name: userInfo.name || "",
+      const valid = await sdk.verifyPassword(password, user.passwordHash);
+      if (!valid) {
+        res.status(401).json({ error: "Invalid credentials" });
+        return;
+      }
+
+      // Create session token
+      const sessionToken = await sdk.createSessionToken(user.openId, {
+        name: user.name || email,
         expiresInMs: ONE_YEAR_MS,
       });
 
+      await db.upsertUser({ openId: user.openId, lastSignedIn: new Date() });
+
       const cookieOptions = getSessionCookieOptions(req);
       res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
-
-      // Extract optional returnPath from state (format: "redirectUri|/return/path")
-      let returnPath = "/";
-      try {
-        const decoded = Buffer.from(state, "base64").toString("utf-8");
-        const parts = decoded.split("|");
-        if (parts.length >= 2 && parts[1].startsWith("/")) {
-          returnPath = parts[1];
-        }
-      } catch {
-        // ignore decode errors, fall back to /
-      }
-
-      res.redirect(302, returnPath);
+      res.json({ success: true, name: user.name, role: user.role });
     } catch (error) {
-      console.error("[OAuth] Callback failed", error);
-      res.status(500).json({ error: "OAuth callback failed" });
+      console.error("[Admin Login] Failed:", error);
+      res.status(500).json({ error: "Login failed" });
     }
+  });
+
+  // ── Admin logout ───────────────────────────────────────────
+  app.post("/api/admin/logout", (req: Request, res: Response) => {
+    const cookieOptions = getSessionCookieOptions(req);
+    res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+    res.json({ success: true });
+  });
+
+  // ── Keep old callback path alive (redirects to home) ──────
+  app.get("/api/oauth/callback", (_req: Request, res: Response) => {
+    res.redirect("/");
   });
 }

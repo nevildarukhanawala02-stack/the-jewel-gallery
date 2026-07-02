@@ -39,6 +39,43 @@ async function startServer() {
   registerStorageProxy(app);
   registerOAuthRoutes(app);
 
+  // ── One-time admin setup (creates/resets admin password) ───────────────────
+  // Protected by ADMIN_SETUP_SECRET env var. Run once then remove or keep secret.
+  app.post("/api/admin/setup", async (req, res) => {
+    const { secret, email, password, name } = req.body as {
+      secret?: string; email?: string; password?: string; name?: string;
+    };
+    const setupSecret = process.env.ADMIN_SETUP_SECRET;
+    if (!setupSecret || secret !== setupSecret) {
+      res.status(403).json({ error: "Forbidden" });
+      return;
+    }
+    if (!email || !password || password.length < 8) {
+      res.status(400).json({ error: "email and password (min 8 chars) required" });
+      return;
+    }
+    try {
+      const { sdk } = await import("./sdk");
+      const { upsertUser } = await import("../db");
+      const passwordHash = await sdk.hashPassword(password);
+      const openId = `admin_${email.toLowerCase().replace(/[^a-z0-9]/g, "_")}`;
+      await upsertUser({
+        openId,
+        email: email.toLowerCase().trim(),
+        name: name || "Admin",
+        loginMethod: "password",
+        role: "admin",
+        passwordHash,
+        lastSignedIn: new Date(),
+      });
+      console.log(`[Admin Setup] Admin created/updated: ${email}`);
+      res.json({ success: true, message: `Admin account set up for ${email}` });
+    } catch (err) {
+      console.error("[Admin Setup] Failed:", err);
+      res.status(500).json({ error: "Setup failed" });
+    }
+  });
+
   // Hero image upload endpoint (admin only — requires valid Manus session cookie)
   const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
   app.post("/api/upload-hero", upload.single("file"), async (req, res) => {
