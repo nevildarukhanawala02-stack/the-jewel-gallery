@@ -1,0 +1,858 @@
+import { AdminLayout } from "./AdminDashboard";
+import AdminProductEditor from "./AdminProductEditor";
+import { trpc } from "@/lib/trpc";
+import { useState } from "react";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { getLoginUrl } from "../const";
+import { useLocation } from "wouter";
+import { toast } from "sonner";
+import { Search, Plus, Edit2, Eye, EyeOff, Settings, X, ChevronDown } from "lucide-react";
+
+const CATEGORY_TABS = [
+  { label: "All", value: undefined },
+  { label: "Rings", value: "rings" },
+  { label: "Necklaces", value: "necklaces" },
+  { label: "Earrings", value: "earrings" },
+  { label: "Bracelets", value: "bracelets" },
+  { label: "Accessories", value: "accessories" },
+];
+
+export default function AdminProducts() {
+  const { user, loading } = useAuth();
+  const [, navigate] = useLocation();
+  const [category, setCategory] = useState<string | undefined>(undefined);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
+  const [sortBy, setSortBy] = useState<"name" | "price_asc" | "price_desc" | "newest">("newest");
+  const [editingProduct, setEditingProduct] = useState<number | null>(null);
+  const [editValues, setEditValues] = useState<Record<number, { price: string; stock: string }>>({});
+  const [fullEditProductId, setFullEditProductId] = useState<number | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: "", slug: "", category: "rings", collection: "", price: "", stock: "0",
+    material: "", description: "", sku: "",
+  });
+
+  const { data: products, isLoading } = trpc.admin.getAllProducts.useQuery(
+    { category: category as "rings" | "necklaces" | "earrings" | "bracelets" | "accessories" | undefined },
+    { enabled: !!user }
+  );
+
+  const updateProductMutation = trpc.admin.updateProduct.useMutation();
+  const createProductMutation = trpc.admin.createProduct.useMutation();
+  const utils = trpc.useUtils();
+
+  if (loading) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", background: "#F8F5F0" }}>
+        <div style={{ color: "var(--gold)", fontSize: "24px" }}>◆</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "100vh", background: "#F8F5F0", gap: "24px" }}>
+        <div style={{ color: "var(--gold)", fontSize: "48px" }}>◆</div>
+        <h2 style={{ color: "var(--text-dark)", fontFamily: "var(--font-serif)", fontSize: "24px", margin: 0 }}>Session Expired</h2>
+        <p style={{ color: "#aaa", fontSize: "14px", margin: 0, textAlign: "center", maxWidth: "320px" }}>Your session has expired. Please sign in again.</p>
+        <a href={getLoginUrl("/admin/products")} style={{ background: "var(--gold)", color: "#fff", padding: "12px 32px", borderRadius: "4px", textDecoration: "none", fontWeight: 600, fontSize: "13px", letterSpacing: "0.1em" }}>SIGN IN</a>
+        <a href="/" style={{ color: "#aaa", fontSize: "13px", textDecoration: "none" }}>Go to Homepage</a>
+      </div>
+    );
+  }
+
+  const formatPrice = (p: number) =>
+    new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", minimumFractionDigits: 0 }).format(p);
+
+  const filteredProducts = (products ?? [])
+    .filter((p) => {
+      // Search across name, SKU, collection, subcategory
+      if (search) {
+        const q = search.toLowerCase();
+        const matches =
+          p.name.toLowerCase().includes(q) ||
+          (p.sku ?? "").toLowerCase().includes(q) ||
+          (p.collection ?? "").toLowerCase().includes(q) ||
+          (p.subcategory ?? "").toLowerCase().includes(q);
+        if (!matches) return false;
+      }
+      // Status filter
+      if (statusFilter === "active" && !p.isActive) return false;
+      if (statusFilter === "inactive" && p.isActive) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === "name") return a.name.localeCompare(b.name);
+      if (sortBy === "price_asc") return Number(a.price) - Number(b.price);
+      if (sortBy === "price_desc") return Number(b.price) - Number(a.price);
+      // newest = descending id
+      return b.id - a.id;
+    });
+
+  const hasActiveFilters = search || statusFilter !== "all" || category !== undefined;
+
+  const handleSaveEdit = async (productId: number) => {
+    const vals = editValues[productId];
+    if (!vals) return;
+    try {
+      await updateProductMutation.mutateAsync({
+        id: productId,
+        price: vals.price ? parseFloat(vals.price) : undefined,
+        stock: vals.stock !== undefined ? parseInt(vals.stock) : undefined,
+      });
+      utils.admin.getAllProducts.invalidate();
+      setEditingProduct(null);
+      toast.success("Product updated");
+    } catch {
+      toast.error("Failed to update product");
+    }
+  };
+
+  const handleToggleActive = async (productId: number, currentActive: boolean) => {
+    try {
+      await updateProductMutation.mutateAsync({ id: productId, isActive: !currentActive });
+      utils.admin.getAllProducts.invalidate();
+      toast.success(!currentActive ? "Product activated" : "Product deactivated");
+    } catch {
+      toast.error("Failed to update product");
+    }
+  };
+
+  const handleCreateProduct = async () => {
+    if (!newProduct.name || !newProduct.slug || !newProduct.price) {
+      toast.error("Name, slug, and price are required");
+      return;
+    }
+    try {
+      await createProductMutation.mutateAsync({
+        name: newProduct.name,
+        slug: newProduct.slug,
+        category: newProduct.category as "rings" | "necklaces" | "earrings" | "bracelets" | "accessories",
+        collection: newProduct.collection || undefined,
+        price: parseFloat(newProduct.price),
+        stock: parseInt(newProduct.stock) || 0,
+        material: newProduct.material || undefined,
+        description: newProduct.description || undefined,
+        sku: newProduct.sku || undefined,
+      });
+      utils.admin.getAllProducts.invalidate();
+      setShowAddModal(false);
+      setNewProduct({ name: "", slug: "", category: "rings", collection: "", price: "", stock: "0", material: "", description: "", sku: "" });
+      toast.success("Product created successfully");
+    } catch {
+      toast.error("Failed to create product");
+    }
+  };
+
+  return (
+    <>
+    <AdminLayout title="Products">
+      {/* Controls */}
+      <div style={{ marginBottom: "20px", background: "#fff", border: "1px solid var(--linen-dark)", padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+        {/* Row 1: Search + Add button */}
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+          <div style={{ position: "relative", flex: 1 }}>
+            <Search size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
+            <input
+              type="text"
+              placeholder="Search by name, SKU, collection or subcategory…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px 36px 10px 36px",
+                background: "#FAFAF8",
+                border: "1px solid rgba(201,169,110,0.25)",
+                color: "var(--text-dark)",
+                fontSize: "13px",
+                outline: "none",
+                boxSizing: "border-box",
+                transition: "border-color 0.2s",
+              }}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "var(--gold)")}
+              onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(201,169,110,0.25)")}
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", padding: "2px", display: "flex", alignItems: "center" }}
+              >
+                <X size={13} />
+              </button>
+            )}
+          </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            style={{
+              display: "flex", alignItems: "center", gap: "8px",
+              padding: "10px 18px", background: "var(--gold)", border: "none",
+              color: "var(--text-dark)", fontSize: "10px", fontWeight: 700,
+              letterSpacing: "1px", textTransform: "uppercase", cursor: "pointer",
+              whiteSpace: "nowrap", flexShrink: 0,
+            }}
+          >
+            <Plus size={14} /> Add Product
+          </button>
+        </div>
+
+        {/* Row 2: Category tabs + Status filter + Sort */}
+        <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+          {/* Category tabs */}
+          <div style={{ display: "flex", gap: "6px", overflowX: "auto", flexShrink: 0, alignItems: "center" }}>
+            {CATEGORY_TABS.map((tab) => (
+              <button
+                key={tab.label}
+                onClick={() => setCategory(tab.value)}
+                style={{
+                  padding: "6px 12px", fontSize: "9px", fontWeight: 700,
+                  letterSpacing: "1px", textTransform: "uppercase",
+                  background: category === tab.value ? "rgba(201,169,110,0.15)" : "transparent",
+                  border: `1px solid ${category === tab.value ? "var(--gold)" : "var(--linen-dark)"}`,
+                  color: category === tab.value ? "var(--gold)" : "var(--text-muted)",
+                  cursor: "pointer", whiteSpace: "nowrap", minHeight: "32px",
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Divider */}
+          <div style={{ width: "1px", height: "24px", background: "var(--linen-dark)", flexShrink: 0 }} />
+
+          {/* Status filter */}
+          <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+            <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "var(--text-muted)", whiteSpace: "nowrap" }}>Status:</span>
+            {(["all", "active", "inactive"] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                style={{
+                  padding: "5px 10px", fontSize: "9px", fontWeight: 700,
+                  letterSpacing: "1px", textTransform: "uppercase",
+                  background: statusFilter === s ? (s === "active" ? "rgba(16,185,129,0.12)" : s === "inactive" ? "rgba(239,68,68,0.1)" : "rgba(201,169,110,0.15)") : "transparent",
+                  border: `1px solid ${statusFilter === s ? (s === "active" ? "#10B981" : s === "inactive" ? "#EF4444" : "var(--gold)") : "var(--linen-dark)"}`,
+                  color: statusFilter === s ? (s === "active" ? "#10B981" : s === "inactive" ? "#EF4444" : "var(--gold)") : "var(--text-muted)",
+                  cursor: "pointer", minHeight: "32px",
+                }}
+              >
+                {s === "all" ? "All" : s === "active" ? "Active" : "Inactive"}
+              </button>
+            ))}
+          </div>
+
+          {/* Divider */}
+          <div style={{ width: "1px", height: "24px", background: "var(--linen-dark)", flexShrink: 0 }} />
+
+          {/* Sort */}
+          <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+            <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "var(--text-muted)", whiteSpace: "nowrap" }}>Sort:</span>
+            <div style={{ position: "relative" }}>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                style={{
+                  padding: "5px 28px 5px 10px", fontSize: "9px", fontWeight: 700,
+                  letterSpacing: "1px", textTransform: "uppercase",
+                  background: "transparent", border: "1px solid var(--linen-dark)",
+                  color: "var(--text-muted)", cursor: "pointer", minHeight: "32px",
+                  appearance: "none", outline: "none",
+                }}
+              >
+                <option value="newest">Newest First</option>
+                <option value="name">Name A–Z</option>
+                <option value="price_asc">Price Low–High</option>
+                <option value="price_desc">Price High–Low</option>
+              </select>
+              <ChevronDown size={11} style={{ position: "absolute", right: "8px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "var(--text-muted)" }} />
+            </div>
+          </div>
+
+          {/* Spacer + result count + clear */}
+          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ fontSize: "11px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+              {filteredProducts.length} of {(products ?? []).length} products
+            </span>
+            {hasActiveFilters && (
+              <button
+                onClick={() => { setSearch(""); setCategory(undefined); setStatusFilter("all"); }}
+                style={{
+                  display: "flex", alignItems: "center", gap: "4px",
+                  padding: "4px 10px", background: "transparent",
+                  border: "1px solid rgba(239,68,68,0.4)", color: "#EF4444",
+                  fontSize: "9px", fontWeight: 700, letterSpacing: "1px",
+                  textTransform: "uppercase", cursor: "pointer",
+                }}
+              >
+                <X size={10} /> Clear Filters
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Products — card list on mobile, table on desktop */}
+      <div style={{ background: "#fff", border: "1px solid var(--linen-dark)" }}>
+        {/* Desktop table header — hidden on mobile via CSS */}
+        <div className="admin-products-table-header" style={{ display: "grid", gridTemplateColumns: "2fr 80px 100px 100px 80px 80px 80px 120px", gap: "8px", padding: "10px 16px", borderBottom: "1px solid var(--linen-dark)" }}>
+          {["Product", "SKU", "Category", "Price", "Stock", "Best", "Status", "Actions"].map((h) => (
+            <div key={h} style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "var(--text-muted)" }}>
+              {h}
+            </div>
+          ))}
+        </div>
+
+        {isLoading ? (
+          <div style={{ padding: "60px", textAlign: "center", color: "var(--text-muted)" }}>
+            Loading products...
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div style={{ padding: "60px", textAlign: "center", color: "var(--text-muted)" }}>
+            No products found
+          </div>
+        ) : filteredProducts.map((product) => {
+          const isEditing = editingProduct === product.id;
+          return (
+            <div key={product.id} className="admin-product-item" style={{ borderBottom: "1px solid var(--linen-dark)", padding: "14px 16px" }}>
+              {/* Desktop row layout */}
+              <div className="admin-products-row" style={{ display: "grid", gridTemplateColumns: "2fr 80px 100px 100px 80px 80px 80px 120px", gap: "8px", alignItems: "center" }}>
+                {/* Product Name */}
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
+                  <div style={{
+                    width: "36px",
+                    height: "36px",
+                    background: "#F8F5F0",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--gold)",
+                    fontSize: "14px",
+                    flexShrink: 0,
+                    overflow: "hidden",
+                  }}>
+                    {Array.isArray(product.images) && product.images.length > 0 ? (
+                      <img src={product.images[0]} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : "◆"}
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: "12px", color: "var(--text-dark)", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{product.name}</div>
+                    {product.collection && (
+                      <div style={{ fontSize: "10px", color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{product.collection}</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* SKU */}
+                <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>{"—"}</div>
+
+                {/* Category */}
+                <div>
+                  <span style={{
+                    padding: "3px 8px",
+                    fontSize: "9px",
+                    fontWeight: 700,
+                    letterSpacing: "1px",
+                    textTransform: "uppercase",
+                    background: "rgba(201,169,110,0.1)",
+                    color: "var(--gold)",
+                    border: "1px solid rgba(201,169,110,0.2)",
+                  }}>
+                    {product.category}
+                  </span>
+                </div>
+
+                {/* Price */}
+                <div>
+                  {isEditing ? (
+                    <input
+                      type="number"
+                      value={editValues[product.id]?.price ?? String(product.price)}
+                      onChange={(e) => setEditValues((prev) => ({
+                        ...prev,
+                        [product.id]: { ...prev[product.id], price: e.target.value },
+                      }))}
+                      style={{
+                        width: "80px",
+                        padding: "6px 8px",
+                        background: "#F8F5F0",
+                        border: "1px solid rgba(201,169,110,0.4)",
+                        color: "var(--text-dark)",
+                        fontSize: "12px",
+                        outline: "none",
+                      }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: "13px", color: "var(--text-dark)", fontFamily: "var(--font-display)" }}>
+                      {formatPrice(Number(product.price))}
+                    </span>
+                  )}
+                </div>
+
+                {/* Stock */}
+                <div>
+                  {isEditing ? (
+                    <input
+                      type="number"
+                      value={editValues[product.id]?.stock ?? String(product.stock)}
+                      onChange={(e) => setEditValues((prev) => ({
+                        ...prev,
+                        [product.id]: { ...prev[product.id], stock: e.target.value },
+                      }))}
+                      style={{
+                        width: "60px",
+                        padding: "6px 8px",
+                        background: "#F8F5F0",
+                        border: "1px solid rgba(201,169,110,0.4)",
+                        color: "var(--text-dark)",
+                        fontSize: "12px",
+                        outline: "none",
+                      }}
+                    />
+                  ) : (
+                    <span style={{
+                      fontSize: "13px",
+                      color: product.stock === 0 ? "#EF4444" : product.stock <= 5 ? "#F97316" : "var(--text-dark)",
+                      fontWeight: product.stock <= 5 ? 700 : 400,
+                    }}>
+                      {product.stock}
+                    </span>
+                  )}
+                </div>
+
+                {/* Bestseller */}
+                <div style={{ textAlign: "center" }}>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await updateProductMutation.mutateAsync({ id: product.id, isBestseller: !product.isBestseller });
+                        utils.admin.getAllProducts.invalidate();
+                        toast.success(product.isBestseller ? "Removed from bestsellers" : "Added to bestsellers");
+                      } catch {
+                        toast.error("Failed to update");
+                      }
+                    }}
+                    title={product.isBestseller ? "Remove from bestsellers" : "Mark as bestseller"}
+                    style={{
+                      padding: "4px 8px",
+                      background: product.isBestseller ? "rgba(201,169,110,0.15)" : "transparent",
+                      border: `1px solid ${product.isBestseller ? "var(--gold)" : "var(--linen-dark)"}`,
+                      color: product.isBestseller ? "var(--gold)" : "var(--text-muted)",
+                      cursor: "pointer",
+                      fontSize: "9px",
+                      fontWeight: 700,
+                      letterSpacing: "1px",
+                      textTransform: "uppercase",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    {product.isBestseller ? "★ Yes" : "☆ No"}
+                  </button>
+                </div>
+
+                {/* Status */}
+                <div>
+                  <span style={{
+                    padding: "3px 8px",
+                    fontSize: "9px",
+                    fontWeight: 700,
+                    letterSpacing: "1px",
+                    textTransform: "uppercase",
+                    background: product.isActive ? "#10B98120" : "#EF444420",
+                    color: product.isActive ? "#10B981" : "#EF4444",
+                    border: `1px solid ${product.isActive ? "#10B98140" : "#EF444440"}`,
+                  }}>
+                    {product.isActive ? "Active" : "Inactive"}
+                  </span>
+                </div>
+
+                {/* Actions */}
+                <div style={{ display: "flex", gap: "6px" }}>
+                  {isEditing ? (
+                    <>
+                      <button
+                        onClick={() => handleSaveEdit(product.id)}
+                        style={{
+                          padding: "6px 12px",
+                          background: "var(--gold)",
+                          border: "none",
+                          color: "var(--text-dark)",
+                          fontSize: "10px",
+                          fontWeight: 700,
+                          cursor: "pointer",
+                        }}
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setEditingProduct(null)}
+                        style={{
+                          padding: "6px 10px",
+                          background: "transparent",
+                          border: "1px solid var(--linen-dark)",
+                          color: "var(--text-muted)",
+                          fontSize: "10px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setFullEditProductId(product.id)}
+                        title="Full Edit"
+                        style={{
+                          padding: "6px",
+                          background: "var(--gold)",
+                          border: "1px solid var(--gold)",
+                          color: "#fff",
+                          cursor: "pointer",
+                          minWidth: "32px",
+                          minHeight: "32px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Settings size={12} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingProduct(product.id);
+                          setEditValues((prev) => ({
+                            ...prev,
+                            [product.id]: { price: String(product.price), stock: String(product.stock) },
+                          }));
+                        }}
+                        title="Edit price & stock"
+                        style={{
+                          padding: "6px",
+                          background: "transparent",
+                          border: "1px solid var(--linen-dark)",
+                          color: "var(--text-muted)",
+                          cursor: "pointer",
+                          minWidth: "32px",
+                          minHeight: "32px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Edit2 size={12} />
+                      </button>
+                      <button
+                        onClick={() => handleToggleActive(product.id, product.isActive ?? true)}
+                        title={product.isActive ? "Deactivate" : "Activate"}
+                        style={{
+                          padding: "6px",
+                          background: "transparent",
+                          border: "1px solid var(--linen-dark)",
+                          color: product.isActive ? "#10B981" : "var(--text-muted)",
+                          cursor: "pointer",
+                          minWidth: "32px",
+                          minHeight: "32px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {product.isActive ? <Eye size={12} /> : <EyeOff size={12} />}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Mobile card layout — shown only on small screens */}
+              <div className="admin-products-card" style={{ display: "none" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>
+                  <div style={{
+                    width: "48px",
+                    height: "48px",
+                    background: "#F8F5F0",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--gold)",
+                    fontSize: "18px",
+                    flexShrink: 0,
+                    overflow: "hidden",
+                  }}>
+                    {Array.isArray(product.images) && product.images.length > 0 ? (
+                      <img src={product.images[0]} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : "◆"}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: "13px", color: "var(--text-dark)", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{product.name}</div>
+                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "4px" }}>
+                      <span style={{ padding: "2px 7px", fontSize: "9px", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", background: "rgba(201,169,110,0.1)", color: "var(--gold)", border: "1px solid rgba(201,169,110,0.2)" }}>
+                        {product.category}
+                      </span>
+                      <span style={{ padding: "2px 7px", fontSize: "9px", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", background: product.isActive ? "#10B98120" : "#EF444420", color: product.isActive ? "#10B981" : "#EF4444", border: `1px solid ${product.isActive ? "#10B98140" : "#EF444440"}` }}>
+                        {product.isActive ? "Active" : "Inactive"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "10px" }}>
+                  <div style={{ background: "#F8F5F0", padding: "10px 12px" }}>
+                    <div style={{ fontSize: "9px", color: "var(--text-muted)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "4px" }}>Price</div>
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        value={editValues[product.id]?.price ?? String(product.price)}
+                        onChange={(e) => setEditValues((prev) => ({ ...prev, [product.id]: { ...prev[product.id], price: e.target.value } }))}
+                        style={{ width: "100%", padding: "6px 8px", background: "#fff", border: "1px solid rgba(201,169,110,0.4)", color: "var(--text-dark)", fontSize: "13px", outline: "none", boxSizing: "border-box" }}
+                      />
+                    ) : (
+                      <div style={{ fontSize: "14px", color: "var(--text-dark)", fontFamily: "var(--font-display)" }}>{formatPrice(Number(product.price))}</div>
+                    )}
+                  </div>
+                  <div style={{ background: "#F8F5F0", padding: "10px 12px" }}>
+                    <div style={{ fontSize: "9px", color: "var(--text-muted)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "4px" }}>Stock</div>
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        value={editValues[product.id]?.stock ?? String(product.stock)}
+                        onChange={(e) => setEditValues((prev) => ({ ...prev, [product.id]: { ...prev[product.id], stock: e.target.value } }))}
+                        style={{ width: "100%", padding: "6px 8px", background: "#fff", border: "1px solid rgba(201,169,110,0.4)", color: "var(--text-dark)", fontSize: "13px", outline: "none", boxSizing: "border-box" }}
+                      />
+                    ) : (
+                      <div style={{ fontSize: "14px", color: product.stock === 0 ? "#EF4444" : product.stock <= 5 ? "#F97316" : "var(--text-dark)", fontWeight: product.stock <= 5 ? 700 : 400 }}>{product.stock}</div>
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                  {isEditing ? (
+                    <>
+                      <button onClick={() => handleSaveEdit(product.id)} style={{ flex: 1, padding: "10px", background: "var(--gold)", border: "none", color: "var(--text-dark)", fontSize: "11px", fontWeight: 700, cursor: "pointer", letterSpacing: "1px", textTransform: "uppercase" }}>Save</button>
+                      <button onClick={() => setEditingProduct(null)} style={{ padding: "10px 16px", background: "transparent", border: "1px solid var(--linen-dark)", color: "var(--text-muted)", fontSize: "11px", cursor: "pointer" }}>Cancel</button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setFullEditProductId(product.id)}
+                        style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 14px", background: "var(--gold)", border: "1px solid var(--gold)", color: "#fff", fontSize: "11px", cursor: "pointer", fontWeight: 600 }}
+                      >
+                        <Edit2 size={12} /> Full Edit
+                      </button>
+                      <button
+                        onClick={() => handleToggleActive(product.id, product.isActive ?? true)}
+                        style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 14px", background: "transparent", border: "1px solid var(--linen-dark)", color: product.isActive ? "#10B981" : "var(--text-muted)", fontSize: "11px", cursor: "pointer" }}
+                      >
+                        {product.isActive ? <><Eye size={12} /> Active</> : <><EyeOff size={12} /> Inactive</>}
+                      </button>
+                      <button
+                        onClick={async () => {
+                          try {
+                            await updateProductMutation.mutateAsync({ id: product.id, isBestseller: !product.isBestseller });
+                            utils.admin.getAllProducts.invalidate();
+                            toast.success(product.isBestseller ? "Removed from bestsellers" : "Added to bestsellers");
+                          } catch { toast.error("Failed to update"); }
+                        }}
+                        style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 14px", background: product.isBestseller ? "rgba(201,169,110,0.15)" : "transparent", border: `1px solid ${product.isBestseller ? "rgba(201,169,110,0.4)" : "rgba(255,255,255,0.15)"}`, color: product.isBestseller ? "var(--gold)" : "var(--text-muted)", fontSize: "11px", cursor: "pointer" }}
+                      >
+                        {product.isBestseller ? "★ Bestseller" : "☆ Bestseller"}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Add Product Modal */}
+      {showAddModal && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,0.85)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
+          padding: "16px",
+          boxSizing: "border-box",
+        }}>
+          <div className="admin-products-modal" style={{
+            background: "#fff",
+            border: "1px solid rgba(201,169,110,0.2)",
+            padding: "28px",
+            width: "600px",
+            maxWidth: "100%",
+            maxHeight: "90vh",
+            overflowY: "auto",
+            boxSizing: "border-box",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 300, color: "var(--text-dark)", margin: 0 }}>
+                Add New Product
+              </h2>
+              <button onClick={() => setShowAddModal(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "24px", lineHeight: 1, padding: "4px", minWidth: "36px", minHeight: "36px" }}>×</button>
+            </div>
+
+            <div className="admin-products-modal-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+              {[
+                { label: "Product Name *", key: "name", type: "text", placeholder: "e.g. Celestial Solitaire Ring" },
+                { label: "Slug *", key: "slug", type: "text", placeholder: "e.g. celestial-solitaire-ring" },
+                { label: "Price (₹) *", key: "price", type: "number", placeholder: "e.g. 4500" },
+                { label: "Stock", key: "stock", type: "number", placeholder: "e.g. 10" },
+                { label: "Collection", key: "collection", type: "text", placeholder: "e.g. Celestial Collection" },
+                { label: "Material", key: "material", type: "text", placeholder: "e.g. Gold Plated" },
+                { label: "SKU", key: "sku", type: "text", placeholder: "e.g. TJG-RNG-001" },
+              ].map((field) => (
+                <div key={field.key} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <label style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "var(--text-muted)" }}>
+                    {field.label}
+                  </label>
+                  <input
+                    type={field.type}
+                    placeholder={field.placeholder}
+                    value={newProduct[field.key as keyof typeof newProduct]}
+                    onChange={(e) => setNewProduct((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                    style={{
+                      padding: "10px 12px",
+                      background: "#F8F5F0",
+                      border: "1px solid rgba(201,169,110,0.2)",
+                      color: "var(--text-dark)",
+                      fontSize: "13px",
+                      outline: "none",
+                    }}
+                  />
+                </div>
+              ))}
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                <label style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "var(--text-muted)" }}>
+                  Category *
+                </label>
+                <select
+                  value={newProduct.category}
+                  onChange={(e) => setNewProduct((prev) => ({ ...prev, category: e.target.value }))}
+                  style={{
+                    padding: "10px 12px",
+                    background: "#F8F5F0",
+                    border: "1px solid rgba(201,169,110,0.2)",
+                    color: "var(--text-dark)",
+                    fontSize: "13px",
+                    outline: "none",
+                  }}
+                >
+                  <option value="rings">Rings</option>
+                  <option value="necklaces">Necklaces</option>
+                  <option value="earrings">Earrings</option>
+                  <option value="bracelets">Bracelets</option>
+                  <option value="accessories">Accessories</option>
+                </select>
+              </div>
+
+              <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: "6px" }}>
+                <label style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "var(--text-muted)" }}>
+                  Description
+                </label>
+                <textarea
+                  placeholder="Product description..."
+                  value={newProduct.description}
+                  onChange={(e) => setNewProduct((prev) => ({ ...prev, description: e.target.value }))}
+                  rows={3}
+                  style={{
+                    padding: "10px 12px",
+                    background: "#F8F5F0",
+                    border: "1px solid rgba(201,169,110,0.2)",
+                    color: "var(--text-dark)",
+                    fontSize: "13px",
+                    outline: "none",
+                    resize: "vertical",
+                    fontFamily: "var(--font-body)",
+                  }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
+              <button
+                onClick={handleCreateProduct}
+                style={{
+                  flex: 1,
+                  padding: "13px",
+                  background: "var(--gold)",
+                  border: "none",
+                  color: "var(--text-dark)",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "1px",
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                }}
+              >
+                Create Product
+              </button>
+              <button
+                onClick={() => setShowAddModal(false)}
+                style={{
+                  padding: "13px 20px",
+                  background: "transparent",
+                  border: "1px solid var(--linen-dark)",
+                  color: "var(--text-muted)",
+                  fontSize: "11px",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </AdminLayout>
+
+    {/* Full Product Editor slide-over */}
+
+    {fullEditProductId !== null && (() => {
+      const p = products?.find((x) => x.id === fullEditProductId);
+      if (!p) return null;
+      return (
+        <AdminProductEditor
+          product={{
+            ...p,
+            price: String(p.price),
+            comparePrice: p.comparePrice ? String(p.comparePrice) : null,
+            sku: p.sku ?? null,
+            collection: p.collection ?? null,
+            subcategory: p.subcategory ?? null,
+            description: p.description ?? null,
+            shortDescription: p.shortDescription ?? null,
+            material: p.material ?? null,
+            gemstone: p.gemstone ?? null,
+            weight: p.weight ?? null,
+            dimensions: p.dimensions ?? null,
+            images: Array.isArray(p.images) ? p.images : null,
+            imageTypes: Array.isArray(p.imageTypes) ? p.imageTypes as Array<'product'|'model'|'lifestyle'> : null,
+            isFeatured: p.isFeatured ?? false,
+            isNewArrival: p.isNewArrival ?? false,
+            isBestseller: p.isBestseller ?? false,
+            isActive: p.isActive ?? true,
+            part1Headline: p.part1Headline ?? null,
+            part2WhatsInside: p.part2WhatsInside ?? null,
+            part3AsWorn: p.part3AsWorn ?? null,
+            metaTitle: p.metaTitle ?? null,
+            metaDescription: p.metaDescription ?? null,
+          }}
+          onClose={() => setFullEditProductId(null)}
+          onSaved={() => {
+            setFullEditProductId(null);
+            utils.admin.getAllProducts.invalidate();
+            toast.success("Product saved successfully");
+          }}
+        />
+      );
+    })()}
+    </>
+  );
+}

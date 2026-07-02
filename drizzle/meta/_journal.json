@@ -1,0 +1,55 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1778745542502,
+      "tag": "0000_sudden_mathemanic",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1778745722512,
+      "tag": "0001_secret_mentor",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1778745744412,
+      "tag": "0002_brainy_mandrill",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1778751745110,
+      "tag": "0003_glamorous_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1778761162210,
+      "tag": "0004_sour_mercury",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1779955575986,
+      "tag": "0005_furry_sugar_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1780910586889,
+      "tag": "0006_spicy_prodigy",
+      "breakpoints": true
+    }
+  ]
+}
