@@ -18,8 +18,8 @@ const NAV_LINKS = [
 export default function Navigation() {
   const { totalItems } = useCart();
   const { customer, logout } = useCustomerAuth();
-  const { user: manusUser } = useAuth();
-  const isAdmin = manusUser?.role === "admin";
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [location, navigate] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);

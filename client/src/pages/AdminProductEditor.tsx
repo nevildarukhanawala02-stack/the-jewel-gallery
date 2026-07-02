@@ -563,7 +563,7 @@ export default function AdminProductEditor({ product, onClose, onSaved }: Props)
                     {form.metaTitle || form.name} — The Jewel Gallery
                   </div>
                   <div style={{ fontSize: 12, color: "#006621", marginBottom: 4 }}>
-                    jewelshop-dwan7zv7.manus.space/product/{form.slug}
+                    your-railway-domain.up.railway.app/product/{form.slug}
                   </div>
                   <div style={{ fontSize: 13, color: "#545454" }}>
                     {form.metaDescription || form.shortDescription || form.description?.slice(0, 160) || "No description set."}

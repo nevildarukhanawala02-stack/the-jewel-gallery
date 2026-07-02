@@ -921,7 +921,7 @@ const newsletterRouter = router({
 const siteSettingsRouter = router({
   getHeroImage: publicProcedure.query(async () => {
     const url = await getSiteSetting("hero_image_url");
-    return { url: url ?? "/manus-storage/hero_banner_5729f2e3.webp" };
+    return { url: url ?? "" };
   }),
   updateHeroImage: protectedProcedure
     .input(z.object({ url: z.string().min(1) }))

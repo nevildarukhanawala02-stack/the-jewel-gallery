@@ -645,7 +645,7 @@ export default function AdminDashboard() {
             <div style={{ fontSize: "11px", color: "var(--text-muted)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "10px" }}>Current Image</div>
             <div style={{ width: "100%", aspectRatio: "16/9", background: "var(--linen)", borderRadius: "4px", overflow: "hidden", border: "1px solid var(--linen-dark)" }}>
               <img
-                src={heroPreview ?? heroData?.url ?? "/manus-storage/hero_banner_5729f2e3.webp"}
+                src={heroPreview ?? heroData?.url ?? "/images/hero-banner.webp"}
                 alt="Current hero"
                 style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
               />

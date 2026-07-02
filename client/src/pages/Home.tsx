@@ -35,9 +35,9 @@ export default function Home() {
 
   // Store slideshow state (swipe-controlled)
   const storeImages = [
-    { src: "/manus-storage/26645fd1-22b1-4c2a-81a0-216a90951a19_14da8fd8.jpg", alt: "The Jewel Gallery store 1" },
-    { src: "/manus-storage/2a5948fc-1ebb-4d8c-b7a1-ec3f922242e9_383065c3.jpg", alt: "The Jewel Gallery store 2" },
-    { src: "/manus-storage/9e0b2ca6-6e2c-494f-96a6-a420ad039ffb_133a30ec.jpg", alt: "The Jewel Gallery store 3" },
+    { src: "/images/store-1.jpg", alt: "The Jewel Gallery store 1" },
+    { src: "/images/store-2.jpg", alt: "The Jewel Gallery store 2" },
+    { src: "/images/store-3.jpg", alt: "The Jewel Gallery store 3" },
   ];
   const [slideIndex, setSlideIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -65,7 +65,7 @@ export default function Home() {
   const { data: celebrities } = trpc.celebrities.list.useQuery({});
 
   const { data: heroData } = trpc.siteSettings.getHeroImage.useQuery();  
-  const heroImageUrl = heroData?.url ?? "/manus-storage/hero_banner_5729f2e3.webp";
+  const heroImageUrl = heroData?.url ?? "/images/hero-banner.webp";
 
   const categoryFilter = activeTab === "All" ? undefined : activeTab.toLowerCase() as "rings" | "necklaces" | "earrings" | "bracelets";
 

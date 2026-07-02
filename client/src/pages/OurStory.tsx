@@ -7,43 +7,43 @@ const CELEBRITIES = [
     name: "Poonam Pandey",
     designation: "Actress & Model",
     slug: "poonam-pandey",
-    imageUrl: "/manus-storage/poonam-pandey-photo-untitled-design_54ed3361.jpg",
+    imageUrl: "/images/celebrity-poonam-pandey.jpg",
     quote: "The Jewel Gallery pieces feel like they were made for me — every stone tells a story.",
   },
   {
     name: "Isha Koppikar",
     designation: "Actress",
     slug: "isha-koppikar",
-    imageUrl: "/manus-storage/isha-koppikar-photo-untitled-design_7435eb2a.jpg",
+    imageUrl: "/images/celebrity-isha-koppikar.jpg",
     quote: "Timeless craftsmanship that elevates every look — from red carpet to everyday elegance.",
   },
   {
     name: "Bindu Madhavi",
     designation: "Actress",
     slug: "bindu-madhavi",
-    imageUrl: "/manus-storage/bindu-madhavi-photo-untitled-design_f955b960.jpg",
+    imageUrl: "/images/celebrity-bindu-madhavi.jpg",
     quote: "I love how each piece blends traditional artistry with a modern, wearable sensibility.",
   },
   {
     name: "Neha Chudasama",
     designation: "Model & Actress",
     slug: "neha-chudasama",
-    imageUrl: "/manus-storage/neha-chudasama-photo-untitled-design_d7581956.jpg",
+    imageUrl: "/images/celebrity-neha-chudasama.jpg",
     quote: "Statement pieces that make you feel powerful the moment you put them on.",
   },
   {
     name: "Avneet Kaur",
     designation: "Actress & Influencer",
     slug: "avneet-kaur",
-    imageUrl: "/manus-storage/avneet-kaur-photo-untitled-design_36863a4d.jpg",
+    imageUrl: "/images/celebrity-avneet-kaur.jpg",
     quote: "Classic elegance meets modern trends — The Jewel Gallery always delivers.",
   },
 ];
 
 const STORY_CAROUSEL_IMAGES = [
-  { src: "/manus-storage/jewel-necklace-set_284826f4.jpeg", alt: "Lakshmi necklace set with jhumka earrings" },
-  { src: "/manus-storage/jewel-pendant-closeup_59672be1.jpeg", alt: "Lakshmi pendant closeup — intricate gold craftsmanship" },
-  { src: "/manus-storage/jewel-earrings_ac342940.jpeg", alt: "Lakshmi jhumka earrings with emerald beads" },
+  { src: "/images/jewel-necklace-set.jpg", alt: "Lakshmi necklace set with jhumka earrings" },
+  { src: "/images/jewel-pendant-closeup.jpg", alt: "Lakshmi pendant closeup — intricate gold craftsmanship" },
+  { src: "/images/jewel-earrings.jpg", alt: "Lakshmi jhumka earrings with emerald beads" },
 ];
 
 const BRAND_PILLARS = [
@@ -468,7 +468,7 @@ export default function OurStory() {
           }}>
             <div style={{ height: "280px", overflow: "hidden" }}>
               <img
-                src="/manus-storage/2a5948fc-1ebb-4d8c-b7a1-ec3f922242e9_383065c3.jpg"
+                src="/images/store-2.jpg"
                 alt="The Jewel Gallery — Lokhandwala Market, Mumbai"
                 style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.6s ease" }}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1.04)"; }}
@@ -525,7 +525,7 @@ export default function OurStory() {
           }}>
             <div style={{ height: "280px", overflow: "hidden" }}>
               <img
-                src="/manus-storage/9e0b2ca6-6e2c-494f-96a6-a420ad039ffb_133a30ec.jpg"
+                src="/images/store-3.jpg"
                 alt="The Jewel Gallery — InOrbit Mall, Hyderabad"
                 style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.6s ease" }}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1.04)"; }}

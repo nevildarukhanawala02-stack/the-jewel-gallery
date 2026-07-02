@@ -18,20 +18,20 @@ const STATUS_LABELS: Record<string, string> = {
 export default function AccountPage() {
   const [, navigate] = useLocation();
   const { customer, logout, isAuthenticated, loading } = useCustomerAuth();
-  const { user: manusUser, loading: manusLoading } = useAuth();
-  const isAdmin = manusUser?.role === "admin";
+  const { user, loading: authLoading } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [activeTab, setActiveTab] = useState("orders");
 
   useEffect(() => {
     // Wait for BOTH auth systems to resolve before deciding to redirect
-    if (manusLoading || loading) return;
+    if (authLoading || loading) return;
     // Admins don't need a customer session — let them through
     if (isAdmin) return;
     // Non-admin, not authenticated as customer → send to login
     if (!isAuthenticated) {
       navigate("/login");
     }
-  }, [isAuthenticated, loading, navigate, isAdmin, manusLoading]);
+  }, [isAuthenticated, loading, navigate, isAdmin, authLoading]);
 
   const { data: orders, isLoading: ordersLoading } = trpc.orders.myOrders.useQuery(
     { token: localStorage.getItem("tjg_customer_token") ?? "" },
@@ -57,7 +57,7 @@ export default function AccountPage() {
         }}>
           <div className="section-eyebrow">Admin Access</div>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: "36px", fontWeight: 300, color: "var(--text-dark)" }}>
-            Welcome, <em style={{ color: "var(--gold)", fontStyle: "italic" }}>{manusUser?.name?.split(" ")[0] ?? "Admin"}</em>
+            Welcome, <em style={{ color: "var(--gold)", fontStyle: "italic" }}>{user?.name?.split(" ")[0] ?? "Admin"}</em>
           </h1>
           <p style={{ fontSize: "14px", color: "var(--text-muted)", maxWidth: "400px", lineHeight: 1.7 }}>
             You are signed in as an administrator. Access the backend dashboard to manage products, orders, celebrities, and more.
@@ -78,7 +78,7 @@ export default function AccountPage() {
     );
   }
 
-  if (loading || manusLoading || !customer) {
+  if (loading || authLoading || !customer) {
     return (
       <StorefrontLayout>
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
