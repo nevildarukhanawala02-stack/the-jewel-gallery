@@ -461,7 +461,7 @@ export default function AdminProductEditor({ product, onClose, onSaved }: Props)
                     key={img.url}
                     style={{
                       border: "1px solid var(--linen-dark)",
-                      borderRadius: 6, overflow: "hidden", background: "#fff",
+                      borderRadius: 6, background: "#fff",
                       position: "relative",
                     }}
                   >
