@@ -131,22 +131,19 @@ export default function AdminProductEditor({ product, onClose, onSaved }: Props)
     }
   }, [product.id, uploadImageMutation]);
 
-  // ── Drag-and-drop reorder ─────────────────────────────────────
+  // ── Drag-and-drop reorder (mouse-event based for reliability) ──
   const handleDragStart = (i: number) => setDragIndex(i);
-  const handleDragOver = (e: React.DragEvent, i: number) => {
-    e.preventDefault();
+  const handleDragEnter = (i: number) => {
+    if (dragIndex === null || dragIndex === i) return;
     setDragOverIndex(i);
   };
-  const handleDrop = (i: number) => {
-    if (dragIndex === null || dragIndex === i) return;
-    const next = [...images];
-    const [moved] = next.splice(dragIndex, 1);
-    next.splice(i, 0, moved);
-    setImages(next);
-    setDragIndex(null);
-    setDragOverIndex(null);
-  };
   const handleDragEnd = () => {
+    if (dragIndex !== null && dragOverIndex !== null && dragIndex !== dragOverIndex) {
+      const next = [...images];
+      const [moved] = next.splice(dragIndex, 1);
+      next.splice(dragOverIndex, 0, moved);
+      setImages(next);
+    }
     setDragIndex(null);
     setDragOverIndex(null);
   };
@@ -473,10 +470,9 @@ export default function AdminProductEditor({ product, onClose, onSaved }: Props)
                   <div
                     key={img.url}
                     draggable
-                    onDragStart={(e) => { e.dataTransfer.effectAllowed = "move"; handleDragStart(i); }}
-                    onDragOver={(e) => handleDragOver(e, i)}
-                    onDragLeave={() => setDragOverIndex(null)}
-                    onDrop={(e) => { e.preventDefault(); handleDrop(i); }}
+                    onDragStart={(e) => { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(i)); handleDragStart(i); }}
+                    onDragEnter={() => handleDragEnter(i)}
+                    onDragOver={(e) => e.preventDefault()}
                     onDragEnd={handleDragEnd}
                     style={{
                       border: dragOverIndex === i ? "2px solid var(--gold)" : "1px solid var(--linen-dark)",
@@ -508,7 +504,7 @@ export default function AdminProductEditor({ product, onClose, onSaved }: Props)
                       src={img.url}
                       alt={`Photo ${i + 1}`}
                       draggable={false}
-                      style={{ width: "100%", aspectRatio: "1", objectFit: "cover", display: "block", pointerEvents: "none" }}
+                      style={{ width: "100%", aspectRatio: "1", objectFit: "cover", display: "block", userSelect: "none" }}
                     />
                     {/* Type selector */}
                     <div style={{ padding: "6px 8px" }}>
