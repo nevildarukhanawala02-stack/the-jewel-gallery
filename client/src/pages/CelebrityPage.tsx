@@ -70,17 +70,9 @@ export default function CelebrityPage() {
         borderBottom: "1px solid var(--linen-dark)",
         borderTop: "1px solid var(--linen-dark)",
       }}>
-        <div style={{
-          maxWidth: "1400px",
-          margin: "0 auto",
-          display: "flex",
-          gap: "40px",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-        }}>
+        <div className="celeb-filter-bar">
           {/* Search */}
-          <div style={{ flex: 1, minWidth: "280px" }}>
+          <div className="celeb-filter-search">
             <input
               type="text"
               placeholder="Search by celebrity name..."
@@ -103,7 +95,7 @@ export default function CelebrityPage() {
           </div>
 
           {/* Filters */}
-          <div style={{ display: "flex", gap: "16px", alignItems: "center", flexWrap: "wrap" }}>
+          <div className="celeb-filter-dropdowns">
             <span style={{
               fontSize: "11px",
               fontWeight: 700,

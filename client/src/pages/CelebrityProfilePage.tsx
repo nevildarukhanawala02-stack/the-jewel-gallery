@@ -119,21 +119,9 @@ export default function CelebrityProfilePage() {
         </div>
 
         {/* Hero Section */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "60px",
-          alignItems: "center",
-          marginBottom: "80px",
-        }}>
+        <div className="celeb-profile-hero">
           {/* Hero Image */}
-          <div style={{
-            width: "100%",
-            height: "500px",
-            background: "var(--ivory-deep)",
-            border: "1px solid var(--linen-dark)",
-            overflow: "hidden",
-          }}>
+          <div className="celeb-profile-hero-img">
             {profile.imageUrl ? (
               <img
                 src={profile.imageUrl}
@@ -278,22 +266,7 @@ export default function CelebrityProfilePage() {
                   {profile.name} wearing The Jewel Gallery
                 </p>
               </div>
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: galleryUrls.length === 1
-                  ? "1fr"
-                  : galleryUrls.length === 2
-                  ? "1fr 1fr"
-                  : galleryUrls.length === 3
-                  ? "2fr 1fr 1fr"
-                  : galleryUrls.length === 4
-                  ? "1fr 1fr 1fr 1fr"
-                  : galleryUrls.length === 5
-                  ? "2fr 1fr 1fr 1fr 1fr"
-                  : "2fr 1fr 1fr 1fr 1fr 1fr",
-                gap: "12px",
-                alignItems: "stretch",
-              }}>
+              <div className={`celeb-profile-gallery celeb-profile-gallery-${Math.min(galleryUrls.length, 6)}`}>
                 {galleryUrls.map((url, idx) => (
                   <GalleryImageItem key={url} url={url} featured={idx === 0} />
                 ))}
@@ -319,12 +292,7 @@ export default function CelebrityProfilePage() {
         </div>
 
         {linkedProducts.length > 0 ? (
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "40px",
-            marginBottom: "60px",
-          }}>
+          <div className="celeb-profile-products">
             {linkedProducts.map((row) => {
               const p = row.product;
               return (
@@ -438,11 +406,7 @@ export default function CelebrityProfilePage() {
             }}>
               Explore Other Celebrity Looks
             </h2>
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: "24px",
-            }}>
+            <div className="celeb-profile-related">
               {relatedCelebrities.map((c) => (
                 <div
                   key={c.id}
