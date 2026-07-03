@@ -17,7 +17,7 @@ COPY patches ./patches/
 # Install ALL dependencies (including devDependencies for build)
 RUN pnpm install --frozen-lockfile
 
-# Copy source code
+# Copy source code (cache-bust: 1783102695)
 COPY . .
 
 # Build frontend (Vite) and backend (tsc/esbuild)
