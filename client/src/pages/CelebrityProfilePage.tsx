@@ -178,7 +178,7 @@ export default function CelebrityProfilePage() {
             )}
 
             {/* Stats */}
-            <div style={{ display: "flex", gap: "40px", marginTop: "32px" }}>
+            <div style={{ display: "flex", gap: "24px", marginTop: "32px", flexWrap: "wrap" }}>
               <div>
                 <div style={{
                   fontFamily: "var(--font-display)",

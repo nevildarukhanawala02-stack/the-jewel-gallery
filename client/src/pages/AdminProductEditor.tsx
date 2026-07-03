@@ -88,8 +88,7 @@ export default function AdminProductEditor({ product, onClose, onSaved }: Props)
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [dragIndex, setDragIndex] = useState<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
   const [activeTab, setActiveTab] = useState<"content" | "photos" | "seo">("content");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -131,21 +130,13 @@ export default function AdminProductEditor({ product, onClose, onSaved }: Props)
     }
   }, [product.id, uploadImageMutation]);
 
-  // ── Drag-and-drop reorder (mouse-event based for reliability) ──
-  const handleDragStart = (i: number) => setDragIndex(i);
-  const handleDragEnter = (i: number) => {
-    if (dragIndex === null || dragIndex === i) return;
-    setDragOverIndex(i);
-  };
-  const handleDragEnd = () => {
-    if (dragIndex !== null && dragOverIndex !== null && dragIndex !== dragOverIndex) {
-      const next = [...images];
-      const [moved] = next.splice(dragIndex, 1);
-      next.splice(dragOverIndex, 0, moved);
-      setImages(next);
-    }
-    setDragIndex(null);
-    setDragOverIndex(null);
+  // ── Image reorder (move up/down) ──────────────────────────────
+  const moveImage = (from: number, to: number) => {
+    if (to < 0 || to >= images.length) return;
+    const next = [...images];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    setImages(next);
   };
 
   const deleteImage = (i: number) =>
@@ -469,27 +460,21 @@ export default function AdminProductEditor({ product, onClose, onSaved }: Props)
                 {images.map((img, i) => (
                   <div
                     key={img.url}
-                    draggable
-                    onDragStart={(e) => { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(i)); handleDragStart(i); }}
-                    onDragEnter={() => handleDragEnter(i)}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDragEnd={handleDragEnd}
                     style={{
-                      border: dragOverIndex === i ? "2px solid var(--gold)" : "1px solid var(--linen-dark)",
+                      border: "1px solid var(--linen-dark)",
                       borderRadius: 6, overflow: "hidden", background: "#fff",
-                      cursor: "grab", opacity: dragIndex === i ? 0.5 : 1,
-                      transition: "border-color 0.15s, opacity 0.15s",
                       position: "relative",
                     }}
                   >
-                    {/* Primary badge */}
-                    {i === 0 && (
-                      <div style={{
-                        position: "absolute", top: 6, left: 6, background: "var(--gold)",
-                        color: "#fff", fontSize: 9, fontWeight: 700, letterSpacing: "0.08em",
-                        padding: "2px 7px", borderRadius: 3, textTransform: "uppercase", zIndex: 2,
-                      }}>Primary</div>
-                    )}
+                    {/* Position badge */}
+                    <div style={{
+                      position: "absolute", top: 6, left: 6,
+                      background: i === 0 ? "var(--gold)" : "rgba(0,0,0,0.55)",
+                      color: "#fff", fontSize: 9, fontWeight: 700, letterSpacing: "0.08em",
+                      padding: "2px 7px", borderRadius: 3, textTransform: "uppercase", zIndex: 2,
+                    }}>
+                      {i === 0 ? "Primary" : `#${i + 1}`}
+                    </div>
                     {/* Delete */}
                     <button
                       onClick={() => deleteImage(i)}
@@ -503,11 +488,10 @@ export default function AdminProductEditor({ product, onClose, onSaved }: Props)
                     <img
                       src={img.url}
                       alt={`Photo ${i + 1}`}
-                      draggable={false}
-                      style={{ width: "100%", aspectRatio: "1", objectFit: "cover", display: "block", userSelect: "none" }}
+                      style={{ width: "100%", aspectRatio: "1", objectFit: "cover", display: "block" }}
                     />
                     {/* Type selector */}
-                    <div style={{ padding: "6px 8px" }}>
+                    <div style={{ padding: "6px 8px 4px" }}>
                       <select
                         value={img.type}
                         onChange={(e) => setImageType(i, e.target.value as ImageType)}
@@ -521,6 +505,32 @@ export default function AdminProductEditor({ product, onClose, onSaved }: Props)
                         <option value="model">Model</option>
                         <option value="lifestyle">Lifestyle</option>
                       </select>
+                    </div>
+                    {/* Move controls */}
+                    <div style={{ display: "flex", borderTop: "1px solid var(--linen-dark)" }}>
+                      <button
+                        onClick={() => moveImage(i, i - 1)}
+                        disabled={i === 0}
+                        title="Move left"
+                        style={{
+                          flex: 1, padding: "6px 0", background: "none", border: "none",
+                          borderRight: "1px solid var(--linen-dark)",
+                          cursor: i === 0 ? "not-allowed" : "pointer",
+                          color: i === 0 ? "var(--linen-dark)" : "var(--text-dark)",
+                          fontSize: 14, fontWeight: 700,
+                        }}
+                      >←</button>
+                      <button
+                        onClick={() => moveImage(i, i + 1)}
+                        disabled={i === images.length - 1}
+                        title="Move right"
+                        style={{
+                          flex: 1, padding: "6px 0", background: "none", border: "none",
+                          cursor: i === images.length - 1 ? "not-allowed" : "pointer",
+                          color: i === images.length - 1 ? "var(--linen-dark)" : "var(--text-dark)",
+                          fontSize: 14, fontWeight: 700,
+                        }}
+                      >→</button>
                     </div>
                   </div>
                 ))}

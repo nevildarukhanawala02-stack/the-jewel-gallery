@@ -166,7 +166,7 @@ export default function CelebrityPage() {
           ) : filtered.length > 0 ? (
             <div style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(min(220px, 45vw), 1fr))",
               gap: "clamp(16px, 3vw, 40px)",
               marginBottom: "60px",
             }}>
