@@ -471,11 +471,12 @@ export default function AdminProductEditor({ product, onClose, onSaved }: Props)
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 14 }}>
                 {images.map((img, i) => (
                   <div
-                    key={img.url + i}
+                    key={img.url}
                     draggable
-                    onDragStart={() => handleDragStart(i)}
+                    onDragStart={(e) => { e.dataTransfer.effectAllowed = "move"; handleDragStart(i); }}
                     onDragOver={(e) => handleDragOver(e, i)}
-                    onDrop={() => handleDrop(i)}
+                    onDragLeave={() => setDragOverIndex(null)}
+                    onDrop={(e) => { e.preventDefault(); handleDrop(i); }}
                     onDragEnd={handleDragEnd}
                     style={{
                       border: dragOverIndex === i ? "2px solid var(--gold)" : "1px solid var(--linen-dark)",
@@ -506,7 +507,8 @@ export default function AdminProductEditor({ product, onClose, onSaved }: Props)
                     <img
                       src={img.url}
                       alt={`Photo ${i + 1}`}
-                      style={{ width: "100%", aspectRatio: "1", objectFit: "cover", display: "block" }}
+                      draggable={false}
+                      style={{ width: "100%", aspectRatio: "1", objectFit: "cover", display: "block", pointerEvents: "none" }}
                     />
                     {/* Type selector */}
                     <div style={{ padding: "6px 8px" }}>
