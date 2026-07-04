@@ -1,30 +1,15 @@
-// Storage helpers - uses AWS S3 for Railway deployment
-// Upload images to S3, return public CDN or presigned URLs.
-
-import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+// Storage helpers - uses Cloudinary for image hosting
 import { ENV } from "./_core/env";
 
-function getS3Client() {
-  if (!ENV.awsAccessKeyId || !ENV.awsSecretAccessKey || !ENV.awsRegion || !ENV.awsS3Bucket) {
-    throw new Error(
-      "Storage config missing: set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, AWS_S3_BUCKET"
-    );
+function getCloudinaryConfig() {
+  if (!ENV.cloudinaryCloudName || !ENV.cloudinaryApiKey || !ENV.cloudinaryApiSecret) {
+    throw new Error("Cloudinary config missing: set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET");
   }
-  return new S3Client({
-    region: ENV.awsRegion,
-    credentials: {
-      accessKeyId: ENV.awsAccessKeyId,
-      secretAccessKey: ENV.awsSecretAccessKey,
-    },
-  });
-}
-
-function appendHashSuffix(relKey: string): string {
-  const hash = crypto.randomUUID().replace(/-/g, "").slice(0, 8);
-  const lastDot = relKey.lastIndexOf(".");
-  if (lastDot === -1) return `${relKey}_${hash}`;
-  return `${relKey.slice(0, lastDot)}_${hash}${relKey.slice(lastDot)}`;
+  return {
+    cloudName: ENV.cloudinaryCloudName,
+    apiKey: ENV.cloudinaryApiKey,
+    apiSecret: ENV.cloudinaryApiSecret,
+  };
 }
 
 export async function storagePut(
@@ -32,38 +17,59 @@ export async function storagePut(
   data: Buffer | Uint8Array | string,
   contentType = "application/octet-stream"
 ): Promise<{ key: string; url: string }> {
-  const s3 = getS3Client();
-  const key = appendHashSuffix(relKey.replace(/^\/+/, ""));
-  const bucket = ENV.awsS3Bucket!;
+  const { cloudName, apiKey, apiSecret } = getCloudinaryConfig();
 
-  await s3.send(
-    new PutObjectCommand({
-      Bucket: bucket,
-      Key: key,
-      Body: typeof data === "string" ? Buffer.from(data) : data,
-      ContentType: contentType,
-    })
-  );
+  // Convert to base64 data URI
+  const buffer = typeof data === "string" ? Buffer.from(data) : Buffer.from(data);
+  const base64 = buffer.toString("base64");
+  const dataUri = `data:${contentType};base64,${base64}`;
 
-  const url = ENV.awsCdnUrl
-    ? `${ENV.awsCdnUrl.replace(/\/+$/, "")}/${key}`
-    : `https://${bucket}.s3.${ENV.awsRegion}.amazonaws.com/${key}`;
+  // Use folder from relKey (e.g. "products/filename.jpg" -> folder "products")
+  const parts = relKey.replace(/^\/+/, "").split("/");
+  const folder = parts.length > 1 ? parts.slice(0, -1).join("/") : "jewel-gallery";
 
-  return { key, url };
+  // Upload via Cloudinary REST API
+  const timestamp = Math.floor(Date.now() / 1000);
+  const signature = await generateSignature({ folder, timestamp }, apiSecret);
+
+  const formData = new FormData();
+  formData.append("file", dataUri);
+  formData.append("folder", folder);
+  formData.append("timestamp", String(timestamp));
+  formData.append("api_key", apiKey);
+  formData.append("signature", signature);
+
+  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Cloudinary upload failed: ${err}`);
+  }
+
+  const result = await response.json() as { public_id: string; secure_url: string };
+  return { key: result.public_id, url: result.secure_url };
 }
 
 export async function storageGet(relKey: string): Promise<{ key: string; url: string }> {
+  const { cloudName } = getCloudinaryConfig();
   const key = relKey.replace(/^\/+/, "");
-  const bucket = ENV.awsS3Bucket!;
-  const url = ENV.awsCdnUrl
-    ? `${ENV.awsCdnUrl.replace(/\/+$/, "")}/${key}`
-    : `https://${bucket}.s3.${ENV.awsRegion}.amazonaws.com/${key}`;
+  const url = `https://res.cloudinary.com/${cloudName}/image/upload/${key}`;
   return { key, url };
 }
 
 export async function storageGetSignedUrl(relKey: string): Promise<string> {
-  const s3 = getS3Client();
-  const key = relKey.replace(/^\/+/, "");
-  const command = new GetObjectCommand({ Bucket: ENV.awsS3Bucket!, Key: key });
-  return getSignedUrl(s3, command, { expiresIn: 3600 });
+  const { url } = await storageGet(relKey);
+  return url;
+}
+
+async function generateSignature(params: Record<string, string | number>, apiSecret: string): Promise<string> {
+  const sorted = Object.keys(params).sort().map(k => `${k}=${params[k]}`).join("&");
+  const str = sorted + apiSecret;
+  const msgBuffer = new TextEncoder().encode(str);
+  const hashBuffer = await crypto.subtle.digest("SHA-1", msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 }
