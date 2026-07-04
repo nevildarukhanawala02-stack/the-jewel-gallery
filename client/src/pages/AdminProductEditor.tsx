@@ -88,7 +88,6 @@ export default function AdminProductEditor({ product, onClose, onSaved }: Props)
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [activeTab, setActiveTab] = useState<"content" | "photos" | "seo">("content");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -130,7 +129,7 @@ export default function AdminProductEditor({ product, onClose, onSaved }: Props)
     }
   }, [product.id, uploadImageMutation]);
 
-  // ── Image reorder (move up/down) ──────────────────────────────
+  // ── Image reorder ─────────────────────────────────────────────
   const moveImage = (from: number, to: number) => {
     if (to < 0 || to >= images.length) return;
     const next = [...images];
@@ -462,7 +461,7 @@ export default function AdminProductEditor({ product, onClose, onSaved }: Props)
                     key={img.url}
                     style={{
                       border: "1px solid var(--linen-dark)",
-                      borderRadius: 6, overflow: "hidden", background: "#fff",
+                      borderRadius: 6, background: "#fff",
                       position: "relative",
                     }}
                   >
@@ -517,7 +516,7 @@ export default function AdminProductEditor({ product, onClose, onSaved }: Props)
                           borderRight: "1px solid var(--linen-dark)",
                           cursor: i === 0 ? "not-allowed" : "pointer",
                           color: i === 0 ? "var(--linen-dark)" : "var(--text-dark)",
-                          fontSize: 14, fontWeight: 700,
+                          fontSize: 16, fontWeight: 700,
                         }}
                       >←</button>
                       <button
@@ -528,7 +527,7 @@ export default function AdminProductEditor({ product, onClose, onSaved }: Props)
                           flex: 1, padding: "6px 0", background: "none", border: "none",
                           cursor: i === images.length - 1 ? "not-allowed" : "pointer",
                           color: i === images.length - 1 ? "var(--linen-dark)" : "var(--text-dark)",
-                          fontSize: 14, fontWeight: 700,
+                          fontSize: 16, fontWeight: 700,
                         }}
                       >→</button>
                     </div>
