@@ -17,6 +17,16 @@ const CATEGORY_TABS = [
   { label: "Accessories", value: "accessories" },
 ];
 
+
+// Helper to safely parse images from JSON string or array
+function parseImages(raw: unknown): string[] | null {
+  if (Array.isArray(raw)) return raw as string[];
+  if (typeof raw === 'string') {
+    try { const p = JSON.parse(raw); return Array.isArray(p) ? p : null; } catch { return null; }
+  }
+  return null;
+}
+
 export default function AdminProducts() {
   const { user, loading } = useAuth();
   const [, navigate] = useLocation();
@@ -331,8 +341,8 @@ export default function AdminProducts() {
                     flexShrink: 0,
                     overflow: "hidden",
                   }}>
-                    {Array.isArray(product.images) && product.images.length > 0 ? (
-                      <img src={product.images[0]} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    {(parseImages(product.images) ?? [])[0] ? (
+                      <img src={(parseImages(product.images) ?? [])[0]} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     ) : "◆"}
                   </div>
                   <div style={{ minWidth: 0 }}>
@@ -580,8 +590,8 @@ export default function AdminProducts() {
                     flexShrink: 0,
                     overflow: "hidden",
                   }}>
-                    {Array.isArray(product.images) && product.images.length > 0 ? (
-                      <img src={product.images[0]} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    {(parseImages(product.images) ?? [])[0] ? (
+                      <img src={(parseImages(product.images) ?? [])[0]} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     ) : "◆"}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -832,8 +842,8 @@ export default function AdminProducts() {
             gemstone: p.gemstone ?? null,
             weight: p.weight ?? null,
             dimensions: p.dimensions ?? null,
-            images: Array.isArray(p.images) ? p.images : null,
-            imageTypes: Array.isArray(p.imageTypes) ? p.imageTypes as Array<'product'|'model'|'lifestyle'> : null,
+            images: parseImages(p.images),
+            imageTypes: (Array.isArray(p.imageTypes) ? p.imageTypes : (typeof p.imageTypes === 'string' ? (() => { try { return JSON.parse(p.imageTypes as string); } catch { return null; } })() : null)) as Array<'product'|'model'|'lifestyle'> | null,
             isFeatured: p.isFeatured ?? false,
             isNewArrival: p.isNewArrival ?? false,
             isBestseller: p.isBestseller ?? false,
