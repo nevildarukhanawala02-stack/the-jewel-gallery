@@ -17,6 +17,7 @@ import {
   getCelebrityProductIds,
   assignCelebrityProduct,
   unassignCelebrityProduct,
+  createCelebrity,
   updateCelebrity,
   getCustomerAddresses,
   getCustomerByEmail,
@@ -54,7 +55,7 @@ import {
   getCeoAlerts,
   type SkuRow,
 } from "./db";
-import { products } from "../drizzle/schema";
+import { products, celebrities } from "../drizzle/schema";
 import { eq, and } from "drizzle-orm";
 import { COOKIE_NAME } from "@shared/const";
 import { storagePut } from "./storage";
@@ -218,6 +219,33 @@ const celebritiesRouter = router({
     .input(z.object({ celebrityId: z.number(), productId: z.number() }))
     .mutation(async ({ input }) => {
       await unassignCelebrityProduct(input.celebrityId, input.productId);
+      return { success: true };
+    }),
+
+  // Admin: create a new celebrity
+  createCelebrity: adminProcedure
+    .input(z.object({
+      name: z.string().min(1),
+      slug: z.string().min(1),
+      designation: z.string().optional(),
+      bio: z.string().optional(),
+      style: z.string().optional(),
+      occasion: z.string().optional(),
+      imageUrl: z.string().optional(),
+      galleryImages: z.array(z.string()).optional(),
+      isActive: z.boolean().optional(),
+    }))
+    .mutation(async ({ input }) => {
+      return createCelebrity(input);
+    }),
+
+  // Admin: delete a celebrity
+  deleteCelebrity: adminProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("DB unavailable");
+      await db.delete(celebrities).where(eq(celebrities.id, input.id));
       return { success: true };
     }),
 

@@ -203,6 +203,7 @@ export default function AdminCelebrities() {
   const [, navigate] = useLocation();
   const [selected, setSelected] = useState<{ id: number; name: string; imageUrl?: string | null } | null>(null);
   const [editingCeleb, setEditingCeleb] = useState<(typeof celebrities)[0] | null>(null);
+  const [creating, setCreating] = useState(false);
   const utils = trpc.useUtils();
 
   const { data: celebrities = [], isLoading: celebLoading } = trpc.celebrities.adminList.useQuery(
@@ -220,6 +221,17 @@ export default function AdminCelebrities() {
         <ProductAssignPanel celebrity={selected} onClose={() => setSelected(null)} />
       )}
 
+      {creating && (
+        <AdminCelebrityEditor
+          celebrity={null}
+          onClose={() => setCreating(false)}
+          onSaved={() => {
+            setCreating(false);
+            utils.celebrities.adminList.invalidate();
+          }}
+        />
+      )}
+
       {editingCeleb && (
         <AdminCelebrityEditor
           celebrity={editingCeleb as Parameters<typeof AdminCelebrityEditor>[0]["celebrity"]}
@@ -231,10 +243,22 @@ export default function AdminCelebrities() {
         />
       )}
 
-      <div style={{ marginBottom: "24px" }}>
+      <div style={{ marginBottom: "24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <p style={{ margin: 0, fontSize: "13px", color: "rgba(255,255,255,0.4)", lineHeight: 1.6 }}>
           Click on a celebrity to assign or remove products from their "Shop the Look" section on the public celebrity detail page.
         </p>
+        <button
+          onClick={() => setCreating(true)}
+          style={{
+            display: "flex", alignItems: "center", gap: "8px",
+            padding: "10px 20px", background: "var(--gold)", border: "none",
+            borderRadius: "8px", cursor: "pointer", color: "#1A1A1A",
+            fontSize: "13px", fontWeight: 600, letterSpacing: "0.5px",
+            whiteSpace: "nowrap",
+          }}
+        >
+          + Add Celebrity
+        </button>
       </div>
 
       {celebLoading ? (

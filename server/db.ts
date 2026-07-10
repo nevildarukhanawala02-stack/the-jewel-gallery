@@ -1175,6 +1175,33 @@ export async function updateProductFull(id: number, data: {
 // ============================================================
 // CELEBRITY EDITOR HELPERS
 // ============================================================
+export async function createCelebrity(data: {
+  name: string;
+  slug: string;
+  designation?: string;
+  bio?: string;
+  style?: string;
+  occasion?: string;
+  imageUrl?: string;
+  galleryImages?: string[];
+  isActive?: boolean;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const result = await db.insert(celebrities).values({
+    name: data.name,
+    slug: data.slug,
+    designation: data.designation,
+    bio: data.bio,
+    style: data.style,
+    occasion: data.occasion,
+    imageUrl: data.imageUrl,
+    galleryImages: data.galleryImages ? JSON.stringify(data.galleryImages) : "[]",
+    isActive: data.isActive ?? true,
+  });
+  return { success: true, id: (result as any)[0]?.insertId };
+}
+
 export async function updateCelebrity(id: number, data: {
   name?: string;
   slug?: string;

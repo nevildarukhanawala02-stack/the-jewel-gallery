@@ -21,23 +21,25 @@ interface CelebrityData {
 }
 
 interface Props {
-  celebrity: CelebrityData;
+  celebrity: CelebrityData | null;
   onClose: () => void;
   onSaved: () => void;
 }
 
 export default function AdminCelebrityEditor({ celebrity, onClose, onSaved }: Props) {
-  const [name, setName] = useState(celebrity.name ?? "");
-  const [slug, setSlug] = useState(celebrity.slug ?? "");
-  const [designation, setDesignation] = useState(celebrity.designation ?? "");
-  const [bio, setBio] = useState(celebrity.bio ?? "");
-  const [style, setStyle] = useState(celebrity.style ?? "");
-  const [occasion, setOccasion] = useState(celebrity.occasion ?? "");
-  const [isActive, setIsActive] = useState(celebrity.isActive ?? true);
-  const [profileImageUrl, setProfileImageUrl] = useState(celebrity.imageUrl ?? "");
+  const isCreating = celebrity === null;
+
+  const [name, setName] = useState(celebrity?.name ?? "");
+  const [slug, setSlug] = useState(celebrity?.slug ?? "");
+  const [designation, setDesignation] = useState(celebrity?.designation ?? "");
+  const [bio, setBio] = useState(celebrity?.bio ?? "");
+  const [style, setStyle] = useState(celebrity?.style ?? "");
+  const [occasion, setOccasion] = useState(celebrity?.occasion ?? "");
+  const [isActive, setIsActive] = useState(celebrity?.isActive ?? true);
+  const [profileImageUrl, setProfileImageUrl] = useState(celebrity?.imageUrl ?? "");
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>(() => {
     try {
-      const parsed = JSON.parse(celebrity.galleryImages ?? "[]");
+      const parsed = JSON.parse(celebrity?.galleryImages ?? "[]");
       return Array.isArray(parsed) ? parsed.map((u: string) => ({ url: u })) : [];
     } catch {
       return [];
@@ -54,6 +56,7 @@ export default function AdminCelebrityEditor({ celebrity, onClose, onSaved }: Pr
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const updateCelebrity = trpc.celebrities.updateCelebrity.useMutation();
+  const createCelebrity = trpc.celebrities.createCelebrity.useMutation();
   const uploadImage = trpc.celebrities.uploadCelebrityImage.useMutation();
 
   // Close on Escape
@@ -122,21 +125,37 @@ export default function AdminCelebrityEditor({ celebrity, onClose, onSaved }: Pr
   };
 
   const handleSave = async () => {
+    if (!name.trim()) { setSaveError("Name is required."); return; }
     setSaving(true);
     setSaveError("");
+    const autoSlug = slug.trim() || name.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
     try {
-      await updateCelebrity.mutateAsync({
-        id: celebrity.id,
-        name: name || undefined,
-        slug: slug || undefined,
-        designation: designation || undefined,
-        bio: bio || undefined,
-        style: style || undefined,
-        occasion: occasion || undefined,
-        imageUrl: profileImageUrl || undefined,
-        galleryImages: galleryImages.map(g => g.url),
-        isActive,
-      });
+      if (isCreating) {
+        await createCelebrity.mutateAsync({
+          name: name.trim(),
+          slug: autoSlug,
+          designation: designation || undefined,
+          bio: bio || undefined,
+          style: style || undefined,
+          occasion: occasion || undefined,
+          imageUrl: profileImageUrl || undefined,
+          galleryImages: galleryImages.map(g => g.url),
+          isActive,
+        });
+      } else {
+        await updateCelebrity.mutateAsync({
+          id: celebrity!.id,
+          name: name || undefined,
+          slug: slug || undefined,
+          designation: designation || undefined,
+          bio: bio || undefined,
+          style: style || undefined,
+          occasion: occasion || undefined,
+          imageUrl: profileImageUrl || undefined,
+          galleryImages: galleryImages.map(g => g.url),
+          isActive,
+        });
+      }
       onSaved();
       onClose();
     } catch (err: unknown) {
@@ -181,10 +200,10 @@ export default function AdminCelebrityEditor({ celebrity, onClose, onSaved }: Pr
         }}>
           <div>
             <div style={{ fontSize: "11px", letterSpacing: "2px", textTransform: "uppercase", color: "#9a8c7e", marginBottom: "4px" }}>
-              Admin — Celebrity Editor
+              {isCreating ? "Admin — New Celebrity" : "Admin — Celebrity Editor"}
             </div>
             <h2 style={{ fontFamily: "var(--font-heading)", fontSize: "22px", fontWeight: 400, color: "#2c2c2c", margin: 0 }}>
-              {celebrity.name}
+              {isCreating ? "Add New Celebrity" : celebrity!.name}
             </h2>
           </div>
           <button
