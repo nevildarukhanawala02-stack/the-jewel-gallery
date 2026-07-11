@@ -56,7 +56,7 @@ import {
   type SkuRow,
 } from "./db";
 import { products, celebrities } from "../drizzle/schema";
-import { logAnalyticsEvent } from "./db";
+import { logAnalyticsEvent, getKpiDashboard } from "./db";
 import { eq, and } from "drizzle-orm";
 import { COOKIE_NAME } from "@shared/const";
 import { storagePut } from "./storage";
@@ -521,6 +521,12 @@ const ordersRouter = router({
 // ADMIN ROUTER
 // ============================================================
 const adminRouter = router({
+  getKpiDashboard: adminProcedure
+    .input(z.object({ period: z.enum(["week", "month"]).optional() }))
+    .query(async ({ input }) => {
+      return getKpiDashboard(input.period ?? "month");
+    }),
+
   getDashboardMetrics: adminProcedure.query(async () => {
     return getDashboardMetrics();
   }),

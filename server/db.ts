@@ -1253,3 +1253,121 @@ export async function logAnalyticsEvent(data: {
   });
   return { success: true };
 }
+
+// ============================================================
+// KPI DASHBOARD (customer journey + celebrity performance)
+// ============================================================
+export async function getKpiDashboard(period: "week" | "month" = "month") {
+  const db = await getDb();
+  if (!db) return null;
+
+  const days = period === "week" ? 7 : 30;
+  const since = new Date();
+  since.setDate(since.getDate() - days);
+
+  const [visitResult] = await db.select({
+    visits: sql<number>`COUNT(DISTINCT ${analyticsEvents.sessionId})`,
+    pageViews: sql<number>`COUNT(*)`,
+  }).from(analyticsEvents)
+    .where(and(eq(analyticsEvents.eventType, "page_view"), gte(analyticsEvents.createdAt, since)));
+
+  const [addToCartResult] = await db.select({
+    sessions: sql<number>`COUNT(DISTINCT ${analyticsEvents.sessionId})`,
+  }).from(analyticsEvents)
+    .where(and(eq(analyticsEvents.eventType, "add_to_cart"), gte(analyticsEvents.createdAt, since)));
+
+  const [checkoutResult] = await db.select({
+    sessions: sql<number>`COUNT(DISTINCT ${analyticsEvents.sessionId})`,
+  }).from(analyticsEvents)
+    .where(and(eq(analyticsEvents.eventType, "checkout_start"), gte(analyticsEvents.createdAt, since)));
+
+  const [orderResult] = await db.select({
+    count: sql<number>`COUNT(*)`,
+    revenue: sql<number>`COALESCE(SUM(CAST(${orders.totalAmount} AS DECIMAL(10,2))), 0)`,
+  }).from(orders)
+    .where(and(eq(orders.paymentStatus, "paid"), gte(orders.createdAt, since)));
+
+  const topProducts = await db.select({
+    productId: orderItems.productId,
+    name: orderItems.productName,
+    image: orderItems.productImage,
+    unitsSold: sql<number>`SUM(${orderItems.quantity})`,
+    revenue: sql<number>`SUM(CAST(${orderItems.lineTotal} AS DECIMAL(10,2)))`,
+  }).from(orderItems)
+    .innerJoin(orders, eq(orderItems.orderId, orders.id))
+    .where(and(eq(orders.paymentStatus, "paid"), gte(orders.createdAt, since)))
+    .groupBy(orderItems.productId, orderItems.productName, orderItems.productImage)
+    .orderBy(sql`SUM(${orderItems.quantity}) DESC`)
+    .limit(5);
+
+  const celebrityViews = await db.select({
+    celebrityId: analyticsEvents.celebrityId,
+    views: sql<number>`COUNT(*)`,
+  }).from(analyticsEvents)
+    .where(and(eq(analyticsEvents.eventType, "page_view"), gte(analyticsEvents.createdAt, since), sql`${analyticsEvents.celebrityId} IS NOT NULL`))
+    .groupBy(analyticsEvents.celebrityId);
+
+  const celebrityRevenue = await db.select({
+    celebrityId: celebrityProducts.celebrityId,
+    unitsSold: sql<number>`SUM(${orderItems.quantity})`,
+    revenue: sql<number>`SUM(CAST(${orderItems.lineTotal} AS DECIMAL(10,2)))`,
+  }).from(celebrityProducts)
+    .innerJoin(orderItems, eq(celebrityProducts.productId, orderItems.productId))
+    .innerJoin(orders, eq(orderItems.orderId, orders.id))
+    .where(and(eq(orders.paymentStatus, "paid"), gte(orders.createdAt, since)))
+    .groupBy(celebrityProducts.celebrityId);
+
+  const celebrityIds = Array.from(new Set([
+    ...celebrityViews.map((c) => c.celebrityId),
+    ...celebrityRevenue.map((c) => c.celebrityId),
+  ].filter((id): id is number => id != null)));
+
+  const celebrityRecords = celebrityIds.length > 0
+    ? await db.select({ id: celebrities.id, name: celebrities.name, imageUrl: celebrities.imageUrl })
+        .from(celebrities).where(inArray(celebrities.id, celebrityIds))
+    : [];
+
+  const celebrityLeaderboard = celebrityRecords.map((c) => {
+    const viewRow = celebrityViews.find((v) => v.celebrityId === c.id);
+    const revRow = celebrityRevenue.find((r) => r.celebrityId === c.id);
+    return {
+      celebrityId: c.id,
+      name: c.name,
+      imageUrl: c.imageUrl,
+      views: Number(viewRow?.views ?? 0),
+      unitsSold: Number(revRow?.unitsSold ?? 0),
+      revenue: Number(revRow?.revenue ?? 0),
+    };
+  }).sort((a, b) => b.revenue - a.revenue);
+
+  const visits = Number(visitResult?.visits ?? 0);
+  const pageViews = Number(visitResult?.pageViews ?? 0);
+  const addToCartSessions = Number(addToCartResult?.sessions ?? 0);
+  const checkoutSessions = Number(checkoutResult?.sessions ?? 0);
+  const purchases = Number(orderResult?.count ?? 0);
+  const revenue = Number(orderResult?.revenue ?? 0);
+
+  return {
+    period,
+    visits,
+    pagesPerVisit: visits > 0 ? Number((pageViews / visits).toFixed(1)) : 0,
+    addToCartRate: visits > 0 ? Number(((addToCartSessions / visits) * 100).toFixed(1)) : 0,
+    conversionRate: visits > 0 ? Number(((purchases / visits) * 100).toFixed(1)) : 0,
+    revenue,
+    avgOrderValue: purchases > 0 ? Number((revenue / purchases).toFixed(2)) : 0,
+    funnel: {
+      visits,
+      addToCart: addToCartSessions,
+      checkoutStarted: checkoutSessions,
+      purchased: purchases,
+    },
+    topProducts: topProducts.map((p) => ({
+      productId: p.productId,
+      name: p.name,
+      image: p.image,
+      unitsSold: Number(p.unitsSold),
+      revenue: Number(p.revenue),
+    })),
+    celebrityLeaderboard,
+  };
+}
