@@ -1164,8 +1164,8 @@ export async function updateProductFull(id: number, data: {
   if (data.part3AsWorn !== undefined) updateData.part3AsWorn = data.part3AsWorn;
   if (data.metaTitle !== undefined) updateData.metaTitle = data.metaTitle;
   if (data.metaDescription !== undefined) updateData.metaDescription = data.metaDescription;
-  if (data.images !== undefined) updateData.images = JSON.stringify(data.images);
-  if (data.imageTypes !== undefined) updateData.imageTypes = JSON.stringify(data.imageTypes);
+  if (data.images !== undefined) updateData.images = data.images;
+  if (data.imageTypes !== undefined) updateData.imageTypes = data.imageTypes;
   if (Object.keys(updateData).length > 0) {
     await db.update(products).set(updateData).where(eq(products.id, id));
   }
