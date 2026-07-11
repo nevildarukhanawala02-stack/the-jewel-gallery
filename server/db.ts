@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/mysql2";
 import {
   InsertUser,
   celebrities,
+  analyticsEvents,
   celebrityProducts,
   customerAddresses,
   customers,
@@ -1228,5 +1229,27 @@ export async function updateCelebrity(id: number, data: {
   if (Object.keys(updateData).length > 0) {
     await db.update(celebrities).set(updateData).where(eq(celebrities.id, id));
   }
+  return { success: true };
+}
+
+// ============================================================
+// ANALYTICS TRACKING (KPI dashboard)
+// ============================================================
+export async function logAnalyticsEvent(data: {
+  sessionId: string;
+  eventType: "page_view" | "add_to_cart" | "checkout_start";
+  productId?: number;
+  celebrityId?: number;
+  pagePath?: string;
+}) {
+  const db = await getDb();
+  if (!db) return { success: false };
+  await db.insert(analyticsEvents).values({
+    sessionId: data.sessionId,
+    eventType: data.eventType,
+    productId: data.productId,
+    celebrityId: data.celebrityId,
+    pagePath: data.pagePath,
+  });
   return { success: true };
 }

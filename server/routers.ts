@@ -56,6 +56,7 @@ import {
   type SkuRow,
 } from "./db";
 import { products, celebrities } from "../drizzle/schema";
+import { logAnalyticsEvent } from "./db";
 import { eq, and } from "drizzle-orm";
 import { COOKIE_NAME } from "@shared/const";
 import { storagePut } from "./storage";
@@ -965,6 +966,26 @@ const siteSettingsRouter = router({
 // ============================================================
 // MAIN APP ROUTER
 // ============================================================
+
+// ============================================================
+// ANALYTICS ROUTER — KPI dashboard event tracking
+// ============================================================
+const analyticsRouter = router({
+  track: publicProcedure
+    .input(
+      z.object({
+        sessionId: z.string().min(1),
+        eventType: z.enum(["page_view", "add_to_cart", "checkout_start"]),
+        productId: z.number().optional(),
+        celebrityId: z.number().optional(),
+        pagePath: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      await logAnalyticsEvent(input);
+      return { success: true };
+    }),
+});
 export const appRouter = router({
   system: systemRouter,
   auth: router({
@@ -978,6 +999,7 @@ export const appRouter = router({
   products: productsRouter,
   celebrities: celebritiesRouter,
   customerAuth: customerAuthRouter,
+  analytics: analyticsRouter,
   orders: ordersRouter,
   admin: adminRouter,
   newsletter: newsletterRouter,
