@@ -265,3 +265,19 @@ export const siteSettings = mysqlTable("site_settings", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type SiteSetting = typeof siteSettings.$inferSelect;
+
+// ============================================================
+// ANALYTICS EVENTS TABLE — customer journey tracking (KPI dashboard)
+// ============================================================
+export const analyticsEvents = mysqlTable("analytics_events", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: varchar("sessionId", { length: 64 }).notNull(),
+  eventType: mysqlEnum("eventType", ["page_view", "add_to_cart", "checkout_start"]).notNull(),
+  productId: int("productId"),
+  celebrityId: int("celebrityId"),
+  pagePath: varchar("pagePath", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
+export type InsertAnalyticsEvent = typeof analyticsEvents.$inferInsert;
