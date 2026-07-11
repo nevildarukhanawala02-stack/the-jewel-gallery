@@ -348,6 +348,9 @@ export default function AdminDashboard() {
   const [heroPreview, setHeroPreview] = useState<string | null>(null);
   const [heroUploading, setHeroUploading] = useState(false);
 
+  const [kpiPeriod, setKpiPeriod] = useState<"week" | "month">("month");
+  const { data: kpi } = trpc.admin.getKpiDashboard.useQuery({ period: kpiPeriod }, { enabled: !!user });
+
   const handleHeroFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -468,6 +471,110 @@ export default function AdminDashboard() {
             </div>
           );
         })}
+      </div>
+
+      {/* Store Performance - KPI Dashboard */}
+      <div style={{ background: "#fff", border: "1px solid var(--linen-dark)", boxShadow: "0 1px 4px rgba(0,0,0,0.04)", padding: "20px", marginBottom: "28px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" }}>
+          <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "var(--text-muted)" }}>
+            Store Performance
+          </div>
+          <div style={{ display: "flex", gap: "8px" }}>
+            {(["week", "month"] as const).map((p) => (
+              <button
+                key={p}
+                onClick={() => setKpiPeriod(p)}
+                style={{
+                  fontSize: "11px",
+                  padding: "6px 14px",
+                  border: "1px solid " + (kpiPeriod === p ? "var(--gold)" : "var(--linen-dark)"),
+                  background: kpiPeriod === p ? "var(--linen)" : "#fff",
+                  color: "var(--text-dark)",
+                  cursor: "pointer",
+                  textTransform: "capitalize",
+                }}
+              >
+                {p === "week" ? "This week" : "This month"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "12px", marginBottom: "24px" }}>
+          {[
+            { label: "Visits", value: kpi ? String(kpi.visits) : "—" },
+            { label: "Pages / Visit", value: kpi ? String(kpi.pagesPerVisit) : "—" },
+            { label: "Add-to-cart rate", value: kpi ? `${kpi.addToCartRate}%` : "—" },
+            { label: "Conversion rate", value: kpi ? `${kpi.conversionRate}%` : "—" },
+            { label: "Revenue", value: kpi ? formatPrice(kpi.revenue) : "—" },
+            { label: "Avg order value", value: kpi ? formatPrice(kpi.avgOrderValue) : "—" },
+          ].map((m) => (
+            <div key={m.label} style={{ background: "var(--linen)", padding: "14px" }}>
+              <div style={{ fontSize: "10px", color: "var(--text-muted)", marginBottom: "6px" }}>{m.label}</div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 300, color: "var(--text-dark)" }}>{m.value}</div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ fontSize: "10px", color: "var(--text-muted)", marginBottom: "10px" }}>Journey funnel</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "24px" }}>
+          {kpi && [
+            { label: "Visits", value: kpi.funnel.visits },
+            { label: "Add to cart", value: kpi.funnel.addToCart },
+            { label: "Checkout started", value: kpi.funnel.checkoutStarted },
+            { label: "Purchased", value: kpi.funnel.purchased },
+          ].map((row, i) => {
+            const max = kpi.funnel.visits || 1;
+            const pct = Math.max((row.value / max) * 100, 2);
+            return (
+              <div key={row.label} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={{ width: "110px", fontSize: "11px", color: "var(--text-muted)" }}>{row.label}</div>
+                <div style={{ flex: 1, background: "var(--linen)", height: "20px", position: "relative" }}>
+                  <div style={{ width: pct + "%", height: "100%", background: i === 3 ? "var(--gold)" : "#D8CFC0" }} />
+                </div>
+                <div style={{ width: "50px", textAlign: "right", fontSize: "12px", fontWeight: 600, color: "var(--text-dark)" }}>{row.value}</div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="admin-dashboard-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+          <div>
+            <div style={{ fontSize: "10px", color: "var(--text-muted)", marginBottom: "10px" }}>Top 5 products</div>
+            {kpi?.topProducts.length ? kpi.topProducts.map((p) => (
+              <div key={p.productId} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 0", borderBottom: "1px solid var(--linen-dark)" }}>
+                {p.image ? (
+                  <img src={p.image} alt={p.name} style={{ width: "32px", height: "32px", objectFit: "cover", borderRadius: "4px", flexShrink: 0 }} />
+                ) : (
+                  <div style={{ width: "32px", height: "32px", background: "var(--linen)", flexShrink: 0 }} />
+                )}
+                <div style={{ flex: 1, fontSize: "12px", color: "var(--text-dark)" }}>{p.name}</div>
+                <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>{p.unitsSold} sold</div>
+                <div style={{ fontSize: "12px", fontWeight: 600, minWidth: "70px", textAlign: "right" }}>{formatPrice(p.revenue)}</div>
+              </div>
+            )) : (
+              <div style={{ fontSize: "12px", color: "var(--text-muted)", padding: "12px 0" }}>No sales in this period yet.</div>
+            )}
+          </div>
+          <div>
+            <div style={{ fontSize: "10px", color: "var(--text-muted)", marginBottom: "10px" }}>Celebrity leaderboard</div>
+            {kpi?.celebrityLeaderboard.length ? kpi.celebrityLeaderboard.map((c) => (
+              <div key={c.celebrityId} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 0", borderBottom: "1px solid var(--linen-dark)" }}>
+                {c.imageUrl ? (
+                  <img src={c.imageUrl} alt={c.name} style={{ width: "32px", height: "32px", objectFit: "cover", borderRadius: "50%", flexShrink: 0 }} />
+                ) : (
+                  <div style={{ width: "32px", height: "32px", background: "var(--linen)", borderRadius: "50%", flexShrink: 0 }} />
+                )}
+                <div style={{ flex: 1, fontSize: "12px", color: "var(--text-dark)" }}>{c.name}</div>
+                <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>{c.views} views</div>
+                <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>{c.unitsSold} sold</div>
+                <div style={{ fontSize: "12px", fontWeight: 600, minWidth: "70px", textAlign: "right" }}>{formatPrice(c.revenue)}</div>
+              </div>
+            )) : (
+              <div style={{ fontSize: "12px", color: "var(--text-muted)", padding: "12px 0" }}>No celebrity-linked sales in this period yet.</div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Recent Orders + Low Stock — stack on mobile */}
