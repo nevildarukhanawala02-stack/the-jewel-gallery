@@ -1,6 +1,8 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Route, Switch, useLocation } from "wouter";
+import { trpc } from "./lib/trpc";
+import { getSessionId } from "./lib/analytics";
 import { useEffect } from "react";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -37,9 +39,13 @@ import AdminCEO from "./pages/AdminCEO";
 import NotFound from "./pages/NotFound";
 
 function ScrollToTop() {
+  const trackEvent = trpc.analytics.track.useMutation();
   const [location] = useLocation();
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [location]);
+  useEffect(() => {
+    trackEvent.mutate({ sessionId: getSessionId(), eventType: "page_view", pagePath: location });
   }, [location]);
   return null;
 }

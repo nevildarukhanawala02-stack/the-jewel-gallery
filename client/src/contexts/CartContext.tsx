@@ -1,4 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { trpc } from "@/lib/trpc";
+import { getSessionId } from "@/lib/analytics";
 
 export interface CartItem {
   id: number;
@@ -23,6 +25,7 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const trackEvent = trpc.analytics.track.useMutation();
   const [items, setItems] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem("tjg_cart");
@@ -44,6 +47,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prev, { ...item, quantity: qty }];
     });
+    trackEvent.mutate({ sessionId: getSessionId(), eventType: "add_to_cart", productId: item.id });
   }, []);
 
   const removeItem = useCallback((id: number) => {

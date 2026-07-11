@@ -3,6 +3,8 @@ import ProductCard from "@/components/ProductCard";
 import { trpc } from "@/lib/trpc";
 import { useLocation, useParams } from "wouter";
 import { getCardImage } from "@/lib/productImage";
+import { useEffect } from "react";
+import { getSessionId } from "@/lib/analytics";
 
 // Gallery image tile component
 function GalleryImageItem({ url, featured }: { url: string; featured: boolean }) {
@@ -48,6 +50,13 @@ export default function CelebrityProfilePage() {
   } | undefined;
 
   const relatedCelebrities = (allCelebrities ?? []).filter((c) => c.slug !== params.slug).slice(0, 4);
+
+  const trackEvent = trpc.analytics.track.useMutation();
+  useEffect(() => {
+    if (profile?.id) {
+      trackEvent.mutate({ sessionId: getSessionId(), eventType: "page_view", celebrityId: profile.id, pagePath: `/celebrity/${params.slug}` });
+    }
+  }, [profile?.id]);
 
   if (isLoading) {
     return (

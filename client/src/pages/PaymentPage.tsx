@@ -1,6 +1,7 @@
 import { useCart } from "@/contexts/CartContext";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 import { trpc } from "@/lib/trpc";
+import { getSessionId } from "@/lib/analytics";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
@@ -33,6 +34,11 @@ export default function PaymentPage() {
 
   const createOrderMutation = trpc.orders.create.useMutation();
   const verifyPaymentMutation = trpc.orders.verifyPayment.useMutation();
+  const trackEvent = trpc.analytics.track.useMutation();
+
+  useEffect(() => {
+    trackEvent.mutate({ sessionId: getSessionId(), eventType: "checkout_start" });
+  }, []);
 
   useEffect(() => {
     const stored = sessionStorage.getItem("tjg_shipping");
