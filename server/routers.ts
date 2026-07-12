@@ -138,10 +138,49 @@ const productsRouter = router({
     }),
 
   related: publicProcedure
-    .input(z.object({ category: z.enum(["rings", "necklaces", "earrings", "bracelets", "accessories"]), excludeId: z.number(), limit: z.number().optional() }))
+    .input(z.object({
+      category: z.enum(["rings", "necklaces", "earrings", "bracelets", "accessories"]),
+      excludeId: z.number(),
+      collection: z.string().optional(),
+      limit: z.number().optional(),
+    }))
     .query(async ({ input }) => {
-      const all = await getProducts({ category: input.category, isActive: true, limit: input.limit ?? 4 });
-      return all.filter((p) => p.id !== input.excludeId).slice(0, input.limit ?? 4);
+      const limit = input.limit ?? 4;
+      const results: Awaited<ReturnType<typeof getProducts>> = [];
+      const seenIds = new Set<number>([input.excludeId]);
+
+      // 1. Prefer pieces from the same collection (fetch extra to survive the excludeId filter)
+      if (input.collection) {
+        const sameCollection = await getProducts({
+          category: input.category,
+          collection: input.collection,
+          isActive: true,
+          limit: limit + 1,
+        });
+        for (const p of sameCollection) {
+          if (!seenIds.has(p.id) && results.length < limit) {
+            results.push(p);
+            seenIds.add(p.id);
+          }
+        }
+      }
+
+      // 2. Fill any remaining slots with other pieces from the same category
+      if (results.length < limit) {
+        const sameCategory = await getProducts({
+          category: input.category,
+          isActive: true,
+          limit: limit + results.length + 1,
+        });
+        for (const p of sameCategory) {
+          if (!seenIds.has(p.id) && results.length < limit) {
+            results.push(p);
+            seenIds.add(p.id);
+          }
+        }
+      }
+
+      return results;
     }),
 
   // Returns a map of subcategory -> count for a given category (only active products)
