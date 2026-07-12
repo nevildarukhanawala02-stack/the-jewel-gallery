@@ -3,6 +3,7 @@ import ProductCard from "@/components/ProductCard";
 import { trpc } from "@/lib/trpc";
 import { useLocation, useParams } from "wouter";
 import { getCardImage } from "@/lib/productImage";
+import { optimizeImageUrl } from "@/lib/cloudinaryImage";
 import { useEffect } from "react";
 import { getSessionId } from "@/lib/analytics";
 
@@ -16,7 +17,7 @@ function GalleryImageItem({ url, featured }: { url: string; featured: boolean })
       background: "#f5f0eb",
     }}>
       <img
-        src={url}
+        src={optimizeImageUrl(url, 800)}
         alt="Celebrity gallery"
         style={{
           width: "100%",
@@ -133,7 +134,7 @@ export default function CelebrityProfilePage() {
           <div className="celeb-profile-hero-img">
             {profile.imageUrl ? (
               <img
-                src={profile.imageUrl}
+                src={optimizeImageUrl(profile.imageUrl, 1200)}
                 alt={profile.name}
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
@@ -328,7 +329,7 @@ export default function CelebrityProfilePage() {
                 >
                   <div style={{ width: "100%", height: "300px", background: "var(--ivory-deep)", overflow: "hidden" }}>
                     <img
-                      src={getCardImage(p.images, (p as any).imageTypes)}
+                      src={optimizeImageUrl(getCardImage(p.images, (p as any).imageTypes), 600)}
                       alt={p.name}
                       loading="lazy"
                       style={{ width: "100%", height: "100%", objectFit: "cover" }}
@@ -438,7 +439,7 @@ export default function CelebrityProfilePage() {
                   }}>
                     {c.imageUrl ? (
                       <img
-                        src={c.imageUrl}
+                        src={optimizeImageUrl(c.imageUrl, 400)}
                         alt={c.name}
                         loading="lazy"
                         style={{ width: "100%", height: "100%", objectFit: "cover" }}
