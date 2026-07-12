@@ -1,6 +1,7 @@
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
+import { optimizeImageUrl } from "@/lib/cloudinaryImage";
 
 interface ProductCardProps {
   id: number;
@@ -51,7 +52,7 @@ export default function ProductCard({
     <div className="product-card" onClick={() => navigate(`/product/${slug}`)}>
       <div className="product-card-img">
         {image ? (
-          <img src={image} alt={name} loading="lazy" />
+          <img src={optimizeImageUrl(image, 600)} alt={name} loading="lazy" />
         ) : (
           <div style={{
             width: "100%",
