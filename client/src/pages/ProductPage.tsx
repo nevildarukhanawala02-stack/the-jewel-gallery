@@ -7,6 +7,7 @@ import { useState, useRef } from "react";
 import { useLocation, useParams } from "wouter";
 import { toast } from "sonner";
 import { getCardImage } from "@/lib/productImage";
+import { optimizeImageUrl } from "@/lib/cloudinaryImage";
 import { useSwipe } from "@/hooks/useSwipe";
 
 export default function ProductPage() {
@@ -151,7 +152,7 @@ export default function ProductPage() {
                 className={`gallery-thumb ${activeImg === i ? "active" : ""}`}
                 onClick={() => setActiveImg(i)}
               >
-                <img src={img} alt={`${product.name} view ${i + 1}`} />
+                <img src={optimizeImageUrl(img, 150)} alt={`${product.name} view ${i + 1}`} />
               </div>
             ))}
           </div>
@@ -161,7 +162,7 @@ export default function ProductPage() {
             style={{ touchAction: "pan-y", cursor: "grab", position: "relative" }}
           >
             <img
-              src={displayImages[activeImg]}
+              src={optimizeImageUrl(displayImages[activeImg], 1200)}
               alt={product.name}
               style={{ userSelect: "none", pointerEvents: "none" }}
             />
