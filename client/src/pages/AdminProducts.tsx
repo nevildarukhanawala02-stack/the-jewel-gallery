@@ -7,6 +7,7 @@ import { getLoginUrl } from "../const";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { Search, Plus, Edit2, Eye, EyeOff, Settings, X, ChevronDown } from "lucide-react";
+import { optimizeImageUrl } from "@/lib/cloudinaryImage";
 
 const CATEGORY_TABS = [
   { label: "All", value: undefined },
@@ -342,7 +343,7 @@ export default function AdminProducts() {
                     overflow: "hidden",
                   }}>
                     {(parseImages(product.images) ?? [])[0] ? (
-                      <img src={(parseImages(product.images) ?? [])[0]} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <img src={optimizeImageUrl((parseImages(product.images) ?? [])[0], 100)} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     ) : "◆"}
                   </div>
                   <div style={{ minWidth: 0 }}>
@@ -591,7 +592,7 @@ export default function AdminProducts() {
                     overflow: "hidden",
                   }}>
                     {(parseImages(product.images) ?? [])[0] ? (
-                      <img src={(parseImages(product.images) ?? [])[0]} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <img src={optimizeImageUrl((parseImages(product.images) ?? [])[0], 100)} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     ) : "◆"}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
