@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { getCardImage } from "@/lib/productImage";
+import { optimizeImageUrl } from "@/lib/cloudinaryImage";
 import { useSwipe } from "@/hooks/useSwipe";
 
 const TICKER_ITEMS = [
@@ -136,7 +137,7 @@ export default function Home() {
         </div>
         <div className="hero-visual">
           <img
-            src={heroImageUrl}
+            src={optimizeImageUrl(heroImageUrl, 1600)}
             alt="Luxury jewellery collection"
             className="hero-img"
             style={{ objectFit: "cover", objectPosition: "center top" }}
@@ -273,7 +274,7 @@ export default function Home() {
             >
               <div className="celeb-card-img">
                 {c.imageUrl ? (
-                  <img src={c.imageUrl} alt={c.name} loading="lazy" />
+                  <img src={optimizeImageUrl(c.imageUrl, 400)} alt={c.name} loading="lazy" />
                 ) : (
                   <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gold)", fontSize: "40px" }}>◆</div>
                 )}
@@ -314,7 +315,7 @@ export default function Home() {
               >
                 <div className="bestseller-img-wrap-v3">
                   {getCardImage(p.images, (p as any).imageTypes) ? (
-                    <img src={getCardImage(p.images, (p as any).imageTypes)!} alt={p.name} loading="lazy" />
+                    <img src={optimizeImageUrl(getCardImage(p.images, (p as any).imageTypes), 600)} alt={p.name} loading="lazy" />
                   ) : (
                     <div style={{
                       width: "100%",
