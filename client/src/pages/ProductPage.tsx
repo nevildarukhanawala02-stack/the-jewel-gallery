@@ -32,12 +32,14 @@ export default function ProductPage() {
     { enabled: !!params.slug }
   );
 
-  const { data: related } = trpc.products.list.useQuery(
+  const { data: related } = trpc.products.related.useQuery(
     {
-      category: product?.category,
+      category: product?.category as any,
+      excludeId: product?.id as number,
+      collection: product?.collection ?? undefined,
       limit: 4,
     },
-    { enabled: !!product?.category }
+    { enabled: !!product?.category && !!product?.id }
   );
 
   const formatPrice = (p: number) =>
@@ -92,7 +94,7 @@ export default function ProductPage() {
   // Keep the ref in sync with the actual length so swipe callbacks are always accurate
   displayImagesLenRef.current = displayImages.length;
 
-  const relatedProducts = (related ?? []).filter((r) => r.id !== product.id).slice(0, 4);
+  const relatedProducts = related ?? [];
 
   const ACCORDION_ITEMS = [
     {
