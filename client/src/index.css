@@ -498,7 +498,7 @@ button {
 .celeb-profile-gallery-1 { grid-template-columns: 1fr; }
 .celeb-profile-gallery-2 { grid-template-columns: 1fr 1fr; }
 .celeb-profile-gallery-3 { grid-template-columns: 2fr 1fr 1fr; }
-.celeb-profile-gallery-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+.celeb-profile-gallery-4 { grid-template-columns: 2fr 1fr 1fr 1fr; }
 .celeb-profile-gallery-5 { grid-template-columns: 2fr 1fr 1fr 1fr 1fr; }
 .celeb-profile-gallery-6 { grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; }
 .celeb-profile-products { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-bottom: 60px; }
