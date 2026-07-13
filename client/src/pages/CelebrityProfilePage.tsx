@@ -23,7 +23,7 @@ function GalleryImageItem({ url, featured }: { url: string; featured: boolean })
           width: "100%",
           height: "100%",
           objectFit: "cover",
-          objectPosition: "top",
+          objectPosition: "center",
           transition: "transform 0.4s cubic-bezier(0.23, 1, 0.32, 1)",
         }}
         onMouseEnter={e => { (e.currentTarget as HTMLImageElement).style.transform = "scale(1.04)"; }}
