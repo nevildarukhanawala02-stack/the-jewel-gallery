@@ -75,14 +75,16 @@ export default function ConfirmationPage() {
         </p>
 
         {/* What's Next */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "24px",
-          maxWidth: "700px",
-          marginBottom: "48px",
-          textAlign: "left",
-        }}>
+        <div
+          className="confirmation-next-steps"
+          style={{
+            display: "grid",
+            gap: "24px",
+            maxWidth: "700px",
+            marginBottom: "48px",
+            textAlign: "left",
+          }}
+        >
           {[
             {
               step: "01",
