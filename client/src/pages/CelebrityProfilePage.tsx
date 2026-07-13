@@ -8,14 +8,22 @@ import { useEffect } from "react";
 import { getSessionId } from "@/lib/analytics";
 
 // Gallery image tile component
-function GalleryImageItem({ url, featured }: { url: string; featured: boolean }) {
+function GalleryImageItem({ url, featured, heroRowSpan }: { url: string; featured: boolean; heroRowSpan?: number }) {
+  const containerStyle: React.CSSProperties = {
+    overflow: "hidden",
+    borderRadius: "4px",
+    background: "#f5f0eb",
+  };
+  if (!heroRowSpan) {
+    containerStyle.aspectRatio = featured ? "3/4" : "4/5";
+  } else {
+    // CSS custom property consumed by .celeb-gallery-hero in index.css —
+    // keeps the actual grid-column/grid-row rules in the stylesheet so
+    // the tablet/mobile breakpoints there can still override them.
+    (containerStyle as Record<string, string>)["--hero-rows"] = String(heroRowSpan);
+  }
   return (
-    <div style={{
-      overflow: "hidden",
-      borderRadius: "4px",
-      aspectRatio: featured ? "3/4" : "4/5",
-      background: "#f5f0eb",
-    }}>
+    <div className={heroRowSpan ? "celeb-gallery-hero" : undefined} style={containerStyle}>
       <img
         src={optimizeImageUrl(url, 800)}
         alt="Celebrity gallery"
@@ -276,11 +284,25 @@ export default function CelebrityProfilePage() {
                   {profile.name} wearing The Jewel Gallery
                 </p>
               </div>
-              <div className={`celeb-profile-gallery celeb-profile-gallery-${Math.min(galleryUrls.length, 6)}`}>
-                {galleryUrls.map((url, idx) => (
-                  <GalleryImageItem key={url} url={url} featured={idx === 0} />
-                ))}
-              </div>
+              {(() => {
+                const total = galleryUrls.length;
+                const wrapped = total >= 3;
+                // How many rows the secondary (non-hero) thumbnails need,
+                // wrapping every 2 items — the hero spans that same height.
+                const secondaryRows = wrapped ? Math.max(1, Math.ceil((total - 1) / 2)) : 1;
+                return (
+                  <div className={`celeb-profile-gallery ${wrapped ? "celeb-profile-gallery-wrapped" : `celeb-profile-gallery-${Math.min(total, 2)}`}`}>
+                    {galleryUrls.map((url, idx) => (
+                      <GalleryImageItem
+                        key={url}
+                        url={url}
+                        featured={idx === 0 && total !== 2}
+                        heroRowSpan={idx === 0 && wrapped ? secondaryRows : undefined}
+                      />
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
           );
         })()}
