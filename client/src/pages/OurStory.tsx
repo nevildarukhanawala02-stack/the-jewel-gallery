@@ -190,7 +190,6 @@ export default function OurStory() {
       {/* ── Origin Story ── */}
       <section style={{
         display: "grid",
-        gridTemplateColumns: "1fr 1fr",
         gap: "0",
         minHeight: "520px",
       }}
@@ -243,7 +242,6 @@ export default function OurStory() {
         </div>
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
           gap: "32px",
         }}
           className="brand-pillars-grid"
@@ -314,7 +312,6 @@ export default function OurStory() {
         {/* Celebrity grid */}
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
           gap: "24px",
           marginBottom: "48px",
         }}
@@ -455,7 +452,6 @@ export default function OurStory() {
 
         <div style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
           gap: "32px",
         }}
           className="stores-grid"
@@ -731,7 +727,6 @@ export default function OurStory() {
       }}>
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
           gap: "32px",
           textAlign: "center",
         }}
