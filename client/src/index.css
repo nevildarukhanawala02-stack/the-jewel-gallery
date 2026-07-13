@@ -1184,6 +1184,16 @@ button {
 .tracker-step.active .tracker-dot { background: white; border-color: var(--gold); border-width: 3px; }
 .tracker-label { font-size: 9px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); }
 .tracker-step.active .tracker-label { color: var(--gold); }
+.confirmation-next-steps { grid-template-columns: repeat(3, 1fr); }
+
+/* ============================================================
+   OUR STORY (ABOUT) PAGE
+   ============================================================ */
+.story-origin-grid { grid-template-columns: 1fr 1fr; }
+.brand-pillars-grid { grid-template-columns: repeat(4, 1fr); }
+.celebrity-story-grid { grid-template-columns: repeat(5, 1fr); }
+.stores-grid { grid-template-columns: 1fr 1fr; }
+.stats-banner-grid { grid-template-columns: repeat(4, 1fr); }
 
 /* ============================================================
    RESPONSIVE
@@ -1228,6 +1238,11 @@ button {
   .policies-hero { padding: 48px 32px 40px; }
   .policies-tabs { padding: 0 24px; flex-wrap: wrap; }
   .policy-tab { padding: 12px 20px; }
+  /* Our Story page */
+  .brand-pillars-grid { grid-template-columns: repeat(2, 1fr); }
+  .celebrity-story-grid { grid-template-columns: repeat(3, 1fr); }
+  .stats-banner-grid { grid-template-columns: repeat(2, 1fr); }
+  .confirmation-next-steps { grid-template-columns: 1fr; }
   .policy-content { padding: 40px 32px; }
   .confirmation-page { padding: 60px 32px; }
   .account-page { padding: 40px 32px; }
@@ -1235,6 +1250,12 @@ button {
 
 @media (max-width: 640px) {
   .nav { padding: 0 16px; }
+  /* Our Story page */
+  .story-origin-grid { grid-template-columns: 1fr; min-height: auto !important; }
+  .brand-pillars-grid { grid-template-columns: 1fr 1fr; gap: 16px !important; }
+  .celebrity-story-grid { grid-template-columns: repeat(2, 1fr); gap: 16px !important; }
+  .stores-grid { grid-template-columns: 1fr; }
+  .stats-banner-grid { grid-template-columns: 1fr 1fr; gap: 20px !important; }
   /* Hero */
   .hero-text { padding: 40px 20px; }
   .hero-h1 { font-size: 32px; line-height: 1.15; }
