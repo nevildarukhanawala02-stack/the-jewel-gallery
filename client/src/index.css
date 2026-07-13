@@ -497,10 +497,9 @@ button {
 .celeb-profile-gallery { display: grid; gap: 12px; align-items: stretch; margin-bottom: 72px; }
 .celeb-profile-gallery-1 { grid-template-columns: 1fr; }
 .celeb-profile-gallery-2 { grid-template-columns: 1fr 1fr; }
-.celeb-profile-gallery-3 { grid-template-columns: 2fr 1fr 1fr; }
-.celeb-profile-gallery-4 { grid-template-columns: 2fr 1fr 1fr 1fr; }
-.celeb-profile-gallery-5 { grid-template-columns: 2fr 1fr 1fr 1fr 1fr; }
-.celeb-profile-gallery-6 { grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; }
+/* 3+ photos: hero in column 1, secondary thumbnails wrap 2-per-row in columns 2-3 */
+.celeb-profile-gallery-wrapped { grid-template-columns: 2fr 1fr 1fr; }
+.celeb-gallery-hero { grid-column: 1; grid-row: 1 / span var(--hero-rows, 1); }
 .celeb-profile-products { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-bottom: 60px; }
 .celeb-profile-related { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
 .celeb-filter-bar { display: flex; gap: 40px; align-items: center; justify-content: space-between; flex-wrap: wrap; max-width: 1400px; margin: 0 auto; }
@@ -1222,10 +1221,8 @@ button {
   .celeb-profile-hero-img { height: 380px; }
   .celeb-profile-products { grid-template-columns: repeat(2, 1fr); gap: 24px; }
   .celeb-profile-related { grid-template-columns: repeat(2, 1fr); gap: 16px; }
-  .celeb-profile-gallery-3,
-  .celeb-profile-gallery-4,
-  .celeb-profile-gallery-5,
-  .celeb-profile-gallery-6 { grid-template-columns: repeat(2, 1fr); }
+  .celeb-profile-gallery-wrapped { grid-template-columns: repeat(2, 1fr); }
+  .celeb-gallery-hero { grid-column: auto; grid-row: auto; aspect-ratio: 3/4; }
   .celeb-filter-bar { gap: 16px; }
   /* Pages missing tablet responsiveness */
   .policies-hero { padding: 48px 32px 40px; }
@@ -1307,10 +1304,7 @@ button {
   .celeb-profile-products { grid-template-columns: 1fr; gap: 16px; }
   .celeb-profile-related { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .celeb-profile-gallery-2,
-  .celeb-profile-gallery-3,
-  .celeb-profile-gallery-4,
-  .celeb-profile-gallery-5,
-  .celeb-profile-gallery-6 { grid-template-columns: 1fr 1fr; }
+  .celeb-profile-gallery-wrapped { grid-template-columns: 1fr 1fr; }
   .celeb-filter-bar { gap: 12px; }
   .celeb-filter-search { min-width: 100%; }
   /* Footer */
